@@ -17,9 +17,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from show_users import views
+from django.views.generic.base import TemplateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('oidc/', include('mozilla_django_oidc.urls')),
-    path('', views.home, name='home')
+    # path('', views.home, name='home')
+    path('', TemplateView.as_view(template_name="home.html"), name="home"),
 ]

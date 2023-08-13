@@ -48,6 +48,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'mozilla_django_oidc.middleware.SessionRefresh',
 ]
 
 ROOT_URLCONF = 'show_users.urls'
@@ -55,7 +56,7 @@ ROOT_URLCONF = 'show_users.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -67,6 +68,22 @@ TEMPLATES = [
         },
     },
 ]
+
+LOGGING = {
+    "version": 1,  # the dictConfig format version
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        }
+    },
+    'loggers': {
+        'mozilla_django_oidc': {
+            'handlers': ['console'],
+            'level': 'DEBUG'
+        },
+    }
+}
 
 WSGI_APPLICATION = 'show_users.wsgi.application'
 
@@ -110,12 +127,28 @@ AUTHENTICATION_BACKENDS = (
 OIDC_RP_CLIENT_ID = 'Demo client'
 OIDC_RP_CLIENT_SECRET = '3FF9GtsLl6eDJAyQRXFUrPHw1oI8CpGB'
 
-OIDC_OP_AUTHORIZATION_ENDPOINT = "https://accounts.local/realms/demo/protocol/openid-connect/auth"
-OIDC_OP_TOKEN_ENDPOINT = "https://accounts.local/realms/demo/protocol/openid-connect/token"
-OIDC_OP_USER_ENDPOINT = "https://accounts.local/realms/demo/protocol/openid-connect/userinfo"
+OIDC_AUTH_URI = 'https://accounts.local/realms/demo/protocol/openid-connect/'
 
-LOGIN_REDIRECT_URL = "http://127.0.0.1:8000/"
-LOGOUT_REDIRECT_URL = "http://127.0.0.1:8000/"
+OIDC_OP_AUTHORIZATION_ENDPOINT = OIDC_AUTH_URI + 'auth'
+OIDC_OP_TOKEN_ENDPOINT = OIDC_AUTH_URI + 'token'
+OIDC_OP_USER_ENDPOINT = OIDC_AUTH_URI + 'userinfo'
+OIDC_OP_JWKS_ENDPOINT = OIDC_AUTH_URI + 'certs'
+OIDC_OP_LOGOUT_ENDPOINT = OIDC_AUTH_URI + 'logout'
+
+
+# Specify the method responsible for building the OIDC logout URL
+OIDC_OP_LOGOUT_URL_METHOD = 'show_users.auth.provider_logout'
+
+# Store the OIDC id_token for use with logout URL method
+OIDC_STORE_ID_TOKEN = True
+OIDC_CALLBACK_PUBLIC_URI = 'http://127.0.0.1:8000'
+
+
+OIDC_VERIFY_SSL = False
+OIDC_RP_SIGN_ALGO = 'RS256'
+
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = '/'
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
