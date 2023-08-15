@@ -1,6 +1,33 @@
-# app/auth.py
-from show_users import settings
+from mozilla_django_oidc.auth import OIDCAuthenticationBackend
 from urllib.parse import urlencode
+from pprint import pprint
+
+from show_users import settings
+
+
+def update_user_from_claims(user, claims):
+    user.first_name = claims.get("given_name", '')
+    user.last_name = claims.get("family_name", '')
+    user.is_staff = "admins" in claims.get("groups", [])
+    user.is_superuser = "admins" in claims.get("groups", [])
+    user.save()
+    return user
+
+
+class MyOIDCAuthenticationBackend(OIDCAuthenticationBackend):
+    def verify_claims(self, claims):
+        pprint(claims)
+        return super().verify_claims(claims)
+
+    def create_user(self, claims):
+        user = super().create_user(claims)
+        user = update_user_from_claims(user, claims)
+        return user
+
+    def update_user(self, user, claims):
+        user = super().update_user(user, claims)
+        user = update_user_from_claims(user, claims)
+        return user
 
 
 def provider_logout(request):

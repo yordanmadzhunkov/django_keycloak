@@ -120,12 +120,14 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Add 'mozilla_django_oidc' authentication backend
 AUTHENTICATION_BACKENDS = (
-    'mozilla_django_oidc.auth.OIDCAuthenticationBackend',
+    'show_users.auth.MyOIDCAuthenticationBackend',
+    "django.contrib.auth.backends.ModelBackend",  # default
+    # 'mozilla_django_oidc.auth.OIDCAuthenticationBackend',
     # ...
 )
 
 OIDC_RP_CLIENT_ID = 'Demo client'
-OIDC_RP_CLIENT_SECRET = '3FF9GtsLl6eDJAyQRXFUrPHw1oI8CpGB'
+OIDC_RP_CLIENT_SECRET = 'S26JiF9J0LcIxzhUtNFo6Ipo6TgqDqJ3'
 
 OIDC_AUTH_URI = 'https://accounts.local/realms/demo/protocol/openid-connect/'
 
