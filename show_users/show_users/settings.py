@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-#0m#dfe^8xuqotai!p0m@=2e@dc##9(9zx!=6z+l(p9y(kk-0c'
+SECRET_KEY = config('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -126,10 +127,14 @@ AUTHENTICATION_BACKENDS = (
     # ...
 )
 
-OIDC_RP_CLIENT_ID = 'Demo client'
-OIDC_RP_CLIENT_SECRET = 'S26JiF9J0LcIxzhUtNFo6Ipo6TgqDqJ3'
 
-OIDC_AUTH_URI = 'https://accounts.local/realms/demo/protocol/openid-connect/'
+OIDC_RP_CLIENT_ID = config('OIDC_RP_CLIENT_ID')
+OIDC_RP_CLIENT_SECRET = config('OIDC_RP_CLIENT_SECRET')
+OIDC_HOSTNAME = config('OIDC_HOSTNAME')  # 'https://accounts.local'
+OIDC_REALM_NAME = config('OIDC_REALM_NAME')  # 'demo'
+
+OIDC_AUTH_URI = OIDC_HOSTNAME + '/realms/' + \
+    OIDC_REALM_NAME + '/protocol/openid-connect/'
 
 OIDC_OP_AUTHORIZATION_ENDPOINT = OIDC_AUTH_URI + 'auth'
 OIDC_OP_TOKEN_ENDPOINT = OIDC_AUTH_URI + 'token'
