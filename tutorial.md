@@ -209,3 +209,66 @@ class MyAuthenticationBackend(OIDCAuthenticationBackend):
 ```
 
 To ensure the application’s permissions match the user’s current group membership, we need to set these attributes both when the user is created by `create_user(...)` and also whenever the user logs and `update_user(...)` is called.
+
+
+## Logging out 
+
+Earlier versions of Keycloak supported a redirectURI parameter, but since Keycloak 18 this is deprecated. The redirectURI parameter has been removed in Keycloak 19 and the Keycloak logout page will display an Invalid parameter: redirect_uri error. Instead we need to set two parameters:
+
+* post_logout_redirect_uri to where we would like to redirect the user; and,
+* id_token_hint to the OIDC ID token issued when the user authenticated.
+
+We need to update settings.py to include the OIDC logout endpoint. We also need to tell mozilla-django-oidc to store the OIDC ID_TOKEN and the name of the function that will build our logout URL.
+
+`app/settings.py`
+
+```
+# Your OIDC server
+OIDC_HOST = "https://auth.example.com"
+
+# Your OIDC realm
+OIDC_REALM = "realm-name"
+
+# Store the OIDC id_token for use with logout URL method
+OIDC_STORE_ID_TOKEN = True
+
+# URL for logout
+OIDC_OP_LOGOUT_ENDPOINT = f"{OIDC_HOST}/realms/{OIDC_REALM}/protocol/openid-connect/logout"
+
+# Specify the method responsible for building the OIDC logout URL
+OIDC_OP_LOGOUT_URL_METHOD = 'app.auth.provider_logout'
+```
+
+
+We then need to implement the OIDC_OP_LOGOUT_URL_METHOD as shown below. You may wish to use urllib.parse.urlparse and urllib.parse.urlunparse to build the registration_url.
+
+
+`app/auth.py`
+
+```
+def provider_logout(request):
+    """ Create the user's OIDC logout URL."""
+    # User must confirm logout request with the default logout URL
+    # and is not redirected.
+    logout_url = settings.OIDC_OP_LOGOUT_ENDPOINT
+
+    # If we have the oidc_id_token, we can automatically redirect
+    # the user back to the application.
+    oidc_id_token = request.session.get('oidc_id_token', None)
+    if oidc_id_token:
+        logout_url = (
+            settings.OIDC_OP_LOGOUT_ENDPOINT
+            + "?"
+            + urlencode(
+                {
+                    "id_token_hint": oidc_id_token,
+                    "post_logout_redirect_uri": request.build_absolute_uri(
+                        location=settings.LOGOUT_REDIRECT_URL
+                    )
+                }
+            )
+        )
+
+    return logout_url
+
+```
