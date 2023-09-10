@@ -130,8 +130,8 @@ AUTHENTICATION_BACKENDS = (
 
 OIDC_RP_CLIENT_ID = config('OIDC_RP_CLIENT_ID')
 OIDC_RP_CLIENT_SECRET = config('OIDC_RP_CLIENT_SECRET')
-OIDC_HOSTNAME = config('OIDC_HOSTNAME')  # 'https://accounts.local'
-OIDC_REALM_NAME = config('OIDC_REALM_NAME')  # 'demo'
+OIDC_HOSTNAME = config('OIDC_HOSTNAME')
+OIDC_REALM_NAME = config('OIDC_REALM_NAME')
 
 OIDC_AUTH_URI = OIDC_HOSTNAME + '/realms/' + \
     OIDC_REALM_NAME + '/protocol/openid-connect/'
@@ -178,3 +178,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
