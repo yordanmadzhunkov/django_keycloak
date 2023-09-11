@@ -28,9 +28,6 @@ RUN pip3 install -r $APP_PATH/requirements.txt
 # Copy the application over into the container.
 COPY ./show_users/ $APP_PATH
 
-#TODO remove this
-#COPY .env $APP_PATH
-
 WORKDIR $APP_PATH/
 
 EXPOSE 8000
