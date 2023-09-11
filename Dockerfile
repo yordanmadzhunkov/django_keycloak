@@ -16,7 +16,8 @@ ENV APP_PATH=/opt/app
 RUN apk update 
 
 
-RUN apk add --no-cache python3 \
+RUN apk add --no-cache python3 gcc libc-dev linux-headers postgresql-dev \
+    && apk add libffi-dev \
     && python3 -m ensurepip \
     && pip3 install --upgrade pip gunicorn    
 
