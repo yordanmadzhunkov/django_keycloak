@@ -21,7 +21,7 @@ eval "$(pyenv init --path)"
 eval "$(pyenv virtualenv-init -)"
 ```
 
-`pyenv install 3.11.10`
+`pyenv install 3.10.11`
 
 
 
