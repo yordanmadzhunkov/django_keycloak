@@ -26,7 +26,7 @@ SECRET_KEY = config('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -151,7 +151,7 @@ OIDC_STORE_ID_TOKEN = True
 OIDC_CALLBACK_PUBLIC_URI = 'http://127.0.0.1:8000'
 
 
-OIDC_VERIFY_SSL = False
+OIDC_VERIFY_SSL = True
 OIDC_RP_SIGN_ALGO = 'RS256'
 
 LOGIN_REDIRECT_URL = 'home'
