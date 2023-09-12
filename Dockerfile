@@ -36,5 +36,5 @@ WORKDIR $APP_PATH/
 EXPOSE 8000
 
 # what happens when I start the container
-ENTRYPOINT ["/entrypoint/entrypoint.sh"]
+ENTRYPOINT ["sh", "/entrypoint/entrypoint.sh"]
 
