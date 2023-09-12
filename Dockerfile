@@ -29,8 +29,12 @@ RUN pip3 install -r $APP_PATH/requirements.txt
 # Copy the application over into the container.
 COPY ./show_users/ $APP_PATH
 
-WORKDIR $APP_PATH/
+# entrypoint, must be executable file chmod +x entrypoint.sh
+COPY entrypoint.sh /entrypoint/entrypoint.sh
 
+WORKDIR $APP_PATH/
 EXPOSE 8000
 
-ENTRYPOINT ["gunicorn", "--bind", ":8000", "--workers", "3",  "show_users.wsgi:application"]
+# what happens when I start the container
+CMD ["/entrypoint/entrypoint.sh"]
+
