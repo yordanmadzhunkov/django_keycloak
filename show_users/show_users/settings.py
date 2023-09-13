@@ -29,6 +29,9 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 
+CSRF_TRUSTED_ORIGINS  = [ config('PUBLIC_URL'), 'http://localhost:8000']
+CORS_ORIGIN_WHITELIST = [ config('PUBLIC_URL'), config('OIDC_HOSTNAME'), 'http://localhost:8000']
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -148,7 +151,7 @@ OIDC_OP_LOGOUT_URL_METHOD = 'show_users.auth.provider_logout'
 
 # Store the OIDC id_token for use with logout URL method
 OIDC_STORE_ID_TOKEN = True
-OIDC_CALLBACK_PUBLIC_URI = 'http://127.0.0.1:8000'
+OIDC_CALLBACK_PUBLIC_URI = config('PUBLIC_URL')
 
 
 OIDC_VERIFY_SSL = True
