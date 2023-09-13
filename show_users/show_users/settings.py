@@ -24,12 +24,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', cast=bool, default=True)
+DEBUG                   = config('DEBUG', cast=bool, default=True)
+ALLOWED_HOSTS           = config('ALLOWED_HOSTS', cast=lambda v: [s.strip() for s in v.split(',')], default='*')
+CSRF_TRUSTED_ORIGINS    = config('CSRF_TRUSTED_ORIGINS', cast=lambda v: [s.strip() for s in v.split(',')], default='*')
+CORS_ORIGIN_WHITELIST   = config('CORS_ORIGIN_WHITELIST', cast=lambda v: [s.strip() for s in v.split(',')], default='*')
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-ALLOWED_HOSTS           = config('ALLOWED_HOSTS', cast=lambda v: [s.strip() for s in v.split(',')], default=['*'])
-CSRF_TRUSTED_ORIGINS    = config('CSRF_TRUSTED_ORIGINS'), cast=lambda v: [s.strip() for s in v.split(',')], default=['*'])
-CORS_ORIGIN_WHITELIST   = config('CORS_ORIGIN_WHITELIST'), cast=lambda v: [s.strip() for s in v.split(',')], default=['*'])
-SECURE_PROXY_SSL_HEADER = config('SECURE_PROXY_SSL_HEADER', cast=Csv(post_process=tuple), default=('HTTP_X_FORWARDED_PROTO', 'https'))
+
+print("DEBUG                   = " + str(DEBUG                  )) 
+print("ALLOWED_HOSTS           = " + str(ALLOWED_HOSTS          )) 
+print("CSRF_TRUSTED_ORIGINS    = " + str(CSRF_TRUSTED_ORIGINS   )) 
+print("CORS_ORIGIN_WHITELIST   = " + str(CORS_ORIGIN_WHITELIST  )) 
+print("SECURE_PROXY_SSL_HEADER = " + str(SECURE_PROXY_SSL_HEADER)) 
 
 # Application definition
 
@@ -175,6 +181,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
