@@ -24,13 +24,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', cast=bool, default=True)
 
-ALLOWED_HOSTS = ['*']
-
-
-CSRF_TRUSTED_ORIGINS  = [ config('PUBLIC_URL'), 'http://localhost:8000']
-CORS_ORIGIN_WHITELIST = [ config('PUBLIC_URL'), config('OIDC_HOSTNAME'), 'http://localhost:8000']
+ALLOWED_HOSTS           = config('ALLOWED_HOSTS', cast=lambda v: [s.strip() for s in v.split(',')], default=['*'])
+CSRF_TRUSTED_ORIGINS    = config('CSRF_TRUSTED_ORIGINS'), cast=lambda v: [s.strip() for s in v.split(',')], default=['*'])
+CORS_ORIGIN_WHITELIST   = config('CORS_ORIGIN_WHITELIST'), cast=lambda v: [s.strip() for s in v.split(',')], default=['*'])
+SECURE_PROXY_SSL_HEADER = config('SECURE_PROXY_SSL_HEADER', cast=Csv(post_process=tuple), default=('HTTP_X_FORWARDED_PROTO', 'https'))
 
 # Application definition
 
