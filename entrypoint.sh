@@ -5,4 +5,4 @@
 # ./manage.py makemigrations show_users
 ./manage.py migrate
 
-gunicorn --bind :8000 --workers 3 show_users.wsgi:application
+gunicorn --bind :8000 --workers 1 show_users.wsgi:application
