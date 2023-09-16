@@ -2,7 +2,7 @@ from mozilla_django_oidc.auth import OIDCAuthenticationBackend
 from urllib.parse import urlencode
 from pprint import pprint
 
-from show_users import settings
+from show_users.settings import base as settings
 
 
 def update_user_from_claims(user, claims):
