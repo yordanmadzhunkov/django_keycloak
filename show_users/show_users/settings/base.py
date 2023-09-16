@@ -31,12 +31,6 @@ CORS_ORIGIN_WHITELIST   = config('CORS_ORIGIN_WHITELIST', cast=lambda v: [s.stri
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
-print("DEBUG                   = " + str(DEBUG                  )) 
-print("ALLOWED_HOSTS           = " + str(ALLOWED_HOSTS          )) 
-print("CSRF_TRUSTED_ORIGINS    = " + str(CSRF_TRUSTED_ORIGINS   )) 
-print("CORS_ORIGIN_WHITELIST   = " + str(CORS_ORIGIN_WHITELIST  )) 
-print("SECURE_PROXY_SSL_HEADER = " + str(SECURE_PROXY_SSL_HEADER)) 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -181,6 +175,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Media filess (Documents, Images)
+MEDIA_URL = 'media/'
 
 
 # Default primary key field type
