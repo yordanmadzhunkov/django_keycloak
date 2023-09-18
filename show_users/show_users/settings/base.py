@@ -59,6 +59,8 @@ TEMPLATES = [
     },
 ]
 
+DEBUG = config("DEBUG", default=True, cast=bool)
+
 LOGGING = {
     "version": 1,  # the dictConfig format version
     'handlers': {

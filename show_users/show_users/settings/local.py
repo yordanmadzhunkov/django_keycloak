@@ -2,7 +2,6 @@ from .base import *
 from decouple import config
 from pathlib import Path
 
-DEBUG = config("DEBUG", default=True, cast=bool)
 
 DATABASES = {
     "default": {
