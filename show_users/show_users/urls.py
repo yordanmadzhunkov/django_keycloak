@@ -19,6 +19,8 @@ from django.urls import path, include
 from show_users import views
 from django.views.generic.base import TemplateView
 
+from show_users.settings import base as settings
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('oidc/', include('mozilla_django_oidc.urls')),
