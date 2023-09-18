@@ -32,6 +32,7 @@ COPY ./show_users/ $APP_PATH
 # entrypoint, must be executable file chmod +x entrypoint.sh
 COPY entrypoint.sh /entrypoint/
 
+
 WORKDIR $APP_PATH/
 EXPOSE 8000
 
