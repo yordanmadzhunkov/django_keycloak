@@ -19,7 +19,10 @@ from django.urls import path, include
 from show_users import views
 from django.views.generic.base import TemplateView
 
-from show_users.settings import base as settings
+from decouple import config
+settings_module = config('DJANGO_SETTINGS_MODULE', default='show_users.settings.local')
+import settings_module as settings
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
