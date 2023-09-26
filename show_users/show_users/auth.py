@@ -15,9 +15,9 @@ def update_user_from_claims(user, claims):
 
 
 class MyOIDCAuthenticationBackend(OIDCAuthenticationBackend):
-    def verify_claims(self, claims):
-        pprint(claims)
-        return super().verify_claims(claims)
+    # def verify_claims(self, claims):
+    #    pprint(claims)
+    #    return super().verify_claims(claims)
 
     def create_user(self, claims):
         user = super().create_user(claims)
