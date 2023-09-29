@@ -1,0 +1,20 @@
+-r ../../requirements_django_oidc.txt
+
+# Expected from requirements_django_oidc
+#Django
+#python-decouple
+#psycopg2
+
+autopep8==1.4.4
+pep8==1.7.1
+pycodestyle==2.5.0
+pytz
+sqlparse>=0.3.1
+
+django-q
+django-extensions
+django-health-check>=3.17
+
+pillow
+psutil
+bs4

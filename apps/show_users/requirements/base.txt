@@ -1,0 +1,1 @@
+-r ../../requirements_django_oidc.txt
