@@ -1,5 +1,5 @@
 from django.test import TestCase
-from core.models import BankLoan, BankLoanInterest
+from vei_platform.models import BankLoan, BankLoanInterest
 from decimal import Decimal
 from datetime import date
 

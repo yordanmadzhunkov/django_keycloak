@@ -1,12 +1,12 @@
 
 from .base import *
 
-DEBUG = config("DEBUG", default=True, cast=bool)
+DEBUG = True
 
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.path.join(BASE_DIR, 'data/db.sqlite3')
+        "NAME": BASE_DIR / 'test_db.sqlite3',
     }
 }
 
