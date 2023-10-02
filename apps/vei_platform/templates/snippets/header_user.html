@@ -1,0 +1,58 @@
+{% load account %}
+{% if request.user.is_authenticated %}
+
+<div class="dropdown dib">
+    <div class="header-icon" data-toggle="dropdown">
+        <span class="user-avatar">{% user_display user %}
+            <i class="ti-angle-down f-s-10"></i>
+        </span>
+        <div class="drop-down dropdown-profile dropdown-menu dropdown-menu-right">
+            <div class="dropdown-content-heading">
+                <span class="text-left">{% user_display user %}</span>
+            </div>
+            <div class="dropdown-content-body">
+                <ul>
+                    <li>
+                        <a href="/accounts/profile">
+                            <i class="ti-user"></i>
+                            <span>Profile</span>
+                        </a>
+                    </li>
+                    {% comment %}
+                    <li>
+                        <a href="#">
+                            <i class="ti-email"></i>
+                            <span>Inbox</span>
+                        </a>
+                    </li>
+                    {% endcomment %}
+                    <li>
+                        <a href="#">
+                            <i class="ti-settings"></i>
+                            <span>Setting</span>
+                        </a>
+                    </li>
+                    {% comment %}
+                    <li>
+                        <a href="#">
+                            <i class="ti-lock"></i>
+                            <span>Lock Screen</span>
+                        </a>
+                    </li>
+                    {% endcomment %}
+
+                    <li>
+                        <form method="post" action="{% url 'oidc_logout' %}">
+                            {% csrf_token %}
+                            {% if redirect_field_value %}
+                            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+                            {% endif %}
+                            <button type="submit"><i class="ti-power-off"></i>Logout</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}

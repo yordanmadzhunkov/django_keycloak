@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block head_title%}
+Solar Estates - DASHBOARD
+{% endblock%}
+{% block content %}
+    <section style="background-color: #eee;">
+      <div class="container py-5">
+        {% include "factory_header.html" %}
+        <form method="post">
+          {% csrf_token %}
+          {{ formset.management_form }}
+          {{ plan_formset.management_form }}
+          {{ plan_formset }}
+          <table class="table-striped table-bordered table-sm">
+            <thead>
+                {% for label in table.labels %}
+                  <th>{{ label }}</th> 
+                {% endfor %}
+          </thead>
+          <tbody>
+          {% for row in table.rows %}
+          <tr>
+            {% for data in row %}
+            {% autoescape off %}
+              <td> {{data}} </td>
+              {% endautoescape %}
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+        </table>
+        <input type="submit" value="Save"/>
+      </form>
+      </div>
+</section>
+{% endblock content %}

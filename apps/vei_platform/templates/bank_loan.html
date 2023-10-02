@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load account %}
+{% block head_title%}
+Solar Estates - DASHBOARD
+{% endblock%}
+{% block content %}
+    <section style="background-color: #eee;">
+      <div class="container py-5">
+        {% include "factory_header.html" %}
+
+        <form method="post">
+          {% csrf_token %}
+          {{ loan_formset.management_form }}
+          {{ loan_formset.as_table }}
+          {{ numbers_formset.management_form }}
+          <input type="submit" value="Save"/>
+          <h2 class="text-center">Годишен процент разходи на месец</h2>
+          <table class="table-striped table-bordered table-sm">
+            <thead>
+                {% for label in table.labels %}
+                  <th>{{ label }}</th> 
+                {% endfor %}
+          </thead>
+          <tbody>
+          {% for row in table.rows %}
+          <tr>
+            {% for data in row %}
+              {% autoescape off %}
+                <td> {{data}} </td>
+              {% endautoescape %}
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+        </table>
+      </form>
+
+      <h2 class="text-center"> Погасителен план</h2> 
+      <table class="table-striped table-bordered table-sm">
+        <thead>
+          {% for label in amortization_schedule.table.labels %}
+            <th>{{ label }}</th> 
+          {% endfor %}
+        </thead>
+        <tbody>
+          {% for row in amortization_schedule.table.rows %}
+          <tr>
+            {% for data in row %}
+              <td> {{ data }} </td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    </section>
+{% endblock content %}

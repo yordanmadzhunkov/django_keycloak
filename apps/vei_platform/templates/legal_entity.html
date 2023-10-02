@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load account %}
+{% block head_title%}
+VEI - DASHBOARD
+{% endblock%}
+{% block content %}
+    <section style="background-color: #eee;">
+      <div class="container py-5">
+        <h2>{{ legal_entity.native_name }}</h2>
+        {% if legal_entity.person %}
+        {% else %}
+          <p>ЕИК: {{legal_entity.tax_id}}</p>
+          <p>Регистрация: {{legal_entity.founded}}
+        {% endif %}
+      </div>
+    </section>
+{% endblock content %}

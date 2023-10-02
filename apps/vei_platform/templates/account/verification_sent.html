@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}{% trans "Verify Your E-mail Address" %}{% endblock %}
+
+{% block content %}
+
+<div class="welcome">
+    <div class="row">
+        <div class="col-md-8 text-center">
+            <h1>VEI platform</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2"></div>
+        <div class="col-md-8 text-center">
+
+        <h1>{% trans "Check your E-mail Address" %}</h1>
+        <h3>{% blocktrans %} We have sent an e-mail to you for verification. {% endblocktrans %}</h3>
+        <h3>{% blocktrans %} Follow the link provided to finalize the signup process.{% endblocktrans %}</h3>
+        <h3>{% blocktrans %} If you do not see the verification e-mail in your main inbox, check your spam folder. {% endblocktrans %}</h3>
+        <h3>{% blocktrans %} Please contact us if you do not receive the verification e-mail within a few minutes.{% endblocktrans %}</h3>
+    
+    </div>
+    </div>
+{% endblock %}
