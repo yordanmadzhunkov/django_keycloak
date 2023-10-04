@@ -37,10 +37,10 @@ VEI - DASHBOARD
                           </div>
                           <div class="mt-1 mb-0 text-muted small">
                             {% if factory.primary_owner %}
-                              <span> Owner   <a href="/entity/{{ factory.primary_owner.pk}}"> {{ factory.primary_owner.pk}}    </a>         <br /></span>
+                              <span> Owner   <a href="/entity/{{ factory.primary_owner.pk}}">  {{ factory.owner_name}}   </a>         <br /></span>
                             {% else %}
                               <span> Owner    {{ factory.owner_name}}                <br /></span>
-                              <span> Tax ID    {{ factory.tax_id }} <br /></span>
+                              <span> Tax ID   {{ factory.tax_id }} <br /></span>
                             {% endif%}
                             <span >Location {{ factory.location}}                  <br /></span>
                             <span> Source   {{ factory.get_factory_type_display}}  <br /></span>

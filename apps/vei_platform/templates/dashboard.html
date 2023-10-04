@@ -6,4 +6,14 @@
 {% endblock%}
 {% block content %}
     <h1>DASHBOARD CONTENT</h1>
+    {% if user.is_authenticated %}
+        {% if user.is_superuser %}
+        You are admin, here is a button to push
+        <form action="" method="post">
+            {% csrf_token %}
+            {{ scripe_form.as_table }}
+            <input type="submit" value="Sripe factories">
+        </form>
+        {% endif %}
+    {% endif %}
 {% endblock content %}

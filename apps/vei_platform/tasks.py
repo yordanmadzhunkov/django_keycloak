@@ -9,27 +9,28 @@ from django_q.tasks import async_task
 
 from .models import add_factory, ElectricityFactory
 
-from .scripers.veiregistar import VEIEegistarScriper
-from .scripers.papagal import PapagalScriper
+from scripers.veiregistar import VEIEegistarScriper
+from scripers.papagal import PapagalScriper
 
 
 def add_factory_hook(task):
     add_factory(task)
 
 
-def scripe_factories_list(page_number):
+def scripe_factories_list(page_number, limit=-1):
     scriper = VEIEegistarScriper()
     factories = scriper.scripe_factories_list(page_number)
     for href in factories:
-        async_task("core.tasks.scripe_factory_page",
+        async_task("vei_platform.tasks.scripe_factory_page",
                    href,
                    task_name=href,
                    hook=add_factory_hook)
     next_page = page_number + 1
-    if len(factories) > 0:
-        async_task("core.tasks.scripe_factories_list",
+    if len(factories) > 0 and limit > 0:
+        async_task("vei_platform.tasks.scripe_factories_list",
                    next_page,
                    task_name=scriper.factories_list_url(next_page),
+                   limit=limit - 1
                    )
 
 

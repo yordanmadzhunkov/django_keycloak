@@ -328,6 +328,7 @@ class ElectricityFactory(models.Model):
             return "/static/img/wind-turbine.jpg"
         if self.factory_type == self.HYDROPOWER:
             return "/static/img/wickramanayaka.jpg"
+        print('type = ' + self.factory_type + '\n')
         return None
 
     @property
@@ -354,19 +355,36 @@ def electical_facoty_post_save(sender, **kwargs):
             instance.save()
         else:
             print('not found, spawning scripe task')
-            async_task("core.tasks.scripe_factory_legal_entity",
+            async_task("vei_platform.tasks.scripe_factory_legal_entity",
                        instance,
                        task_name="LegalEntity-for-%s" % instance.name,
                        hook=add_legal_entity)
 
 
+def parse_energy(x):
+    map = {
+        'ВЕЦ': ElectricityFactory.HYDROPOWER,
+        'МВЕЦ': ElectricityFactory.HYDROPOWER,
+        'ПАВЕЦ': ElectricityFactory.HYDROPOWER,
+        'Каскада': ElectricityFactory.HYDROPOWER,
+
+        'БиоЕЦ': ElectricityFactory.BIOMASS,
+        'БиоГЕЦ': ElectricityFactory.REN_GAS,
+        'ФЕЦ': ElectricityFactory.PHOTOVOLTAIC,
+        'ФтЦ': ElectricityFactory.PHOTOVOLTAIC,
+        'ВтЕЦ': ElectricityFactory.WIND_TURBINE,
+    }
+    return map[x.replace('"', '')]
+
+
 def add_factory(task):
     result = task.result
     factories = ElectricityFactory.objects.filter(name=result['name'])
+    factory_type = parse_energy(result['energy'])
     if len(factories) == 0:
         factory = ElectricityFactory(
             name=result['name'],
-            factory_type=result['energy'],
+            factory_type=factory_type,
             manager=None,
             location=result['location'],
             opened=result['opened'],
@@ -377,7 +395,8 @@ def add_factory(task):
         )
         factory.save()
     else:
-        print("Factory found %s", factories[0].name)
+        print("Factory found name='%s' type='%s'" %
+              (factories[0].name, factories[0].factory_type))
 
 
 # FINANCIAL PLANNING

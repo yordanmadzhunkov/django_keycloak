@@ -114,3 +114,14 @@ class UserProfileForm(forms.Form):
     avatar = forms.ImageField(initial=None, required=False,)
     first_name = forms.CharField(required=False)
     last_name = forms.CharField(required=False)
+
+
+class FactoryScriperForm(forms.Form):
+    page_number = forms.CharField(initial=None,
+                                  required=False,
+                                  widget=forms.TextInput(attrs={
+                                      'class': 'form-control',
+                                      'autocomplete': 'off',
+                                      'pattern': '[0-9\.]+',
+                                      'style': 'width:9ch',
+                                      'title': 'Enter numbers Only'}))

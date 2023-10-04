@@ -4,13 +4,14 @@ from .models import ElectricityWorkingHoursPerMonth, FactoryProductionPlan
 from .models import ElectricityPricePlan, ElectricityPrice
 from .models import BankLoan, BankLoanInterest
 from .models import UserProfile, get_user_profile
-from .forms import FactoryFinancialPlaning, NumberPerMonthForm, PricePlanForm, BankLoanForm, UserProfileForm
+from .forms import FactoryFinancialPlaning, NumberPerMonthForm, PricePlanForm, BankLoanForm, UserProfileForm, FactoryScriperForm
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from decimal import Decimal, DecimalException
 from django.forms import formset_factory
 from django.forms.models import model_to_dict
 from django.contrib import messages
+
 import re
 
 from django.contrib.auth.models import User
@@ -29,8 +30,16 @@ def common_context():
     return context
 
 
-@login_required(login_url='/accounts/login/')
-def factories_list(request):
+@login_required(login_url='/oidc/authenticate/')
+def view_home(request):
+    context = common_context()
+    if request.user.is_authenticated:
+        context['profile'] = get_user_profile(request.user)
+    return render(request, "home.html", context)
+
+
+@login_required(login_url='/oidc/authenticate/')
+def view_factories_list(request):
     factories_list = ElectricityFactory.objects.all().order_by('pk')
     paginator = Paginator(factories_list, 5)  # Show 25 contacts per page.
     page_number = request.GET.get('page')
@@ -41,17 +50,26 @@ def factories_list(request):
     return render(request, "factories_list.html", context)
 
 
-@login_required(login_url='/accounts/login/')
-def dashboard(request):
+@login_required(login_url='/oidc/authenticate/')
+def view_dashboard(request):
     context = common_context()
-    #async_task("core.tasks.scripe_factories_list", 1)
     context['profile'] = get_user_profile(request.user)
+    scripe_form = FactoryScriperForm(request.POST)
 
-    # messages.success(request, 'Hello from dashboard view')
+    if scripe_form.is_valid() and request.method == "POST":
+        # messages.error(request, 'Profile error')
+        page_number = int(scripe_form.cleaned_data.get('page_number'))
+        async_task("vei_platform.tasks.scripe_factories_list",
+                   page_number, limit=1)
+        messages.success(
+            request, 'Form is valid with number = %d' % page_number)
+
+    context['scripe_form'] = scripe_form
+
     return render(request, "dashboard.html", context)
 
 
-@login_required(login_url='/accounts/login/')
+@login_required(login_url='/oidc/authenticate/')
 def view_profile(request):
     context = common_context()
     avatar_form = UserProfileForm(request.POST or None, request.FILES or None)
@@ -86,7 +104,7 @@ def view_profile(request):
     return render(request, "account/profile.html", context)
 
 
-@login_required(login_url='/accounts/login/')
+@login_required(login_url='/oidc/authenticate/')
 def view_factory_detail(request, pk=None):
     context = common_context()
     factory = ElectricityFactory.objects.get(pk=pk)
@@ -166,7 +184,7 @@ def view_factory_detail(request, pk=None):
     return render(request, "factory.html", context)
 
 
-@login_required(login_url='/accounts/login/')
+@login_required(login_url='/oidc/authenticate/')
 def view_entity_detail(request, pk=None):
     context = common_context()
     context['legal_entity'] = LegalEntity.objects.get(pk=pk)
@@ -174,7 +192,7 @@ def view_entity_detail(request, pk=None):
     return render(request, "legal_entity.html", context)
 
 
-@login_required(login_url='/accounts/login/')
+@login_required(login_url='/oidc/authenticate/')
 def view_factory_production(request, pk=None):
     context = common_context()
     plan = FactoryProductionPlan.objects.get(pk=pk)
@@ -273,7 +291,7 @@ def generate_formset_table(years, objects, NumberPerMonthFormSet, prefix):
     return formset, table
 
 
-@login_required(login_url='/accounts/login/')
+@login_required(login_url='/oidc/authenticate/')
 def view_electricity_prices(request, pk=None):
     context = common_context()
     plan = ElectricityPricePlan.objects.get(pk=pk)
@@ -328,7 +346,7 @@ def view_electricity_prices(request, pk=None):
     return render(request, "electricity_prices.html", context)
 
 
-@login_required(login_url='/accounts/login/')
+@login_required(login_url='/oidc/authenticate/')
 def view_bank_loan_detail(request, pk=None):
     context = common_context()
     loan = BankLoan.objects.get(pk=pk)
