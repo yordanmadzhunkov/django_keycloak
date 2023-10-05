@@ -340,7 +340,7 @@ class ElectricityFactory(models.Model):
 
 
 @receiver(post_save, sender=ElectricityFactory)
-def electical_facoty_post_save(sender, **kwargs):
+def electical_factory_post_save(sender, **kwargs):
     instance = kwargs.get('instance')
     if instance.primary_owner is None:
         owner_name = instance.owner_name
@@ -359,6 +359,17 @@ def electical_facoty_post_save(sender, **kwargs):
                        instance,
                        task_name="LegalEntity-for-%s" % instance.name,
                        hook=add_legal_entity)
+
+
+@receiver(post_save, sender=LegalEntity)
+def legal_entity_post_save(sender, **kwargs):
+    instance = kwargs.get('instance')
+    tax_id = instance.tax_id
+    factories_for_upgrade = ElectricityFactory.objects.filter(
+        tax_id=tax_id).filter(primary_owner=None)
+    for factory in factories_for_upgrade:
+        factory.primary_owner = instance
+        factory.save()
 
 
 def parse_energy(x):

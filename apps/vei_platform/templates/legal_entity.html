@@ -7,10 +7,13 @@ VEI - DASHBOARD
       <div class="container py-5">
         <h2>{{ legal_entity.native_name }}</h2>
         {% if legal_entity.person %}
+          <p>Физическо лице</p>
         {% else %}
           <p>ЕИК: {{legal_entity.tax_id}}</p>
           <p>Регистрация: {{legal_entity.founded}}
         {% endif %}
+         <h3>Factories</h2>
+         {% include "snippets/factories_list.html" %}
+      {% include "snippets/pagination.html" %}
       </div>
-    </section>
 {% endblock content %}
