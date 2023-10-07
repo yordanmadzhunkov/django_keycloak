@@ -3,7 +3,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic.base import TemplateView
-from .views import view_factories_list, view_dashboard, view_home, view_profile, view_factory_detail, view_entity_detail, view_factory_production, view_electricity_prices, view_bank_loan_detail
+from .views import view_factories_list, view_dashboard, view_home, view_my_profile, view_user_profile, view_factory_detail, view_entity_detail, view_factory_production, view_electricity_prices, view_bank_loan_detail
 
 urlpatterns = [
     path('', view_home, name="home"),
@@ -12,7 +12,8 @@ urlpatterns = [
     path('ht/', include('health_check.urls')),
 
     path('dashboard', view_dashboard, name='dashboard'),
-    path('profile', view_profile, name='account_profile'),
+    path('profile', view_my_profile, name='my_profile'),
+    path('profile/<int:pk>', view_user_profile, name='user_profile'),
     path('invest', view_factories_list, name='factories_list'),
     path('factory/<int:pk>', view_factory_detail, name='view_factory'),
     path('production/<int:pk>', view_factory_production,

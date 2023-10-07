@@ -18,10 +18,10 @@
                   <h5>{{ factory.name }}</h5>
                   <div class="d-flex flex-row">
                     <span> Manager:
-                        <a href="/profile/{{factory.manager}}"> 
-                            {{factory.manager}} 
-                        </a>
-                       <br /> 
+                      <a href = {{factory.get_manager_profile.get_href}}>
+                            {{factory.get_manager_profile.get_display_name}}
+                      </a>
+                      <br /> 
                     </span>
                   </div>
                   <div class="mt-1 mb-0 text-muted small">
@@ -67,6 +67,7 @@
                         <button class="btn btn-primary btn-sm" type="button" onclick="window.location.href='/factory/{{factory.pk}}';">Details</button>
                       </div>
                     {% endif %}
+  
                 </div>
               </div>
             </div>

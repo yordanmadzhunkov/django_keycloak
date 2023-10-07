@@ -12,7 +12,12 @@
         <form action="" method="post">
             {% csrf_token %}
             {{ scripe_form.as_table }}
-            <input type="submit" value="Sripe factories">
+            <!-- <input type="submit" value="Sripe factories"> -->
+            <div class="buttonHolder">
+                <button class="btn btn-primary" type="submit" name="scripe_page" >Scripe page</button>
+                <button class="btn btn-danger" type="submit" name="scripe_all" >scripe all</button>
+            </div>
+          
         </form>
         {% endif %}
     {% endif %}

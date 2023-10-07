@@ -338,6 +338,13 @@ class ElectricityFactory(models.Model):
     def get_absolute_url(self):
         return "/factory/%s" % self.pk
 
+    @property
+    def get_manager_profile(self):
+        if self.manager:
+            return get_user_profile(self.manager)
+        else:
+            return None
+
 
 @receiver(post_save, sender=ElectricityFactory)
 def electical_factory_post_save(sender, **kwargs):
@@ -667,6 +674,22 @@ class UserProfile(models.Model):
             return self.avatar.url
         else:
             return "/static/img/undraw_profile.svg"
+
+    @property
+    def get_display_name(self):
+        return "%s %s" % (self.user.first_name, self.user.last_name)
+
+    @property
+    def get_href(self):
+        return "/profile/%d" % (self.pk)
+
+    @property
+    def last_login(self):
+        return self.user.last_login
+
+    @property
+    def date_joined(self):
+        return self.user.date_joined
 
 
 def get_user_profile(user):

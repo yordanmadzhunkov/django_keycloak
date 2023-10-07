@@ -55,22 +55,29 @@ def view_dashboard(request):
     context = common_context()
     context['profile'] = get_user_profile(request.user)
     scripe_form = FactoryScriperForm(request.POST)
+    if request.method == "POST":
+        if 'scripe_page' in request.POST and scripe_form.is_valid():
 
-    if scripe_form.is_valid() and request.method == "POST":
-        # messages.error(request, 'Profile error')
-        page_number = int(scripe_form.cleaned_data.get('page_number'))
-        async_task("vei_platform.tasks.scripe_factories_list",
-                   page_number, limit=1)
-        messages.success(
-            request, 'Form is valid with number = %d' % page_number)
+            # messages.error(request, 'Profile error')
+            page_number = int(scripe_form.cleaned_data.get('page_number'))
+            limit = 1
+            async_task("vei_platform.tasks.scripe_factories_list",
+                       page_number, limit)
+            messages.success(
+                request, 'Form is valid with number = %d' % page_number)
 
+        if 'scripe_all' in request.POST:
+            page_number = 1
+            limit = 10000
+            async_task("vei_platform.tasks.scripe_factories_list",
+                       page_number, limit)
+            messages.success(request, 'Scriping all pages!')
     context['scripe_form'] = scripe_form
-
     return render(request, "dashboard.html", context)
 
 
 @login_required(login_url='/oidc/authenticate/')
-def view_profile(request):
+def view_my_profile(request):
     context = common_context()
     avatar_form = UserProfileForm(request.POST or None, request.FILES or None)
     profile = get_user_profile(request.user)
@@ -101,7 +108,15 @@ def view_profile(request):
             messages.error(request, 'Profile error')
     context['avatar_form'] = avatar_form
     context['profile'] = get_user_profile(request.user)
-    return render(request, "account/profile.html", context)
+    return render(request, "my_profile.html", context)
+
+
+@login_required(login_url='/oidc/authenticate/')
+def view_user_profile(request, pk=None):
+    context = common_context()
+    context['profile'] = get_user_profile(request.user)
+    context['user_profile'] = UserProfile.objects.get(pk=pk)
+    return render(request, "user_profile.html", context)
 
 
 @login_required(login_url='/oidc/authenticate/')
@@ -112,6 +127,15 @@ def view_factory_detail(request, pk=None):
     context['production_plans'] = FactoryProductionPlan.objects.filter(
         factory=factory)
     context['price_plans'] = ElectricityPricePlan.objects.all()
+    if factory.manager is None:
+        context['manager'] = None
+    else:
+        profile = get_user_profile(factory.manager)
+        # profile.get_avatar_url()
+        context['manager'] = profile.user.first_name + \
+            ' ' + profile.user.last_name
+        context['manager_avatar_url'] = profile.avatar.url
+        context['manager_profile'] = get_user_profile(factory.manager)
 
     if request.method == 'POST':
         form = FactoryFinancialPlaning(factory=factory, data=request.POST)
@@ -136,6 +160,14 @@ def view_factory_detail(request, pk=None):
                 factory=factory)
             bank_loan.save()
             return redirect(bank_loan.get_absolute_url())
+
+        if '_become_manager':
+            if factory.manager is None:
+                factory.manager = request.user
+                factory.save()
+                messages.success(request, "You are now manager")
+            else:
+                messages.error(request, "Already taken")
 
         if form.is_valid():
             context['form_data'] = form.cleaned_data

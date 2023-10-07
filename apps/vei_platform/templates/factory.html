@@ -10,6 +10,20 @@ Solar Estates - DASHBOARD
         <form method="post">
           <table>
             {% csrf_token %}
+
+            <tr>
+              <td> Manager </td>
+                {% if manager_profile  %}
+                  <td>  <a href={{manager_profile.get_href}}> {{ manager_profile.get_display_name }} </a> </td>
+                  <td> 
+                    <img class="img-profile rounded-circle topbar nav-item nav-link " src={{ manager_profile.get_avatar_url }}> 
+                  </td>
+                {% else%}
+                  <td> - </td>   
+                  <td> <input type="submit" value="take" name="_become_manager" class="btn btn-secondary btn-sm" > </td>
+                {% endif%}
+            </tr>
+
             <tr>
               <td> {{ form.capitalization.errors }} {{ form.capitalization.label_tag }} </td>
               <td> {{ form.capitalization}} </td>
