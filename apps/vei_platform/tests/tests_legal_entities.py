@@ -1,5 +1,5 @@
 from django.test import TestCase
-from vei_platform.models import LegalEntity, StakeHolder, LegalEntitySources, create_legal_entity, canonize_name
+from vei_platform.models.legal import LegalEntity, StakeHolder, LegalEntitySources, create_legal_entity, canonize_name
 from datetime import date
 from decimal import Decimal
 

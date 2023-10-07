@@ -1,9 +1,8 @@
 from django.shortcuts import render, redirect
-from .models import ElectricityFactory, LegalEntity
-from .models import ElectricityWorkingHoursPerMonth, FactoryProductionPlan
-from .models import ElectricityPricePlan, ElectricityPrice
-from .models import BankLoan, BankLoanInterest
-from .models import UserProfile, get_user_profile
+from .models.factory import ElectricityFactory, ElectricityWorkingHoursPerMonth, FactoryProductionPlan
+from .models.legal import LegalEntity
+from .models.finance_modeling import BankLoan, BankLoanInterest, ElectricityPricePlan, ElectricityPrice
+from .models.profile import UserProfile, get_user_profile
 from .forms import FactoryFinancialPlaning, NumberPerMonthForm, PricePlanForm, BankLoanForm, UserProfileForm, FactoryScriperForm
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator

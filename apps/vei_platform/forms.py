@@ -1,6 +1,8 @@
 from django import forms
 from datetime import date
-from .models import FactoryProductionPlan, ElectricityPricePlan, BankLoan, UserProfile
+from .models.factory import FactoryProductionPlan
+from .models.finance_modeling import ElectricityPricePlan, BankLoan
+from .models.profile import UserProfile
 
 
 class FactoryFinancialPlaning(forms.Form):

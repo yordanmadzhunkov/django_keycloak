@@ -1,5 +1,7 @@
 from django.contrib import admin
-from .models import ElectricityFactory, LegalEntity, UserProfile
+from .models.factory import ElectricityFactory
+from .models.legal import LegalEntity
+from .models.profile import UserProfile
 # Register your models here.
 
 admin.site.register(ElectricityFactory)
