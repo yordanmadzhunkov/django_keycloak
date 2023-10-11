@@ -7,7 +7,7 @@ from decimal import Decimal
 
 from django_q.tasks import async_task
 
-from .models import add_factory, ElectricityFactory
+from .models.factory import add_factory, ElectricityFactory
 
 from scripers.veiregistar import VEIEegistarScriper
 from scripers.papagal import PapagalScriper

@@ -1,5 +1,6 @@
 from django.db import models
 from .legal import LegalEntity
+from .profile import get_user_profile
 from django.db.models.signals import post_save
 from django.conf import settings
 from decimal import Decimal

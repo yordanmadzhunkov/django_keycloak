@@ -15,7 +15,7 @@
                   </div>
                 </div>
                 <div class="col-md-6 col-lg-6 col-xl-6">
-                  <h5>{{ factory.name }}</h5>
+                  <h5><a href=/factory/{{factory.pk}}> {{ factory.name }}<a></h5>
                   <div class="d-flex flex-row">
                     <span> Manager:
                       <a href = {{factory.get_manager_profile.get_href}}>
@@ -39,7 +39,12 @@
                 </div>
 
                 <div class="col-md-6 col-lg-3 col-xl-3 border-sm-start-none border-start">
-                    {% if factory.fraction_on_platform > 0 %}
+                    {% if factory.get_manager_profile == profile %}
+                      <div class="d-flex flex-column mt-4">
+                        <button class="btn btn-info btn-sm" type="button" onclick="window.location.href='/factory/{{factory.pk}}';">List on platform</button>
+                      </div>
+                    {% else %}
+                      {% if factory.fraction_on_platform > 0 %}
                     <div class="text-success">
                       <span>Listed on platform {{ factory.fraction_on_platform }}</span>
                       <span><br /></span>
@@ -51,22 +56,17 @@
                         <h4 class="mb-1 me-1">10000 Eur</h4>
                       </div>
                       <div class="d-flex flex-column mt-4">
-                        <button 
-                            class="btn btn-primary btn-sm"
-                            type="button"  
-                            onclick="window.location.href='/factory/{{factory.pk}}';">Details</button>
                         <button class="btn btn-outline-primary btn-sm mt-2" type="button">
                           Invest
                         </button>
                       </div>
-                    {% else %}
+                      {% else %}
                       <div class="d-flex flex-row align-items-center mb-1">
                         <h4 class="mb-1 me-1">Not available for investment</h4>
                       </div>
-                      <div class="d-flex flex-column mt-4">
-                        <button class="btn btn-primary btn-sm" type="button" onclick="window.location.href='/factory/{{factory.pk}}';">Details</button>
-                      </div>
+                      {% endif %}
                     {% endif %}
+
   
                 </div>
               </div>
