@@ -5,7 +5,8 @@ from .models.finance_modeling import ElectricityPricePlan, BankLoan
 from .models.profile import UserProfile
 
 
-class FactoryFinancialPlaning(forms.Form):
+
+class FactoryFinancialPlaningForm(forms.Form):
     capitalization = forms.DecimalField(label='Капитализация',
                                         initial=53000,
                                         widget=forms.widgets.NumberInput(
@@ -34,7 +35,7 @@ class FactoryFinancialPlaning(forms.Form):
         initial=2025, max_value=2050, min_value=1990, required=True)
 
     def __init__(self, factory, *args, **kwargs):
-        super(FactoryFinancialPlaning, self).__init__(*args, **kwargs)
+        super(FactoryFinancialPlaningForm, self).__init__(*args, **kwargs)
         production_plan_choise = [
             (t.pk, t.name) for t in FactoryProductionPlan.objects.filter(factory=factory)]
         self.fields['production_plan'] = forms.ChoiceField(label="работни часове",
@@ -127,3 +128,55 @@ class FactoryScriperForm(forms.Form):
                                       'pattern': '[0-9\.]+',
                                       'style': 'width:9ch',
                                       'title': 'Enter numbers Only'}))
+
+
+class SolarEstateListingForm(forms.Form):
+    amount = forms.DecimalField(label='Капитализация',
+                                        initial=1000,
+                                        widget=forms.widgets.NumberInput(
+                                            attrs={
+                                                "class": "form-control",
+                                                "inputmode": "decimal",
+                                            }
+                                        ))
+
+    persent_from_profit = forms.DecimalField(label='Дял от централата[%]',
+                                        initial=10.0,
+                                        widget=forms.widgets.NumberInput(
+                                            attrs={
+                                                "class": "form-control",
+                                                "inputmode": "decimal",
+                                            }
+                                        ))
+
+
+    start_date = forms.DateField(initial=date(2023, 6, 1),
+                                widget= forms.widgets.SelectDateWidget(attrs={
+                'class': 'form-control',
+                'title': 'Дата на придобиване'})
+                                    )
+
+    duration = forms.CharField(initial="180",
+                               label='Продължителност',
+                             required=False,
+                             widget=forms.widgets.TextInput(attrs={
+                                 'class': 'form-control',
+                                 'autocomplete': 'off',
+                                 'pattern': '[0-9\.]+',
+                                 'style': 'width:9ch',
+                                 'title': 'Enter numbers Only'}))
+
+    commision = forms.DecimalField(label='Комисионна за Солар Естайет [%]',
+                                        initial=1.5,
+                                        widget=forms.widgets.TextInput(attrs={
+                                            'class': 'form-control',
+                                            'autocomplete': 'off',
+                                            'pattern': '[0-9\.]+',
+                                            'style': 'width:9ch',
+                                            'title': 'Enter numbers Only',
+                                            'readonly': True,}
+                                        )
+                                 )
+                                        
+                                        
+        

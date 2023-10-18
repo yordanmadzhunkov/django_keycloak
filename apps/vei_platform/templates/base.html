@@ -1,13 +1,14 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>        
+    <title>
         {% block head_title %}
         {% endblock head_title %}
     </title>
@@ -23,12 +24,12 @@
     <!-- Page Wrapper -->
     <div id="wrapper">
         {% if request.user.is_authenticated %}
-            {% include "snippets/sidebar.html" %}
+        {% include "snippets/sidebar.html" %}
         {% endif %}
         <!-- Content Wrapper -->
         <div id="content-wrapper" class="d-flex flex-column">
             {% if request.user.is_authenticated %}
-                {% include "snippets/topbar.html" %}
+            {% include "snippets/topbar.html" %}
             {% endif %}
             {% include "snippets/messages.html" %}
             <!-- Main Content -->
@@ -36,18 +37,19 @@
                 {% block content %}
                 {% endblock content %}
             </div>
-        {% include "snippets/footer.html" %}
-        <!-- End of Content Wrapper -->
+            {% include "snippets/footer.html" %}
+            <!-- End of Content Wrapper -->
         </div>
-    <!-- Scroll to Top Button-->
-    <a class="scroll-to-top rounded" href="#page-top">
-        <i class="fas fa-angle-up"></i>
-    </a>
-    <!-- End of Page Wrapper -->
+        <!-- Scroll to Top Button-->
+        <a class="scroll-to-top rounded" href="#page-top">
+            <i class="fas fa-angle-up"></i>
+        </a>
+        <!-- End of Page Wrapper -->
     </div>
     {% if request.user.is_authenticated %}
-        {% include "snippets/logout_modal.html" %}
+    {% include "snippets/logout_modal.html" %}
     {% endif %}
     {% include "snippets/scripts.html" %}
 </body>
+
 </html>

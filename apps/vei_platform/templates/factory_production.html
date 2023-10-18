@@ -3,40 +3,41 @@
 Solar Estates - DASHBOARD
 {% endblock%}
 {% block content %}
-    <section style="background-color: #eee;">
-      <div class="container py-5">
-        {% include "factory_header.html" %}
-        <form method="post">
-          {% csrf_token %}
-          {{ formset.management_form }}
-          {{ plan_formset.management_form }}
-          {{ plan_formset }}
-          <table class="table-striped table-bordered table-sm">
-            <thead>
-                {% for label in table.labels %}
-                  <th>{{ label }}</th> 
-                {% endfor %}
-          </thead>
-          <tbody>
+<section style="background-color: #eee;">
+  <div class="container py-5">
+    {% include "factory_header.html" %}
+    <form method="post">
+      {% csrf_token %}
+      {{ formset.management_form }}
+      {{ plan_formset.management_form }}
+      {{ plan_formset }}
+      <table class="table-striped table-bordered table-sm">
+        <thead>
+          {% for label in table.labels %}
+          <th>{{ label }}</th>
+          {% endfor %}
+        </thead>
+        <tbody>
           {% for row in table.rows %}
           <tr>
             {% for data in row %}
             {% autoescape off %}
-              <td> {{data}} </td>
-              {% endautoescape %}
+            <td> {{data}} </td>
+            {% endautoescape %}
             {% endfor %}
           </tr>
           {% endfor %}
         </tbody>
-        </table>
-        <input type="submit" value="Save"/>
+      </table>
+      <input type="submit" value="Save" />
 
-        {% if not factory.manager  %}
-           <div class="d-flex flex-column mt-4">
-              <button class="btn btn-secondary btn-sm" type="button" onclick="window.location.href='/factory/{{factory.pk}}';">Become manager</button>
-           </div>
-        {% endif%}
-      </form>
+      {% if not factory.manager %}
+      <div class="d-flex flex-column mt-4">
+        <button class="btn btn-secondary btn-sm" type="button"
+          onclick="window.location.href='/factory/{{factory.pk}}';">Become manager</button>
       </div>
+      {% endif%}
+    </form>
+  </div>
 </section>
 {% endblock content %}

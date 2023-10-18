@@ -3,7 +3,13 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic.base import TemplateView
-from .views import view_factories_list, view_dashboard, view_home, view_my_profile, view_user_profile, view_factory_detail, view_entity_detail, view_factory_production, view_electricity_prices, view_bank_loan_detail
+from .views.factory import view_factories_list, view_factory_detail, view_factory_production
+from .views.dashboard import view_dashboard
+from .views.home import view_home
+from .views.profile import view_my_profile, view_user_profile
+from .views.legal_entity import view_entity_detail
+from .views.electricity_prices import view_electricity_prices
+from .views.loan import view_bank_loan_detail
 
 urlpatterns = [
     path('', view_home, name="home"),

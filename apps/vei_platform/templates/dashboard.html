@@ -1,24 +1,24 @@
 {% extends 'base.html' %}
-{% load static %} 
+{% load static %}
 
 {% block head_title %}
-    DASHBOARD
+DASHBOARD
 {% endblock%}
 {% block content %}
-    <h1>DASHBOARD CONTENT</h1>
-    {% if user.is_authenticated %}
-        {% if user.is_superuser %}
-        You are admin, here is a button to push
-        <form action="" method="post">
-            {% csrf_token %}
-            {{ scripe_form.as_table }}
-            <!-- <input type="submit" value="Sripe factories"> -->
-            <div class="buttonHolder">
-                <button class="btn btn-primary" type="submit" name="scripe_page" >Scripe page</button>
-                <button class="btn btn-danger" type="submit" name="scripe_all" >scripe all</button>
-            </div>
-          
-        </form>
-        {% endif %}
-    {% endif %}
+<h1>DASHBOARD CONTENT</h1>
+{% if user.is_authenticated %}
+{% if user.is_superuser %}
+You are admin, here is a button to push
+<form action="" method="post">
+    {% csrf_token %}
+    {{ scripe_form.as_table }}
+    <!-- <input type="submit" value="Sripe factories"> -->
+    <div class="buttonHolder">
+        <button class="btn btn-primary" type="submit" name="scripe_page">Scripe page</button>
+        <button class="btn btn-danger" type="submit" name="scripe_all">scripe all</button>
+    </div>
+
+</form>
+{% endif %}
+{% endif %}
 {% endblock content %}
