@@ -150,8 +150,9 @@ class SolarEstateListingForm(forms.Form):
                                         ))
 
 
-    start_date = forms.DateField(initial=date(2023, 6, 1),
-                                widget= forms.widgets.SelectDateWidget(attrs={
+    start_date = forms.DateField(label='Влизане в сила',
+                                 initial=date(2023, 6, 1),
+                                 widget= forms.widgets.SelectDateWidget(attrs={
                 'class': 'form-control',
                 'title': 'Дата на придобиване'})
                                     )

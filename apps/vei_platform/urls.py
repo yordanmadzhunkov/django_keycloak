@@ -3,13 +3,15 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic.base import TemplateView
-from .views.factory import view_factories_list, view_factory_detail, view_factory_production
+
+from .views.factory import view_factories_list, view_factory_detail, view_factory_production, view_factory_offer_shares
 from .views.dashboard import view_dashboard
 from .views.home import view_home
 from .views.profile import view_my_profile, view_user_profile
 from .views.legal_entity import view_entity_detail
 from .views.electricity_prices import view_electricity_prices
 from .views.loan import view_bank_loan_detail
+from .views.bank_account import view_bank_accounts
 
 urlpatterns = [
     path('', view_home, name="home"),
@@ -22,12 +24,14 @@ urlpatterns = [
     path('profile/<int:pk>', view_user_profile, name='user_profile'),
     path('invest', view_factories_list, name='factories_list'),
     path('factory/<int:pk>', view_factory_detail, name='view_factory'),
+    path('factory/offer_shares/<int:pk>', view_factory_offer_shares, name='view_factory_offer_shares'),
     path('production/<int:pk>', view_factory_production,
          name='view_factory_production'),
     path('electricity/<int:pk>', view_electricity_prices,
          name='view_electricity_prices'),
     path('entity/<int:pk>', view_entity_detail, name='entity'),
     path('bank_loan/<int:pk>', view_bank_loan_detail, name='bank_loan'),
+    path('bank_accounts_list', view_bank_accounts, name='bank_accounts_list')
 ]
 
 if settings.DEBUG:

@@ -19,7 +19,6 @@ def view_entity_detail(request, pk=None):
         context['legal_entity'] = legal_entity
         factories_list = ElectricityFactory.objects.all().filter(
             primary_owner=legal_entity).order_by('pk')
-        print(factories_list)
         paginator = Paginator(factories_list, 5)  # Show 25 contacts per page.
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)

@@ -11,6 +11,11 @@ from django.dispatch import receiver
 from django_q.tasks import async_task
 
 import re
+    
+# Financial data related to the platform
+# Evealuation, P/E, available for investment, number of investors
+
+
 
 
 class ElectricityPricePlan(models.Model):
@@ -151,12 +156,19 @@ class BankLoanInterest(models.Model):
 
 class SolarEstateListing(models.Model):
     start_date = models.DateField()
-    amount = models.DecimalField(max_digits=12, decimal_places=2)
-    persent_from_profit = models.DecimalField(max_digits=2, decimal_places=2)
+    amount = models.DecimalField(max_digits=16, decimal_places=2)
+    persent_from_profit = models.DecimalField(max_digits=4, decimal_places=2)
     duration = models.IntegerField(default=12*15)
     commision = models.DecimalField(
-        default=1.5, max_digits=2, decimal_places=2)
+        default=1.5, max_digits=4, decimal_places=2)
+    factory = models.ForeignKey(ElectricityFactory, null=False, blank=False, on_delete=models.DO_NOTHING)
 
+    def price_per_kw(self):
+        return Decimal(self.amount / (self.factory.get_capacity_in_kw() * self.persent_from_profit * Decimal('0.01'))).quantize(Decimal('1.00'))
+        
+    @staticmethod
+    def is_listed(factory):
+        return len(SolarEstateListing.objects.filter(factory=factory)) > 0
 
 class SolarEstateInvestor(models.Model):
     name = models.CharField(max_length=128)
@@ -183,7 +195,6 @@ class FinancialPlan(models.Model):
     prices = models.ForeignKey(
         ElectricityPricePlan, null=True, blank=True, on_delete=models.DO_NOTHING)
 
-    @property
     def rows(self):
         res = []
         next_month = self.start_month

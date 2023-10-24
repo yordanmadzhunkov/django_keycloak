@@ -6,7 +6,6 @@ from django.conf import settings
 from decimal import Decimal
 from django.dispatch import receiver
 
-
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 
@@ -16,7 +15,6 @@ def user_image_upload_directory_path(instance, filename):
 
 
 class ElectricityFactory(models.Model):
-
     name = models.CharField(max_length=128)
 
     # Factory type
@@ -40,11 +38,6 @@ class ElectricityFactory(models.Model):
         default=PHOTOVOLTAIC,
     )
 
-    # Financial data related to the platform
-    # Evealuation, P/E, available for investment, number of investors
-    fraction_on_platform = models.DecimalField(
-        default=0, decimal_places=6, max_digits=9)
-
     # User that manages the data shown on the platform
     manager = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, default=None, on_delete=models.DO_NOTHING)
@@ -66,7 +59,7 @@ class ElectricityFactory(models.Model):
     owner_name = models.CharField(max_length=128, default="Unknown")
 
     def __str__(self):
-        return self.name + ' listed ' + str(self.fraction_on_platform)
+        return self.name
 
     def is_working(self):
         return self.status == self.WORKING
@@ -74,7 +67,6 @@ class ElectricityFactory(models.Model):
     def is_stopped(self):
         return self.status == self.STOPED
 
-    @property
     def get_image_url(self):
         if self.image and hasattr(self.image, 'url'):
             return self.image.url
@@ -87,19 +79,19 @@ class ElectricityFactory(models.Model):
         print('type = ' + self.factory_type + '\n')
         return None
 
-    @property
     def get_capacity_in_kw(self):
-        return self.capacity_in_mw * 1000
+        return self.capacity_in_mw * Decimal(1000)
 
     def get_absolute_url(self):
         return "/factory/%s" % self.pk
 
-    @property
     def get_manager_profile(self):
         if self.manager:
             return get_user_profile(self.manager)
         else:
             return None
+        
+
 
 
 @receiver(post_save, sender=ElectricityFactory)

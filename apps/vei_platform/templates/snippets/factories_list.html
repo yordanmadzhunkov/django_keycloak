@@ -1,77 +1,95 @@
+{% load vei_platform_utils %}
+
 {% for factory in page_obj %}
-    <div class="row justify-content-center mb-3">
-        <div class="col-md-12 col-xl-10">
-          <div class="card shadow-0 border rounded-3">
-            <div class="card-body">
-              <div class="row">
-                <div class="col-md-12 col-lg-3 col-xl-3 mb-4 mb-lg-0">
-                  <div class="bg-image hover-zoom ripple rounded ripple-surface">
-                      <img src="{{ factory.get_image_url }}" class="img-fluid img-thumbnail" />
-                    <a href="#!">
-                      <div class="hover-overlay">
-                        <div class="mask" style="background-color: rgba(253, 253, 253, 0.15);"></div>
-                      </div>
-                    </a>
-                  </div>
+<div class="row justify-content-center mb-3">
+  <div class="col-md-12 col-xl-10">
+    <div class="card shadow-0 border rounded-3">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-12 col-lg-3 col-xl-3 mb-4 mb-lg-0">
+            <div class="bg-image hover-zoom ripple rounded ripple-surface">
+              <img src="{{ factory.get_image_url }}" class="img-fluid img-thumbnail" />
+              <a href="#!">
+                <div class="hover-overlay">
+                  <div class="mask" style="background-color: rgba(253, 253, 253, 0.15);"></div>
                 </div>
-                <div class="col-md-6 col-lg-6 col-xl-6">
-                  <h5><a href=/factory/{{factory.pk}}> {{ factory.name }}<a></h5>
-                  <div class="d-flex flex-row">
-                    <span> Manager:
-                      <a href = {{factory.get_manager_profile.get_href}}>
-                            {{factory.get_manager_profile.get_display_name}}
-                      </a>
-                      <br /> 
-                    </span>
-                  </div>
-                  <div class="mt-1 mb-0 text-muted small">
-                    {% if factory.primary_owner %}
-                      <span> Owner   <a href="/entity/{{ factory.primary_owner.pk}}">  {{ factory.owner_name}}   </a>         <br /></span>
-                    {% else %}
-                      <span> Owner    {{ factory.owner_name}}                <br /></span>
-                      <span> Tax ID   {{ factory.tax_id }} <br /></span>
-                    {% endif%}
-                    <span >Location {{ factory.location}}                  <br /></span>
-                    <span> Source   {{ factory.get_factory_type_display}}  <br /></span>
-                    <span> Capacity	{{ factory.capacity_in_mw }} MW       <br /></span>
-                    <span> Opened   {{ factory.opened }}                  <br /></span>
-                  </div>
-                </div>
-
-                <div class="col-md-6 col-lg-3 col-xl-3 border-sm-start-none border-start">
-                    {% if factory.get_manager_profile == profile %}
-                      <div class="d-flex flex-column mt-4">
-                        <button class="btn btn-info btn-sm" type="button" onclick="window.location.href='/factory/{{factory.pk}}';">List on platform</button>
-                      </div>
-                    {% else %}
-                      {% if factory.fraction_on_platform > 0 %}
-                    <div class="text-success">
-                      <span>Listed on platform {{ factory.fraction_on_platform }}</span>
-                      <span><br /></span>
-                    </div>
-                    <div class="d-flex flex-row align-items-center mb-1">
-                        <h4 class="mb-1 me-1">Max investment</h4>
-                      </div>
-                      <div class="d-flex flex-row align-items-center mb-1">
-                        <h4 class="mb-1 me-1">10000 Eur</h4>
-                      </div>
-                      <div class="d-flex flex-column mt-4">
-                        <button class="btn btn-outline-primary btn-sm mt-2" type="button">
-                          Invest
-                        </button>
-                      </div>
-                      {% else %}
-                      <div class="d-flex flex-row align-items-center mb-1">
-                        <h4 class="mb-1 me-1">Not available for investment</h4>
-                      </div>
-                      {% endif %}
-                    {% endif %}
-
-  
-                </div>
-              </div>
+              </a>
             </div>
+          </div>
+          <div class="col-md-6 col-lg-6 col-xl-6">
+            <h5><a href=/factory/{{factory.pk}}> {{ factory.name }}<a></h5>
+            <div class="d-flex flex-row">
+              <span> Manager:
+                <a href={{factory.get_manager_profile.get_href}}>
+                  {{factory.get_manager_profile.get_display_name}}
+                </a>
+                <br />
+              </span>
+            </div>
+            <div class="mt-1 mb-0 text-muted small">
+              {% if factory.primary_owner %}
+              <span> Owner <a href="/entity/{{ factory.primary_owner.pk}}"> {{ factory.owner_name}} </a> <br /></span>
+              {% else %}
+              <span> Owner {{ factory.owner_name}} <br /></span>
+              <span> Tax ID {{ factory.tax_id }} <br /></span>
+              {% endif%}
+              <span>Location {{ factory.location}} <br /></span>
+              <span> Source {{ factory.get_factory_type_display}} <br /></span>
+              <span> Capacity {{ factory.capacity_in_mw }} MW <br /></span>
+              <span> Opened {{ factory.opened }} <br /></span>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-lg-3 col-xl-3 border-sm-start-none border-start">
+            {% if factory|is_listed %}
+
+            <div class="text-success">
+              <button class="btn btn-success" type="button"
+                onclick="window.location.href='/factory/invest/{{factory.pk}}';">Invest up to
+                {{factory|total_amount_listed }}</button>
+              <span><br /></span>
+            </div>
+            {% endif %}
+
+            {% if factory.get_manager_profile == profile %}
+            <div class="d-flex flex-column mt-4">
+              <button class="btn btn-info" type="button"
+                onclick="window.location.href='/factory/offer_shares/{{factory.pk}}';">Offer for investors</button>
+            </div>
+            {% else %}
+
+            {% if factory|is_listed %}
+            <div class="text-success">
+              <span>Listed on platform {{ factory|total_amount_listed }}</span>
+              <span><br /></span>
+            </div>
+            <div class="d-flex flex-row align-items-center mb-1">
+              <h4 class="mb-1 me-1">Max investment</h4>
+            </div>
+            <div class="d-flex flex-row align-items-center mb-1">
+              <h4 class="mb-1 me-1">10000 Eur</h4>
+            </div>
+            <div class="d-flex flex-column mt-4">
+              <button class="btn btn-outline-primary btn-sm mt-2" type="button">
+                Invest
+              </button>
+            </div>
+            {% else %}
+            <div class="d-flex flex-row align-items-center mb-1">
+              <h4 class="mb-1 me-1">Not available for investment</h4>
+            </div>
+            <div class="d-flex flex-column mt-4">
+              <button class="btn btn-info" type="button"
+                onclick="window.location.href='/factory/{{factory.pk}}';">Details</button>
+            </div>
+            {% endif %}
+            {% endif %}
+
+
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
 {% endfor%}

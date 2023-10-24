@@ -2,6 +2,7 @@ from django.core.paginator import Paginator
 
 from . import common_context
 from vei_platform.models.factory import ElectricityFactory, FactoryProductionPlan, ElectricityWorkingHoursPerMonth
+from vei_platform.models.finance_modeling import SolarEstateListing
 from vei_platform.models.finance_modeling import ElectricityPricePlan, BankLoan
 from vei_platform.models.profile import get_user_profile
 from vei_platform.forms import SolarEstateListingForm, FactoryFinancialPlaningForm
@@ -12,8 +13,7 @@ from django.contrib import messages
 
 from decimal import Decimal, DecimalException
 from datetime import date
-
-
+from django import template
 
 
 @login_required(login_url='/oidc/authenticate/')
@@ -27,6 +27,67 @@ def view_factories_list(request):
     context['profile'] = get_user_profile(request.user)
     return render(request, "factories_list.html", context)
 
+@login_required(login_url='/oidc/authenticate/')
+def view_factory_offer_shares(request, pk=None):
+    context = common_context()
+    factory = ElectricityFactory.objects.get(pk=pk)
+    context['profile'] = get_user_profile(request.user)
+    context['factory'] = factory
+    context['manager_profile'] = None if factory.manager is None else get_user_profile(factory.manager)
+    context['factory_is_listed'] = SolarEstateListing.is_listed(factory)
+
+    listings = SolarEstateListing.objects.filter(factory=factory)
+    total_amount = Decimal(0)
+    total_listed_persent = Decimal(0)
+    total_available = Decimal(0)
+    for listing in listings:
+        total_amount += listing.amount
+        total_listed_persent += listing.persent_from_profit
+        total_available += 0
+
+    context['listings_total'] = {
+        'amount': total_amount,
+        'available': total_available,
+        'listed': total_listed_persent,
+    }
+
+    context['listings'] = listings
+
+    if context['manager_profile']:
+        capacity = factory.get_capacity_in_kw()
+        fraction = Decimal(0.5)
+        form = SolarEstateListingForm(initial={
+            'amount': Decimal(1500) * capacity * fraction,
+            'persent_from_profit': fraction * Decimal(100),
+            'start_date': date(2023,12,1),
+            'duration': Decimal(15*12),
+            'commision': Decimal(1.5),
+        })
+
+    if request.method == 'POST':
+        form = SolarEstateListingForm(data=request.POST)
+        if form.is_valid():
+            context['form_data'] = form.cleaned_data
+            amount = form.cleaned_data['amount']
+            persent_from_profit = form.cleaned_data['persent_from_profit']
+            start_date = form.cleaned_data['start_date']
+            duration = form.cleaned_data['duration']
+            commision = form.cleaned_data['commision']
+            listing = SolarEstateListing(
+                    start_date=start_date, 
+                    amount=Decimal(amount).quantize(Decimal('1.')), 
+                    persent_from_profit=Decimal(persent_from_profit).quantize(Decimal('99.99')),
+                    duration=Decimal(duration).quantize(Decimal('1.')), 
+                    commision=Decimal(commision).quantize(Decimal('99.99')),
+                    factory=factory
+            )
+            listing.save()
+            messages.success(request, "You listed your factory")
+        else:
+            messages.error(request, "Form is not valid, please retry")
+
+    context['create_listing_form'] = form
+    return render(request, "factory_offer_shares.html", context)
 
 
 @login_required(login_url='/oidc/authenticate/')
@@ -42,7 +103,6 @@ def view_factory_detail(request, pk=None):
     else:
         profile = get_user_profile(factory.manager)
         context['manager_profile'] = get_user_profile(factory.manager)
-        context['create_listing_form'] = SolarEstateListingForm()
 
     if request.method == 'POST':
         form = FactoryFinancialPlaningForm(factory=factory, data=request.POST)

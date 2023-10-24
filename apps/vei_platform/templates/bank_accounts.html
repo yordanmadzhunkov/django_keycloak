@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head_title %}
+Bank Accounts
+{% endblock%}
+
+{% block content %}
+
+<table class="table align-middle mb-0 bg-white">
+    <thead class="bg-light">
+        <tr>
+            <th>Owner</th>
+            <th>IBAN</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+
+        {% for account in accounts%}
+        <tr>
+
+            <td>
+                <div class="d-flex align-items-center">
+                    <img src="{{account.avatar_url}}" class="rounded-circle" alt="" style="width: 45px; height: 45px" />
+                    <div class="ms-3">
+                        <p class="fw-bold mb-1">{{account.owner}}</p>
+                        <p class="text-muted mb-0"></p>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <p class="fw-normal mb-1">{{account.iban}}</p>
+                <p class="text-muted mb-0">{{account.currency}}</p>
+            </td>
+            <td>
+                {%if account.status == "Active" %}
+                <span class="badge badge-success rounded-pill d-inline">Active</span>
+                {%endif%}
+                {%if account.status == "Inactive" %}
+                <span class="badge badge-error rounded-pill d-inline">Inactive</span>
+                {%endif%}
+                {%if account.status == "Unverified" %}
+                <span class="badge badge-warning rounded-pill d-inline">Unverified</span>
+                {%endif%}
+            </td>
+            <td>
+                {%for action in account.actions %}
+                <button type="button" class="btn btn-link btn-rounded btn-sm fw-bold" data-mdb-ripple-color="dark">
+                    {{action}}
+                </button>
+                {%endfor%}
+            </td>
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+</table>
+
+{% endblock content %}

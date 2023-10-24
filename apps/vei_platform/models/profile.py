@@ -15,26 +15,21 @@ class UserProfile(models.Model):
     def __str__(self):
         return self.user.username
 
-    @property
     def get_avatar_url(self):
         if self.avatar and hasattr(self.avatar, 'url'):
             return self.avatar.url
         else:
             return "/static/img/undraw_profile.svg"
 
-    @property
     def get_display_name(self):
         return "%s %s" % (self.user.first_name, self.user.last_name)
 
-    @property
     def get_href(self):
         return "/profile/%d" % (self.pk)
 
-    @property
     def last_login(self):
         return self.user.last_login
 
-    @property
     def date_joined(self):
         return self.user.date_joined
 
