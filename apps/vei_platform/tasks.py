@@ -40,14 +40,11 @@ def scripe_factory_legal_entity(factory):
         scriper = PapagalScriper()
         info = None
         if info is None:
-            print("scripe for factory.tax_id = " + str(factory.tax_id))
             info = scriper.scripe(factory.tax_id)
         if info is None:
-            print("scripe for factory.owner_name = " + str(factory.owner_name))
             info = scriper.scripe(factory.owner_name)
         if info is not None:
             info['source'] = scriper.base_url
-        print(info)
         return info
     return None
 
