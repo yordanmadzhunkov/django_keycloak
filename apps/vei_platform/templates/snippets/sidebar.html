@@ -34,6 +34,26 @@
         </a>
     </li>
 
+    {% if user.is_superuser %}
+    <!-- Nav Item - Profile Collapse Menu -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#admin_collapseUtilities"
+            aria-expanded="true" aria-controls="admin_collapseUtilities">
+            <i class="fas fa-fw fa-user"></i>
+            <span>Admin</span>
+        </a>
+        <div id="admin_collapseUtilities" class="collapse" aria-labelledby="headingUtilities"
+            data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <!-- <h6 class="collapse-header">Custom Utilities:</h6> -->
+                <a class="collapse-item" href="{% url 'platform_legal'    %}">Platform legal </a>
+                <a class="collapse-item" href="{% url 'scriping_tools'     %}">Scriping tools</a>
+            </div>
+        </div>
+    </li>
+    {% endif %}
+
+
     <!-- Divider -->
     <hr class="sidebar-divider">
 
@@ -48,6 +68,7 @@
             <div class="bg-white py-2 collapse-inner rounded">
                 <!-- <h6 class="collapse-header">Custom Utilities:</h6> -->
                 <a class="collapse-item" href="{% url 'my_profile'    %}">Profile </a>
+                <a class="collapse-item" href="{% url 'my_entity'     %}">My Tax ID </a>
                 <a class="collapse-item" href="{% url 'oidc_logout'   %}">Logout </a>
             </div>
         </div>

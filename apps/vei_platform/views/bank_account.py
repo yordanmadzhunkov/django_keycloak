@@ -4,6 +4,10 @@ from django.contrib.auth.decorators import login_required
 from vei_platform.models.profile import get_user_profile
 from django.shortcuts import render
 
+from vei_platform.forms import BankAccountForm
+from vei_platform.models.finance_modeling import BankAccount
+
+from django.contrib import messages
 
 @login_required(login_url='/oidc/authenticate/')
 def view_bank_accounts(request):
@@ -12,8 +16,7 @@ def view_bank_accounts(request):
     if request.user.is_authenticated:
         profile = get_user_profile(request.user)
         context['profile'] = profile
-        avatar_url = profile.get_avatar_url
-
+        avatar_url = profile.get_avatar_url()
     context['accounts'] = [
         {
             'iban':'LU130107645115151684',
@@ -40,6 +43,22 @@ def view_bank_accounts(request):
             'avatar_url': avatar_url,
             'actions': ['Verify', ],
          },
-
     ]
+
+    form = BankAccountForm(profile, request.POST)
+    if request.method == "POST":
+        if form.is_valid():
+            balance = form.cleaned_data['balance']
+            new_account = BankAccount(
+                owner = form.cleaned_data['owner'],
+                iban = form.cleaned_data['iban'], 
+                balance = balance,
+                initial_balance = balance,
+                currency = form.cleaned_data['currency'], 
+                status = BankAccount.AccountStatus.UNVERIFIED
+            )
+            new_account.save()
+        else:
+            messages.error(request, 'Invalid from ' + str(form.errors))
+    context['form'] = form
     return render(request, "bank_accounts.html", context)

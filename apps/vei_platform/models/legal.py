@@ -6,7 +6,7 @@ import re
 class LegalEntity(models.Model):
     native_name = models.CharField(max_length=1024)
     latin_name = models.CharField(max_length=1024)
-    legal_form = models.CharField(max_length=4, null=True)
+    legal_form = models.CharField(max_length=48, null=True)
     tax_id = models.CharField(max_length=48, unique=True, null=True)
     founded = models.DateField(null=True)
     person = models.BooleanField(default=False, null=False)
@@ -239,5 +239,28 @@ def add_legal_entity(task):
     result = task.result
     if result is not None:
         source = task.result['source']
-        print(task)
+        #print(task)
         create_legal_entity(result, source)
+
+
+def find_legal_entity_for_user(user):
+    my_source_url=("user:%s" % user)
+    sources = LegalEntitySources.objects.filter(url=my_source_url)
+    if len(sources) > 0:
+        my_source = sources[0]
+        return my_source.entity
+    return None
+
+
+def find_legal_entity_by_tax_id(tax_id):
+    if tax_id is not None:
+        objects = LegalEntity.objects.filter(tax_id=tax_id)
+        if len(objects) > 0:
+            return objects[0]
+    return None
+    
+def find_legal_entity(tax_id=None, user=None):
+    res = find_legal_entity_by_tax_id(tax_id)
+    if res is None:
+        res = find_legal_entity_for_user(user)
+    return res

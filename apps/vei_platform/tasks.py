@@ -53,5 +53,9 @@ def scripe_factory_legal_entity(factory):
     return None
 
 
-def scripe_legal_entty(params):
-    print(params)
+def scripe_legal_entity(tax_id):
+    scriper = PapagalScriper()
+    info = scriper.scripe(tax_id)
+    if info is not None:
+        info['source'] = scriper.base_url
+    return info

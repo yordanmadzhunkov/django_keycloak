@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head_title %}
+Scriping tools
+{% endblock%}
+{% block content %}
+{% if user.is_authenticated %}
+
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6 text-center">
+        <div class="text-center justify-content-center">
+            <h1>Platfotm tools</h1>
+            <form method="post">
+                {% csrf_token %}
+                <table class="table table-bordered align-middle mb-0 bg-white">
+
+                    <thead>
+                        <th>Source</th>
+                        <th>Param</th>
+                        <th>href</th>
+                        <th>Action</th>
+
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td> https://www.veiregistar.bg/ </td>
+                            <td> Page: {{ scripe_form.page_number }} </td>
+                            <td> </td>
+                            <td> <button class="btn btn-primary" type="submit" name="scripe_page">Scripe page</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td> https://www.veiregistar.bg/ </td>
+                            <td> All pages </td>
+                            <td> </td>
+                            <td> <button class="btn btn-danger" type="submit" name="scripe_all">Scripe all
+                                    pages </button></td>
+                        </tr>
+                        <tr>
+                            <td> https://papagal.bg/ </td>
+                            <td> Tax ID: {{ scripe_form.page_number }} </td>
+                            <td> </td>
+                            <td> <button class="btn btn-primary" type="submit" name="scripe_tax_id">Scripe Legal
+                                    Entity</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+
+
+            </form>
+        </div>
+
+    </div>
+</div>
+
+
+{% endif %}
+{% endblock content %}

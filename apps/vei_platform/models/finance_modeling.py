@@ -5,6 +5,7 @@ from decimal import Decimal
 from datetime import date
 from django.core.validators import MaxValueValidator, MinValueValidator
 from .factory import ElectricityFactory, FactoryProductionPlan
+from .legal import LegalEntity
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -61,6 +62,38 @@ class ElectricityPrice(models.Model):
 
     def __str__(self) -> str:
         return "%s @ %.2f - plan = %s" % (str(self.month), self.number,  self.plan.name)
+
+
+class Currency(models.TextChoices):
+    BGN = 'BGN', ('Bulgarian lev')
+    EUR = 'EUR', ('Euro')
+    USD = 'USD', ('Unated States Dolar')
+
+
+class BankAccount(models.Model):
+    class AccountStatus(models.TextChoices):
+        UNVERIFIED = 'UN', ('Unverified')
+        INACTIVE = 'IN', ('Inactive')
+        ACTIVE = 'AC', ('Active')
+
+    owner = models.ForeignKey(LegalEntity, null=True, blank=True, on_delete=models.DO_NOTHING)
+    iban = models.TextField(max_length=100, null=False, blank=False)
+    balance = models.DecimalField(max_digits=24, decimal_places=2, default=Decimal(0))
+    initial_balance = models.DecimalField(max_digits=24, decimal_places=2, default=Decimal(0))
+    currency = models.CharField(
+        max_length=4,
+        choices=Currency.choices,
+        default=Currency.BGN,
+    )
+    status = models.CharField(
+        max_length=2,
+        choices=AccountStatus.choices,
+        default=AccountStatus.UNVERIFIED,
+    )
+
+    def __str__(self) -> str:
+        return "%s / %s" % (self.iban, self.owner.native_name)
+
 
 
 class BankLoan(models.Model):
@@ -161,7 +194,7 @@ class SolarEstateListing(models.Model):
     duration = models.IntegerField(default=12*15)
     commision = models.DecimalField(
         default=1.5, max_digits=4, decimal_places=2)
-    factory = models.ForeignKey(ElectricityFactory, null=False, blank=False, on_delete=models.DO_NOTHING)
+    factory = models.ForeignKey(ElectricityFactory, null=True, blank=True, on_delete=models.DO_NOTHING)
 
     def price_per_kw(self):
         return Decimal(self.amount / (self.factory.get_capacity_in_kw() * self.persent_from_profit * Decimal('0.01'))).quantize(Decimal('1.00'))

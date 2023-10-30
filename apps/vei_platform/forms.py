@@ -1,8 +1,9 @@
 from django import forms
 from datetime import date
-from .models.factory import FactoryProductionPlan
-from .models.finance_modeling import ElectricityPricePlan, BankLoan
+from .models.factory import FactoryProductionPlan, ElectricityFactory
+from .models.finance_modeling import ElectricityPricePlan, BankLoan, BankAccount
 from .models.profile import UserProfile
+from .models.legal import LegalEntity, find_legal_entity
 
 
 
@@ -100,6 +101,73 @@ class BankLoanForm(forms.ModelForm):
             }),
         }
 
+class LegalEntityForm(forms.ModelForm):
+    class Meta:
+        model = LegalEntity
+        fields = "__all__"
+        exclude = ['legal_form', 'person']
+        labels = {
+            'founded': 'Рожденна дата',
+            'tax_id': 'ЕГН',
+            'native_name': 'Всички имена',
+            'latin_name': 'Всички имена на латиница'
+
+        }
+        widgets = {
+            'founded': forms.SelectDateWidget(attrs={
+                
+                'class': 'form-control  datetimepicker-input',
+                'title': 'Birthday'},
+                years=range(1911,2011)
+                ),    
+            'tax_id': forms.TextInput(attrs={
+                'class': 'form-control',
+                'autocomplete': 'off',
+                'pattern': '[0-9\.]+',
+                'style': 'width:30ch',
+                'title': 'Enter numbers Only'}),
+            'native_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'autocomplete': 'off',
+                'style': 'width:50ch',}),
+            'latin_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'autocomplete': 'off',
+                'style': 'width:50ch',}),
+        }
+
+
+class BankAccountForm(forms.ModelForm):
+    class Meta:
+        model = BankAccount
+        fields = "__all__"
+        exclude = ['initial_balance', 'status']
+        widgets = {
+
+            'iban': forms.TextInput(attrs={
+                'class': 'form-control',
+                'style': 'width:40ch',
+            }),
+            'balance': forms.TextInput(attrs={
+                'class': 'form-control',
+                'autocomplete': 'off',
+                'pattern': '[0-9\.]+',
+                'style': 'width:30ch',
+                'title': 'Enter numbers Only'}),
+        }
+
+    def __init__(self, profile, *args, **kwargs):
+        super (BankAccountForm,self ).__init__(*args,**kwargs) # populates the post
+        my_list = []
+        entity = find_legal_entity(user=profile.user)
+        if entity:
+            my_list.append(entity.pk)
+        for factory in ElectricityFactory.objects.filter(manager=profile.user):
+            my_list.append(factory.primary_owner.pk)
+        if profile.user.is_superuser:
+            print("Admin power hahah")         
+        self.fields['owner'].queryset = LegalEntity.objects.filter(pk__in=my_list)
+
 
 class NumberPerMonthForm(forms.Form):
     number = forms.CharField(initial=None,
@@ -128,6 +196,17 @@ class FactoryScriperForm(forms.Form):
                                       'pattern': '[0-9\.]+',
                                       'style': 'width:9ch',
                                       'title': 'Enter numbers Only'}))
+    
+
+
+class SearchForm(forms.Form):
+    search_text = forms.CharField(initial=None,
+                                  required=False,
+                                  widget=forms.TextInput(attrs={
+                                      'class': 'form-control',
+                                      'autocomplete': 'off',
+                                      'style': 'width:30ch',
+                                      'title': 'Text to search'}))
 
 
 class SolarEstateListingForm(forms.Form):

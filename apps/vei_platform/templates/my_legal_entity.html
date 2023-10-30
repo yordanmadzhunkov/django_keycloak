@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block head_title%}
+VEI - DASHBOARD
+{% endblock%}
+{% block content %}
+<section style="background-color: #eee;">
+  <div class="container py-5">
+    <form method="post">
+      {% csrf_token %}
+      <table>{{form.as_table}}
+        <td> - </td>
+        <td> <input type="submit" value="Save" name="_save_my_legal" class="btn btn-primary btn-sm"> </td>
+      </table>
+    </form>
+  </div>
+  {% endblock content %}

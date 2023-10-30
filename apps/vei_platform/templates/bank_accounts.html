@@ -12,6 +12,7 @@ Bank Accounts
         <tr>
             <th>Owner</th>
             <th>IBAN</th>
+            <th>Balance</th>
             <th>Status</th>
             <th>Actions</th>
         </tr>
@@ -20,7 +21,6 @@ Bank Accounts
 
         {% for account in accounts%}
         <tr>
-
             <td>
                 <div class="d-flex align-items-center">
                     <img src="{{account.avatar_url}}" class="rounded-circle" alt="" style="width: 45px; height: 45px" />
@@ -34,6 +34,7 @@ Bank Accounts
                 <p class="fw-normal mb-1">{{account.iban}}</p>
                 <p class="text-muted mb-0">{{account.currency}}</p>
             </td>
+            <td>0</td>
             <td>
                 {%if account.status == "Active" %}
                 <span class="badge badge-success rounded-pill d-inline">Active</span>
@@ -53,10 +54,20 @@ Bank Accounts
                 {%endfor%}
             </td>
         </tr>
-
         {% endfor %}
-
+        <tr>
+            <form action="" method="post">
+                {% csrf_token %}
+                <td>{{form.owner}}</td>
+                <td>IBAN:{{form.iban}}
+                    currency:
+                    {{form.currency}}
+                </td>
+                <td> {{form.balance}} </td>
+                <td><input type="submit" class="btn btn-link btn-rounded btn-sm fw-bold" data-mdb-ripple-color="dark"
+                        value="Add"></td>
+            </form>
+        </tr>
     </tbody>
 </table>
-
 {% endblock content %}
