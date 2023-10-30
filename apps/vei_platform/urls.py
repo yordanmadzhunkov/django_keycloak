@@ -11,7 +11,7 @@ from .views.profile import view_my_profile, view_user_profile
 from .views.legal_entity import view_entity_detail, view_my_entity_detail, view_entity_platform
 from .views.electricity_prices import view_electricity_prices
 from .views.loan import view_bank_loan_detail
-from .views.bank_account import view_bank_accounts
+from .views.bank_account import view_bank_accounts, view_verify_bank_account
 from .views.scriping_tools import view_scriping_tools
 
 urlpatterns = [
@@ -35,6 +35,8 @@ urlpatterns = [
     path('tools/scriping', view_scriping_tools, name='scriping_tools'),
     path('bank_loan/<int:pk>', view_bank_loan_detail, name='bank_loan'),
     path('bank_accounts', view_bank_accounts, name='bank_accounts'),
+    path('bank_accounts/verify/<int:pk>', view_verify_bank_account, name='verify_bank_account'),
+
 ]
 
 if settings.DEBUG:

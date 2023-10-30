@@ -23,7 +23,6 @@ Bank Accounts
         <tr>
             <td>
                 <div class="d-flex align-items-center">
-                    <img src="{{account.avatar_url}}" class="rounded-circle" alt="" style="width: 45px; height: 45px" />
                     <div class="ms-3">
                         <p class="fw-bold mb-1">{{account.owner}}</p>
                         <p class="text-muted mb-0"></p>
@@ -36,21 +35,14 @@ Bank Accounts
             </td>
             <td>0</td>
             <td>
-                {%if account.status == "Active" %}
-                <span class="badge badge-success rounded-pill d-inline">Active</span>
-                {%endif%}
-                {%if account.status == "Inactive" %}
-                <span class="badge badge-error rounded-pill d-inline">Inactive</span>
-                {%endif%}
-                {%if account.status == "Unverified" %}
-                <span class="badge badge-warning rounded-pill d-inline">Unverified</span>
-                {%endif%}
+                <span class="badge {{account.badge}} rounded-pill d-inline">{{ account.status_str}} </span>
             </td>
             <td>
                 {%for action in account.actions %}
-                <button type="button" class="btn btn-link btn-rounded btn-sm fw-bold" data-mdb-ripple-color="dark">
-                    {{action}}
-                </button>
+                <form action="{{ action.url }}" method="post">
+                    {% csrf_token %}
+                    <input type="submit" class="btn btn-link btn-rounded btn-sm fw-bold" data-mdb-ripple-color="dark" value="{{action.value}}">
+                </form>
                 {%endfor%}
             </td>
         </tr>

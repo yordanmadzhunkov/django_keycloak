@@ -93,7 +93,34 @@ class BankAccount(models.Model):
 
     def __str__(self) -> str:
         return "%s / %s" % (self.iban, self.owner.native_name)
+    
+    def actions(self):
+        actions = []
+        if self.status == BankAccount.AccountStatus.UNVERIFIED:
+            actions.append({'url': '/bank_accounts/verify/%s' % self.pk, 'value': 'Verify'})
+        elif self.status == BankAccount.AccountStatus.ACTIVE:
+            actions.append({'url': '/bank_accounts/deposit/%s' % self.pk, 'value': 'Deposit'})
+            actions.append({'url': '/bank_accounts/withdraw/%s' % self.pk, 'value': 'Withdraw'})
+        return actions
 
+    def badge(self):
+        if self.status == BankAccount.AccountStatus.ACTIVE:
+            return 'badge-success'
+        if self.status == BankAccount.AccountStatus.UNVERIFIED:
+            return 'badge-warning'
+        #if self.status == BankAccount.AccountStatus.INACTIVE:
+        return 'badge-error'
+    
+    def status_str(self):
+        if self.status == BankAccount.AccountStatus.ACTIVE:
+            return 'Active'
+        if self.status == BankAccount.AccountStatus.UNVERIFIED:
+            return 'Unverified'
+        if self.status == BankAccount.AccountStatus.INACTIVE:
+            return 'Inactive'
+        return 'Unknown'
+    
+        
 
 
 class BankLoan(models.Model):
