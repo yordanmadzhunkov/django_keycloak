@@ -188,7 +188,14 @@ class FactoryScriperForm(forms.Form):
                                       'pattern': '[0-9\.]+',
                                       'style': 'width:9ch',
                                       'title': 'Enter numbers Only'}))
-    
+    tax_id = forms.CharField(initial=None,
+                                  required=False,
+                                  widget=forms.TextInput(attrs={
+                                      'class': 'form-control',
+                                      'autocomplete': 'off',
+                                      'pattern': '[0-9\.]+',
+                                      'style': 'width:9ch',
+                                      'title': 'Enter numbers Only'}))
 
 
 class SearchForm(forms.Form):

@@ -52,7 +52,8 @@ def view_bank_accounts(request):
     if entity:
         my_list.append(entity.pk)
     for factory in ElectricityFactory.objects.filter(manager=profile.user):
-        my_list.append(factory.primary_owner.pk)
+        if factory.primary_owner:
+            my_list.append(factory.primary_owner.pk)
     if profile.user.is_superuser:
         print("Admin power hahah")         
 

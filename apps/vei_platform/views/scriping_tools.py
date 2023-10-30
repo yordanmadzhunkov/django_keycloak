@@ -18,13 +18,15 @@ def view_scriping_tools(request):
         # TODO, only admin should be able to trigger this
         if 'scripe_page' in request.POST and scripe_form.is_valid():
 
-            # messages.error(request, 'Profile error')
-            page_number = int(scripe_form.cleaned_data.get('page_number'))
-            limit = 1
-            async_task("vei_platform.tasks.scripe_factories_list",
+            try:
+                page_number = int(scripe_form.cleaned_data.get('page_number'))
+                limit = 1
+                async_task("vei_platform.tasks.scripe_factories_list",
                        page_number, limit)
-            messages.success(
-                request, 'Form is valid with number = %d' % page_number)
+                messages.success(request, 'Form is valid with number = %d' % page_number)
+            except ValueError:
+                messages.error(request, 'Form cleaned data = ' + str(scripe_form.cleaned_data))
+            
 
         if 'scripe_all' in request.POST:
             page_number = 1
@@ -34,7 +36,7 @@ def view_scriping_tools(request):
             messages.success(request, 'Scriping all pages!')
 
         if 'scripe_tax_id' in request.POST and scripe_form.is_valid():
-            tax_id = scripe_form.cleaned_data.get('page_number')
+            tax_id = scripe_form.cleaned_data.get('tax_id')
             task_name="LegalEntity-for-%s" % tax_id
             async_task("vei_platform.tasks.scripe_legal_entity",
                        tax_id=tax_id,

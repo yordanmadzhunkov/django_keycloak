@@ -13,9 +13,6 @@ from scripers.veiregistar import VEIEegistarScriper
 from scripers.papagal import PapagalScriper
 
 
-def add_factory_hook(task):
-    add_factory(task)
-
 
 def scripe_factories_list(page_number, limit=-1):
     scriper = VEIEegistarScriper()
@@ -24,7 +21,7 @@ def scripe_factories_list(page_number, limit=-1):
         async_task("vei_platform.tasks.scripe_factory_page",
                    href,
                    task_name=href,
-                   hook=add_factory_hook)
+                   hook=add_factory)
     next_page = page_number + 1
     if len(factories) > 0 and limit > 0:
         async_task("vei_platform.tasks.scripe_factories_list",
@@ -43,8 +40,10 @@ def scripe_factory_legal_entity(factory):
         scriper = PapagalScriper()
         info = None
         if info is None:
+            print("scripe for factory.tax_id = " + str(factory.tax_id))
             info = scriper.scripe(factory.tax_id)
         if info is None:
+            print("scripe for factory.owner_name = " + str(factory.owner_name))
             info = scriper.scripe(factory.owner_name)
         if info is not None:
             info['source'] = scriper.base_url
@@ -59,3 +58,5 @@ def scripe_legal_entity(tax_id):
     if info is not None:
         info['source'] = scriper.base_url
     return info
+
+

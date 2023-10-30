@@ -1,13 +1,13 @@
 from django.db import models
-from .legal import LegalEntity
+from .legal import LegalEntity, add_legal_entity
 from .profile import get_user_profile
 from django.db.models.signals import post_save
 from django.conf import settings
 from decimal import Decimal
 from django.dispatch import receiver
+from django_q.tasks import async_task
 
 from django.core.validators import MaxValueValidator, MinValueValidator
-
 
 def user_image_upload_directory_path(instance, filename):
     # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
@@ -109,11 +109,11 @@ def electical_factory_post_save(sender, **kwargs):
                   str(legal_entity))
             instance.save()
         else:
-            print('not found, spawning scripe task')
             async_task("vei_platform.tasks.scripe_factory_legal_entity",
                        instance,
                        task_name="LegalEntity-for-%s" % instance.name,
                        hook=add_legal_entity)
+
 
 
 @receiver(post_save, sender=LegalEntity)
@@ -161,8 +161,12 @@ def add_factory(task):
         )
         factory.save()
     else:
+        factory = factories[0];
+        if factory.manager is None:
+            # trigger scriping of legal entity
+            factory.save()
         print("Factory found name='%s' type='%s'" %
-              (factories[0].name, factories[0].factory_type))
+              (factory.name, factory.factory_type))
 
 
 # FINANCIAL PLANNING
