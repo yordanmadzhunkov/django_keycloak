@@ -156,17 +156,9 @@ class BankAccountForm(forms.ModelForm):
                 'title': 'Enter numbers Only'}),
         }
 
-    def __init__(self, profile, *args, **kwargs):
+    def __init__(self, legal_entities_pk_list, *args, **kwargs):
         super (BankAccountForm,self ).__init__(*args,**kwargs) # populates the post
-        my_list = []
-        entity = find_legal_entity(user=profile.user)
-        if entity:
-            my_list.append(entity.pk)
-        for factory in ElectricityFactory.objects.filter(manager=profile.user):
-            my_list.append(factory.primary_owner.pk)
-        if profile.user.is_superuser:
-            print("Admin power hahah")         
-        self.fields['owner'].queryset = LegalEntity.objects.filter(pk__in=my_list)
+        self.fields['owner'].queryset = LegalEntity.objects.filter(pk__in=legal_entities_pk_list)
 
 
 class NumberPerMonthForm(forms.Form):

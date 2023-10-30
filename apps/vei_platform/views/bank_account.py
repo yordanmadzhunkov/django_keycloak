@@ -6,6 +6,8 @@ from django.shortcuts import render
 
 from vei_platform.forms import BankAccountForm
 from vei_platform.models.finance_modeling import BankAccount
+from vei_platform.models.legal import find_legal_entity
+from vei_platform.models.factory import ElectricityFactory
 
 from django.contrib import messages
 
@@ -45,7 +47,16 @@ def view_bank_accounts(request):
          },
     ]
 
-    form = BankAccountForm(profile, request.POST)
+    my_list = []
+    entity = find_legal_entity(user=request.user)
+    if entity:
+        my_list.append(entity.pk)
+    for factory in ElectricityFactory.objects.filter(manager=profile.user):
+        my_list.append(factory.primary_owner.pk)
+    if profile.user.is_superuser:
+        print("Admin power hahah")         
+
+    form = BankAccountForm(my_list, request.POST)
     if request.method == "POST":
         if form.is_valid():
             balance = form.cleaned_data['balance']

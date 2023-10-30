@@ -34,7 +34,7 @@ urlpatterns = [
     path('entity/platform', view_entity_platform, name='platform_legal'),
     path('tools/scriping', view_scriping_tools, name='scriping_tools'),
     path('bank_loan/<int:pk>', view_bank_loan_detail, name='bank_loan'),
-    path('bank_accounts_list', view_bank_accounts, name='bank_accounts_list'),
+    path('bank_accounts', view_bank_accounts, name='bank_accounts'),
 ]
 
 if settings.DEBUG:
