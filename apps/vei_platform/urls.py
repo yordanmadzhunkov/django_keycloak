@@ -11,7 +11,7 @@ from .views.profile import view_my_profile, view_user_profile
 from .views.legal_entity import view_entity_detail, view_my_entity_detail, view_entity_platform
 from .views.electricity_prices import view_electricity_prices
 from .views.loan import view_bank_loan_detail
-from .views.bank_account import view_bank_accounts, view_verify_bank_account
+from .views.bank_account import view_bank_accounts, view_verify_bank_account, view_deposit_bank_account, view_withdraw_bank_account
 from .views.scriping_tools import view_scriping_tools
 
 urlpatterns = [
@@ -34,9 +34,11 @@ urlpatterns = [
     path('entity/platform', view_entity_platform, name='platform_legal'),
     path('tools/scriping', view_scriping_tools, name='scriping_tools'),
     path('bank_loan/<int:pk>', view_bank_loan_detail, name='bank_loan'),
+    
     path('bank_accounts', view_bank_accounts, name='bank_accounts'),
     path('bank_accounts/verify/<int:pk>', view_verify_bank_account, name='verify_bank_account'),
-
+    path('bank_accounts/deposit/<int:pk>', view_deposit_bank_account, name='deposit_bank_account'),
+    path('bank_accounts/withdraw/<int:pk>', view_withdraw_bank_account, name='withdraw_bank_account'),
 ]
 
 if settings.DEBUG:

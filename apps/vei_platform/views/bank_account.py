@@ -67,5 +67,22 @@ def view_verify_bank_account(request, pk=None):
             messages.error(request, "Can't activate " + str(account))
     return redirect('bank_accounts')
     
+@login_required(login_url='/oidc/authenticate/')
+def view_deposit_bank_account(request, pk=None):
+    context = common_context()
     
+    #form = BankAccountDepositForm(entities, request.POST)
+    context['bank_account'] = BankAccount.objects.get(pk=pk)
 
+    if request.user.is_authenticated:
+        profile = get_user_profile(request.user)
+        context['profile'] = profile
+    return render(request, "bank_account_deposit.html", context)
+
+@login_required(login_url='/oidc/authenticate/')
+def view_withdraw_bank_account(request, pk=None):
+    context = common_context()
+    if request.user.is_authenticated:
+        profile = get_user_profile(request.user)
+        context['profile'] = profile
+    return render(request, "bank_account_deposit.html", context)

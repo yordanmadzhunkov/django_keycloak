@@ -11,13 +11,12 @@ from django.dispatch import receiver
 
 from django_q.tasks import async_task
 
+from uuid import uuid4, UUID
+
 import re
     
 # Financial data related to the platform
 # Evealuation, P/E, available for investment, number of investors
-
-
-
 
 class ElectricityPricePlan(models.Model):
     name = models.CharField(max_length=128)
@@ -70,6 +69,7 @@ class Currency(models.TextChoices):
     USD = 'USD', ('Unated States Dolar')
 
 
+
 class BankAccount(models.Model):
     class AccountStatus(models.TextChoices):
         UNVERIFIED = 'UN', ('Unverified')
@@ -119,6 +119,31 @@ class BankAccount(models.Model):
         if self.status == BankAccount.AccountStatus.INACTIVE:
             return 'Inactive'
         return 'Unknown'
+    
+class BankTransaction(models.Model):
+    uuid = models.UUIDField(default=uuid4, editable=False, primary_key=True)
+    account = models.ForeignKey(BankAccount, on_delete=models.CASCADE)
+    amount = models.DecimalField(decimal_places=2,
+                                 max_digits=20,
+                                 default=0.00,
+                                 verbose_name=('Amount'),
+                                 help_text=('Account of the transaction.'),
+                                 )
+    fee = models.DecimalField(decimal_places=2,
+                                 max_digits=20,
+                                 default=0.00,
+                                 verbose_name=('Fee'),
+                                 help_text=('Fee assosiated with the transaction.'),
+                                 )
+    other_account_iban = models.TextField(max_length=100, null=True, blank=True, default='')
+    occured_at = models.DateTimeField(blank=False, null=False)
+    #created_at = models.DateTimeField(auto_now_add=True)
+    #updated_at = models.DateTimeField(auto_now=True)
+    description = models.CharField(max_length=256,
+                                   null=False,
+                                   blank=True,
+                                   verbose_name=('Tx Description'),
+                                   help_text=('A description to be included with this individual transaction'))
     
         
 
