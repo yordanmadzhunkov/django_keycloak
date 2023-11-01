@@ -1,10 +1,74 @@
 from django import forms
 from datetime import date
 from .models.factory import FactoryProductionPlan, ElectricityFactory
-from .models.finance_modeling import ElectricityPricePlan, BankLoan, BankAccount
+from .models.finance_modeling import ElectricityPricePlan, BankLoan, BankAccount, BankTransaction
 from .models.profile import UserProfile
 from .models.legal import LegalEntity, find_legal_entity
 
+
+import re
+from django.conf import settings
+from django.utils.translation import get_language
+from django import forms
+from django.utils import formats, timezone
+
+class BootstrapDatePicker(forms.DateInput):
+    format_re = re.compile(r'(?P<part>%[bBdDjmMnyY])')
+
+    def __init__(self, attrs=None, format=None):
+        '''
+        for a list of useful attributes see:
+        http://bootstrap-datepicker.readthedocs.io/en/latest/options.html
+
+        Most options can be provided via data-attributes. An option can be
+        converted to a data-attribute by taking its name, replacing each
+        uppercase letter with its lowercase equivalent preceded by a dash, and
+        prepending "data-date-" to the result. For example, startDate would be
+        data-date-start-date, format would be data-date-format, and
+        daysOfWeekDisabled would be data-date-days-of-week-disabled.
+        '''
+        # final_attrs provides:
+        # - data-provide: apply datepicker to inline created inputs
+        # - data-date-language: apply the current language
+        # - data-date-format: apply the current format for dates
+        final_attrs = {
+            'data-provide': 'datepicker',
+            'data-date-language': get_language(),
+            'data-date-format': self.get_date_format(format=format),
+            'data-date-autoclose': 'true',
+            'data-date-clear-btn': 'true',
+            'data-date-today-btn': 'linked',
+            'data-date-today-highlight': 'true',
+        }
+        if attrs is not None:
+            classes = attrs.get('class', '').split(' ')
+            classes.append('datepicker')
+            attrs['class'] = ' '.join(classes)
+            final_attrs.update(attrs)
+        super(BootstrapDatePicker, self).__init__(attrs=final_attrs, format=format)
+
+    def get_date_format(self, format=None):
+        format_map = {
+            '%d': 'dd',
+            '%j': 'd',
+            '%m': 'mm',
+            '%n': 'm',
+            '%y': 'yy',
+            '%Y': 'yyyy',
+            '%b': 'M',
+            '%B': 'MM',
+        }
+        if format is None:
+            format = formats.get_format(self.format_key)[0]
+        return re.sub(self.format_re, lambda x: format_map[x.group()], format)
+
+    @property
+    def media(self):
+        root = 'static/'
+        css = {'screen': ('%s/css/bootstrap-datepicker3.min.css' % root,)}
+        js = ['%s/js/bootstrap-datepicker.min.js' % root]
+        js += ['%s/locales/bootstrap-datepicker.%s.min.js' % (root, lang) for lang, _ in settings.LANGUAGES]
+        return forms.Media(js=js, css=css)
 
 
 class FactoryFinancialPlaningForm(forms.Form):
@@ -114,11 +178,9 @@ class LegalEntityForm(forms.ModelForm):
 
         }
         widgets = {
-            'founded': forms.SelectDateWidget(attrs={
-                
-                'class': 'form-control  datetimepicker-input',
+            'founded': BootstrapDatePicker(attrs={
+                'class': 'form-control',
                 'title': 'Birthday'},
-                years=range(1911,2011)
                 ),    
             'tax_id': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -143,7 +205,6 @@ class BankAccountForm(forms.ModelForm):
         fields = "__all__"
         exclude = ['initial_balance', 'status']
         widgets = {
-
             'iban': forms.TextInput(attrs={
                 'class': 'form-control',
                 'style': 'width:40ch',
@@ -159,6 +220,40 @@ class BankAccountForm(forms.ModelForm):
     def __init__(self, legal_entities_pk_list, *args, **kwargs):
         super (BankAccountForm,self ).__init__(*args,**kwargs) # populates the post
         self.fields['owner'].queryset = LegalEntity.objects.filter(pk__in=legal_entities_pk_list)
+
+class BankAccountDepositForm(forms.ModelForm):
+    class Meta:
+        model = BankTransaction
+        fields = "__all__"
+        exclude = ['account']
+        widgets = {
+            'iban': forms.TextInput(attrs={
+                'class': 'form-control',
+                'style': 'width:40ch',
+            }),
+            'amount': forms.TextInput(attrs={
+                'class': 'form-control',
+                'autocomplete': 'off',
+                'pattern': '[0-9\.]+',
+                'style': 'width:30ch',
+                'title': 'Enter numbers Only'}),
+            'fee': forms.TextInput(attrs={
+                'class': 'form-control',
+                'autocomplete': 'off',
+                'pattern': '[0-9\.]+',
+                'style': 'width:30ch',
+                'title': 'Enter numbers Only'}),
+            'occured_at': forms.SelectDateWidget(attrs={
+                'class': 'form-control datetimepicker-input',
+                'title': 'Birthday'},
+                years=range(1911,2011)
+                )
+        }
+
+    def __init__(self, bank_account, *args, **kwargs):
+        super (BankAccountDepositForm, self).__init__(*args,**kwargs) # populates the post
+        #self.fields['owner'].queryset = LegalEntity.objects.filter(pk__in=legal_entities_pk_list)
+
 
 
 class NumberPerMonthForm(forms.Form):

@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from vei_platform.models.profile import get_user_profile
 from django.shortcuts import render, redirect
 
-from vei_platform.forms import BankAccountForm
+from vei_platform.forms import BankAccountForm, BankAccountDepositForm
 from vei_platform.models.finance_modeling import BankAccount
 from vei_platform.models.legal import find_legal_entity
 from vei_platform.models.factory import ElectricityFactory
@@ -70,13 +70,12 @@ def view_verify_bank_account(request, pk=None):
 @login_required(login_url='/oidc/authenticate/')
 def view_deposit_bank_account(request, pk=None):
     context = common_context()
-    
-    #form = BankAccountDepositForm(entities, request.POST)
-    context['bank_account'] = BankAccount.objects.get(pk=pk)
-
+    bank_account = BankAccount.objects.get(pk=pk)
+    context['bank_account'] = bank_account
     if request.user.is_authenticated:
         profile = get_user_profile(request.user)
         context['profile'] = profile
+    context['form'] = BankAccountDepositForm(bank_account, request.POST)
     return render(request, "bank_account_deposit.html", context)
 
 @login_required(login_url='/oidc/authenticate/')
