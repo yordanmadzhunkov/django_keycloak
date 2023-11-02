@@ -124,7 +124,7 @@ class BankAccount(models.Model):
     def balance_from_transactions(self):
         r = BankTransaction.objects.filter(account=self).aggregate(
             total=models.Sum(models.F('amount') - models.F('fee')))
-        return Decimal(r['total'])
+        return Decimal(r['total'] if r['total'] else 0)
     
 class BankTransaction(models.Model):
     uuid = models.UUIDField(default=uuid4, editable=False, primary_key=True)
