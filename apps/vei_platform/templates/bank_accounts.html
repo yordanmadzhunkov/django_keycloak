@@ -31,9 +31,9 @@ Bank Accounts
             </td>
             <td>
                 <p class="fw-normal mb-1">{{account.iban}}</p>
-                <p class="text-muted mb-0">{{account.currency}}</p>
+                <p class="text-muted mb-0"></p>
             </td>
-            <td>0</td>
+            <td>{{ account.balance_from_transactions }} {{account.currency}}</td>
             <td>
                 <span class="badge {{account.badge}} rounded-pill d-inline">{{ account.status_str}} </span>
             </td>
@@ -41,7 +41,8 @@ Bank Accounts
                 {%for action in account.actions %}
                 <form action="{{ action.url }}" method="post">
                     {% csrf_token %}
-                    <input type="submit" class="btn btn-link btn-rounded btn-sm fw-bold" data-mdb-ripple-color="dark" value="{{action.value}}">
+                    <input type="submit" class="btn btn-link btn-rounded btn-sm fw-bold" data-mdb-ripple-color="dark"
+                        value="{{action.value}}">
                 </form>
                 {%endfor%}
             </td>

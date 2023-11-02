@@ -120,6 +120,12 @@ class BankAccount(models.Model):
             return 'Inactive'
         return 'Unknown'
     
+    @property
+    def balance_from_transactions(self):
+        r = BankTransaction.objects.filter(account=self).aggregate(
+            total=models.Sum(models.F('amount') - models.F('fee')))
+        return Decimal(r['total'])
+    
 class BankTransaction(models.Model):
     uuid = models.UUIDField(default=uuid4, editable=False, primary_key=True)
     account = models.ForeignKey(BankAccount, on_delete=models.CASCADE)
@@ -145,6 +151,9 @@ class BankTransaction(models.Model):
                                    verbose_name=('Tx Description'),
                                    help_text=('A description to be included with this individual transaction'))
     
+
+    def __str__(self) -> str:
+        return "%s %s %s->%s %s" % (self.occured_at, self.amount, self.account.iban, self.other_account_iban, self.description)
         
 
 

@@ -1,9 +1,10 @@
 from django import forms
-from datetime import date
+from datetime import date, datetime
 from .models.factory import FactoryProductionPlan, ElectricityFactory
 from .models.finance_modeling import ElectricityPricePlan, BankLoan, BankAccount, BankTransaction
 from .models.profile import UserProfile
 from .models.legal import LegalEntity, find_legal_entity
+from .models.platform import platform_bank_accounts
 
 
 import re
@@ -62,13 +63,6 @@ class BootstrapDatePicker(forms.DateInput):
             format = formats.get_format(self.format_key)[0]
         return re.sub(self.format_re, lambda x: format_map[x.group()], format)
 
-    @property
-    def media(self):
-        root = 'static/'
-        css = {'screen': ('%s/css/bootstrap-datepicker3.min.css' % root,)}
-        js = ['%s/js/bootstrap-datepicker.min.js' % root]
-        js += ['%s/locales/bootstrap-datepicker.%s.min.js' % (root, lang) for lang, _ in settings.LANGUAGES]
-        return forms.Media(js=js, css=css)
 
 
 class FactoryFinancialPlaningForm(forms.Form):
@@ -225,7 +219,7 @@ class BankAccountDepositForm(forms.ModelForm):
     class Meta:
         model = BankTransaction
         fields = "__all__"
-        exclude = ['account']
+        exclude = ['account', 'other_account_iban', 'fee']
         widgets = {
             'iban': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -243,16 +237,23 @@ class BankAccountDepositForm(forms.ModelForm):
                 'pattern': '[0-9\.]+',
                 'style': 'width:30ch',
                 'title': 'Enter numbers Only'}),
-            'occured_at': forms.SelectDateWidget(attrs={
-                'class': 'form-control datetimepicker-input',
-                'title': 'Birthday'},
-                years=range(1911,2011)
-                )
+            'occured_at':  BootstrapDatePicker(attrs={
+                'class': 'form-control',
+                'title': 'Date of transaction',
+                'style': 'width:12ch',
+                'data-date-autoclose': 'true',
+                'data-date-clear-btn': 'false',
+                'data-date-today-btn': 'linked',
+                'data-date-today-highlight': 'true'
+                }),
         }
 
     def __init__(self, bank_account, *args, **kwargs):
         super (BankAccountDepositForm, self).__init__(*args,**kwargs) # populates the post
-        #self.fields['owner'].queryset = LegalEntity.objects.filter(pk__in=legal_entities_pk_list)
+        bank_accounts = [(t.pk, str(t)) for t in platform_bank_accounts(bank_account.currency)]
+        dest_iban = forms.ChoiceField(label="IBAN", choices=bank_accounts)
+        self.fields['dest_iban'] = dest_iban 
+
 
 
 
