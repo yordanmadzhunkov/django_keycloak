@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+from decimal import Decimal
 
 def user_profile_image_upload_directory_path(instance, filename):
     # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
@@ -33,6 +33,10 @@ class UserProfile(models.Model):
 
     def date_joined(self):
         return self.user.date_joined
+    
+    def get_balance_available(self):
+        res = {'BGN': Decimal(0)}
+        return res
 
 
 def get_user_profile(user):
