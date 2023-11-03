@@ -87,7 +87,6 @@ def view_deposit_bank_account(request, pk=None):
                 source_account = bank_account
                 amount = Decimal(form.cleaned_data['amount'])
                 description = form.cleaned_data['description']
-
                 deposit = BankTransaction(
                     account = source_account,
                     amount = -Decimal(form.cleaned_data['amount']),
@@ -95,7 +94,6 @@ def view_deposit_bank_account(request, pk=None):
                     other_account_iban = destination_account.iban,
                     occured_at = occured_at,
                     description = description)
-            
                 accepted_deposit = BankTransaction(
                     account = destination_account,
                     amount = amount,

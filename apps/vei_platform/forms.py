@@ -270,9 +270,17 @@ class NumberPerMonthForm(forms.Form):
 
 
 class UserProfileForm(forms.Form):
-    avatar = forms.ImageField(initial=None, required=False,)
+    avatar = forms.ImageField(initial=None, 
+                              required=False,
+                              widget=forms.ClearableFileInput(attrs={
+                                    'onchange': 'showImage(this);',}))
     first_name = forms.CharField(required=False)
     last_name = forms.CharField(required=False)
+    show_balance = forms.BooleanField(required=False, 
+                                      label="Show balance", 
+                                      widget=forms.CheckboxInput(attrs={
+                                        'class': 'form-control form-control-user',})
+                                      )
 
 
 class FactoryScriperForm(forms.Form):

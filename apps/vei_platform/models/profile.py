@@ -11,6 +11,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE,)
     avatar = models.ImageField(
         upload_to=user_profile_image_upload_directory_path, default=None, null=True, blank=True)
+    show_balance = models.BooleanField(default=True, null=False, blank=False)
 
     def __str__(self):
         return self.user.username

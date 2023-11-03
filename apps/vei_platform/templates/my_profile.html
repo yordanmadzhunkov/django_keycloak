@@ -7,60 +7,44 @@
 <div class="row">
     <div class="col-md-3"></div>
     <div class="col-md-6 text-center">
-        <table class="table w-auto text-lg">
-            <tr>
-                <td>E-mail</td>
-                <td>{{ user.email }}</td>
-            </tr>
-            <tr>
-                <td>User</td>
-                <td> {{ user.username }} </td>
-            </tr>
-            <tr>
-                <td>is staff</td>
-                <td> {{ user.is_staff }} </td>
-            </tr>
-            <tr>
-                <td>is_active</td>
-                <td> {{ user.is_active }}</td>
-            </tr>
-            <tr>
-                <td>Member since</td>
-                <td> {{ user.date_joined }}</td>
-            </tr>
-            <tr>
-                <td>Last Login</td>
-                <td> {{ user.last_login }}</td>
-            </tr>
-        </table>
-
-
+        <!-- To display image -->
+        <img id="myimage" src="{{ profile.get_avatar_url }}" width="256" height="256">
 
         <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="form-group">
-                <p>
-                    <label for="id_first_name">First name:</label>
-                    <input type="text" name="first_name" id="id_first_name" value="{{ user.first_name }}"
-                        class="form-control form-control-user" aria-describedby="Enter your first name ..."
-                        placeholder="Enter your first name">
-                </p>
-            </div>
-            <div class="form-group">
-                <p>
-                    <label for="id_last_name">Last name:</label>
-                    <input type="text" name="last_name" id="id_last_name" value="{{ user.last_name }}"
-                        class="form-control form-control-user" aria-describedby="Enter your last name ..."
-                        placeholder="Enter your last name">
-                </p>
-            </div>
-            </br>
-            <!-- To display image -->
-            <img id="myimage" src="{{ profile.get_avatar_url }}" width="256" height="256">
-            </br>
-            <input type="file" name="avatar" onchange="showImage(this);" accept="image/*" id="id_avatar">
-            <button type="submit" class="btn btn-primary btn-user btn-block">Save</button>
+            <table class="table w-auto text-lg">
+                <tr>
+                    <td>E-mail</td>
+                    <td>{{ user.email }}</td>
+                </tr>
+                <tr>
+                    <td>User</td>
+                    <td> {{ user.username }} </td>
+                </tr>
+                <tr>
+                    <td>is staff</td>
+                    <td> {{ user.is_staff }} </td>
+                </tr>
+                <tr>
+                    <td>is_active</td>
+                    <td> {{ user.is_active }}</td>
+                </tr>
+                <tr>
+                    <td>Member since</td>
+                    <td> {{ user.date_joined }}</td>
+                </tr>
+                <tr>
+                    <td>Last Login</td>
+                    <td> {{ user.last_login }}</td>
+                </tr>
+                {% csrf_token %}
+                {{ avatar_form.as_table }}
+                <td></td>
+                <td>
+                    <button type="submit" class="btn btn-primary btn-user btn-block">Save</button>
+                </td>
+            </table>
         </form>
+
     </div>
 
 </div>
