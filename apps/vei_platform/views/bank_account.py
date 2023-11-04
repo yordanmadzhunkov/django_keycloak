@@ -13,7 +13,7 @@ from vei_platform.models.platform import PlatformLegalEntity
 from django.contrib import messages
 
 from decimal import Decimal
-from datetime import datetime
+
 def legal_entities_pk_for_user(user):
     profile = get_user_profile(user)
     res = []

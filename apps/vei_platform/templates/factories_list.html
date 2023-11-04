@@ -1,12 +1,14 @@
 {% extends 'base.html' %}
+
 {% block head_title%}
 VEI - DASHBOARD
 {% endblock%}
 {% block content %}
-    <section style="background-color: #eee;">
+<section style="background-color: #eee;">
     <div class="container py-5">
-       <h3>Electric factory for renewable sources</h2>
-       {% include "snippets/factories_list.html" %}
-    {% include "snippets/pagination.html" %}
+        <h3>Electric factory for renewable sources</h3>
+        {% include "snippets/factories_list.html" %}
+        {% include "snippets/pagination.html" %}
     </div>
+</section>
 {% endblock content %}

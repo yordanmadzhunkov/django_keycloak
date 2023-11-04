@@ -34,10 +34,6 @@ class UserProfile(models.Model):
     def date_joined(self):
         return self.user.date_joined
     
-    def get_balance_available(self):
-        res = {'BGN': Decimal(0)}
-        return res
-
 
 def get_user_profile(user):
     profile = UserProfile.objects.filter(user=user)

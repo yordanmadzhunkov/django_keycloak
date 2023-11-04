@@ -264,3 +264,5 @@ def find_legal_entity(tax_id=None, user=None):
     if res is None:
         res = find_legal_entity_for_user(user)
     return res
+
+

@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load vei_platform_utils %}
+
 
 {% block head_title %}
 Bank Accounts
@@ -32,7 +34,7 @@ Bank Accounts
                 <p class="fw-normal mb-1">{{account.iban}}</p>
                 <p class="text-muted mb-0"></p>
             </td>
-            <td>{{ account.balance_from_transactions }} {{account.currency}}</td>
+            <td>{{ account|balance_from_transactions }} {{account.currency}}</td>
             <td>
                 <span class="badge {{account.badge}} rounded-pill d-inline">{{ account.status_str}} </span>
             </td>

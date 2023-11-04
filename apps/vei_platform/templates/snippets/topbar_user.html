@@ -8,9 +8,6 @@
         </span>
         <img src="{{ profile.get_avatar_url }}" alt="" style="width: 45px; height: 45px"
             class="img-profile rounded-circle" />
-        {%for cur, balance in profile.get_balance_available.items %}
-        {{balance}}{{cur}}
-        {%endfor%}
     </a>
     <!-- Dropdown - User Information -->
     <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
