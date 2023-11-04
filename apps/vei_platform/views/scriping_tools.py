@@ -11,8 +11,7 @@ from django_q.tasks import async_task
 
 @login_required(login_url='/oidc/authenticate/')
 def view_scriping_tools(request):
-    context = common_context()
-    context['profile'] = get_user_profile(request.user)
+    context = common_context(request)
     scripe_form = FactoryScriperForm(request.POST)
     if request.method == "POST":
         # TODO, only admin should be able to trigger this

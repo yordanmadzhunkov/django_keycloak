@@ -14,7 +14,7 @@ from decimal import Decimal, DecimalException
 
 @login_required(login_url='/oidc/authenticate/')
 def view_bank_loan_detail(request, pk=None):
-    context = common_context()
+    context = common_context(request)
     loan = BankLoan.objects.get(pk=pk)
     objects = BankLoanInterest.objects.filter(loan=loan)
     factory = loan.factory
@@ -92,6 +92,5 @@ def view_bank_loan_detail(request, pk=None):
     context['loan_formset'] = loan_formset
     context['numbers_formset'] = numbers_formset
     context['factory'] = factory
-    context['profile'] = get_user_profile(request.user)
 
     return render(request, "bank_loan.html", context)

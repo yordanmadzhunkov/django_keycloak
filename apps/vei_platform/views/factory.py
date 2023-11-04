@@ -22,16 +22,14 @@ def view_factories_list(request):
     paginator = Paginator(factories_list, 5)  # Show 25 contacts per page.
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    context = common_context()
+    context = common_context(request)
     context['page_obj'] = page_obj
-    context['profile'] = get_user_profile(request.user)
     return render(request, "factories_list.html", context)
 
 @login_required(login_url='/oidc/authenticate/')
 def view_factory_offer_shares(request, pk=None):
-    context = common_context()
+    context = common_context(request)
     factory = ElectricityFactory.objects.get(pk=pk)
-    context['profile'] = get_user_profile(request.user)
     context['factory'] = factory
     context['manager_profile'] = None if factory.manager is None else get_user_profile(factory.manager)
     context['factory_is_listed'] = SolarEstateListing.is_listed(factory)
@@ -92,7 +90,7 @@ def view_factory_offer_shares(request, pk=None):
 
 @login_required(login_url='/oidc/authenticate/')
 def view_factory_detail(request, pk=None):
-    context = common_context()
+    context = common_context(request)
     factory = ElectricityFactory.objects.get(pk=pk)
     context['factory'] = ElectricityFactory.objects.get(pk=pk)
     context['production_plans'] = FactoryProductionPlan.objects.filter(
@@ -179,7 +177,6 @@ def view_factory_detail(request, pk=None):
     else:
         form = FactoryFinancialPlaningForm(factory=factory, data=None)
     context['form'] = form
-    context['profile'] = get_user_profile(request.user)
     return render(request, "factory.html", context)
 
 
@@ -188,7 +185,7 @@ def view_factory_detail(request, pk=None):
 
 @login_required(login_url='/oidc/authenticate/')
 def view_factory_production(request, pk=None):
-    context = common_context()
+    context = common_context(request)
     plan = FactoryProductionPlan.objects.get(pk=pk)
     factory = plan.factory
     context['factory'] = factory
@@ -243,8 +240,6 @@ def view_factory_production(request, pk=None):
     context['table'] = table
     context['formset'] = formset
     context['plan_formset'] = plan_formset
-    context['profile'] = get_user_profile(request.user)
-
     return render(request, "factory_production.html", context)
 
 

@@ -12,16 +12,15 @@ from vei_platform.forms import UserProfileForm
 
 @login_required(login_url='/oidc/authenticate/')
 def view_user_profile(request, pk=None):
-    context = common_context()
-    context['profile'] = get_user_profile(request.user)
+    context = common_context(request)
     context['user_profile'] = UserProfile.objects.get(pk=pk)
     return render(request, "user_profile.html", context)
 
 
 @login_required(login_url='/oidc/authenticate/')
 def view_my_profile(request):
-    context = common_context()
-    profile = get_user_profile(request.user)
+    context = common_context(request)
+    profile = get_user_profile(user=request.user)
     user = User.objects.get(username=request.user)
     user_profile_form = UserProfileForm(request.POST or None, request.FILES or None, 
                                         initial={

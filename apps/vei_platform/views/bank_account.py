@@ -30,10 +30,7 @@ def legal_entities_pk_for_user(user):
 
 @login_required(login_url='/oidc/authenticate/')
 def view_bank_accounts(request):
-    context = common_context()
-    if request.user.is_authenticated:
-        profile = get_user_profile(request.user)
-        context['profile'] = profile
+    context = common_context(request)
     entities = legal_entities_pk_for_user(user=request.user)
     form = BankAccountForm(entities, request.POST)
     if request.method == "POST":
@@ -71,13 +68,9 @@ def view_verify_bank_account(request, pk=None):
     
 @login_required(login_url='/oidc/authenticate/')
 def view_deposit_bank_account(request, pk=None):
-    context = common_context()
+    context = common_context(request)
     bank_account = BankAccount.objects.get(pk=pk)
     context['bank_account'] = bank_account
-    if request.user.is_authenticated:
-        profile = get_user_profile(request.user)
-        context['profile'] = profile
-
     form = BankAccountDepositForm(bank_account, request.POST)
     if request.method == "POST":
         if form.is_valid():
@@ -112,8 +105,5 @@ def view_deposit_bank_account(request, pk=None):
 
 @login_required(login_url='/oidc/authenticate/')
 def view_withdraw_bank_account(request, pk=None):
-    context = common_context()
-    if request.user.is_authenticated:
-        profile = get_user_profile(request.user)
-        context['profile'] = profile
+    context = common_context(request)
     return render(request, "bank_account_deposit.html", context)

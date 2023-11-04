@@ -14,8 +14,7 @@ from django.forms.models import model_to_dict
 
 @login_required(login_url='/oidc/authenticate/')
 def view_entity_detail(request, pk=None):
-    context = common_context()
-    context['profile'] = get_user_profile(request.user)
+    context = common_context(request)
     if pk is not None:
         legal_entity = LegalEntity.objects.get(pk=pk)
         context['legal_entity'] = legal_entity
@@ -30,8 +29,7 @@ def view_entity_detail(request, pk=None):
 
 @login_required(login_url='/oidc/authenticate/')
 def view_my_entity_detail(request):
-    context = common_context()
-    context['profile'] = get_user_profile(request.user)
+    context = common_context(request)
     instance = find_legal_entity(user=request.user)
     if instance:
         form = LegalEntityForm(instance=instance) if request.method != "POST" else LegalEntityForm(request.POST, instance=instance)
@@ -69,8 +67,7 @@ def view_my_entity_detail(request):
 
 @login_required(login_url='/oidc/authenticate/')
 def view_entity_platform(request):
-    context = common_context()
-    context['profile'] = get_user_profile(request.user)
+    context = common_context(request)
     form = SearchForm(request.POST)
     if request.method == "POST":
         if form.is_valid():

@@ -7,7 +7,5 @@ from django.shortcuts import render
 
 @login_required(login_url='/oidc/authenticate/')
 def view_home(request):
-    context = common_context()
-    if request.user.is_authenticated:
-        context['profile'] = get_user_profile(request.user)
+    context = common_context(request)
     return render(request, "home.html", context)

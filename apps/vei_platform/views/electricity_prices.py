@@ -14,7 +14,7 @@ from decimal import Decimal, DecimalException
 
 @login_required(login_url='/oidc/authenticate/')
 def view_electricity_prices(request, pk=None):
-    context = common_context()
+    context = common_context(request)
     plan = ElectricityPricePlan.objects.get(pk=pk)
     objects = ElectricityPrice.objects.filter(plan=plan)
 
@@ -63,5 +63,4 @@ def view_electricity_prices(request, pk=None):
     context['plan'] = plan
     context['plan_formset'] = plan_formset
     context['numbers_formset'] = numbers_formset
-    context['profile'] = get_user_profile(request.user)
     return render(request, "electricity_prices.html", context)

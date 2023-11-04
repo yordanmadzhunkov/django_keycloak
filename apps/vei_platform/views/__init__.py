@@ -2,7 +2,7 @@
 #from .models.factory import ElectricityFactory, ElectricityWorkingHoursPerMonth, FactoryProductionPlan
 #from .models.legal import LegalEntity
 #from .models.finance_modeling import BankLoan, BankLoanInterest, ElectricityPricePlan, ElectricityPrice
-#from .models.profile import UserProfile, get_user_profile
+from vei_platform.models.profile import UserProfile, get_user_profile
 #from .forms import FactoryFinancialPlaningForm, NumberPerMonthForm, PricePlanForm, BankLoanForm, UserProfileForm, FactoryScriperForm, SolarEstateListingForm
 #from django.contrib.auth.decorators import login_required
 #from django.core.paginator import Paginator
@@ -24,11 +24,16 @@
 
 
 
-def common_context():
+def common_context(request):
     context = {
         'platform_name': 'Solar Estates',
         'copyright': 'Data Intensive 2023',
     }
+    if request:
+        if request.user:
+            if request.user.is_authenticated:
+                profile = get_user_profile(request.user)
+                context['profile'] = profile
     return context
 
 
