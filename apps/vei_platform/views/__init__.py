@@ -20,9 +20,32 @@ from vei_platform.models.profile import UserProfile, get_user_profile
 #from django_q.tasks import async_task
 # Create your views here.
 
+from vei_platform.models.legal import find_legal_entity
+from vei_platform.models.factory import ElectricityFactory
+from vei_platform.models.finance_modeling import BankAccount
+from decimal import Decimal
+from vei_platform.templatetags.vei_platform_utils import balance_from_transactions
 
 
+def get_balance(profile):
+    legal_entities_pk = []
+    entity = find_legal_entity(user=profile.user)
+    if entity:
+        legal_entities_pk.append(entity.pk)
 
+    for factory in ElectricityFactory.objects.filter(manager=profile.user):
+        if factory.primary_owner:
+            legal_entities_pk.append(factory.primary_owner.pk)
+    
+    bank_accounts = BankAccount.objects.filter(owner__in=legal_entities_pk)
+    amounts = {}
+    for account in bank_accounts:
+        cur = account.currency
+        sum = amounts[cur] if cur in amounts.keys() else Decimal(0)
+        balance = sum - balance_from_transactions(account)
+        amounts[cur] = balance
+    #amounts = {'BGN': Decimal(10), 'EUR': Decimal(20)}
+    return amounts.items()
 
 def common_context(request):
     context = {
@@ -34,6 +57,8 @@ def common_context(request):
             if request.user.is_authenticated:
                 profile = get_user_profile(request.user)
                 context['profile'] = profile
+                if profile.show_balance:
+                    context['profile_balance'] = get_balance(profile)
     return context
 
 

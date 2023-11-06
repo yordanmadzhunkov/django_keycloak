@@ -4,14 +4,15 @@ from django.contrib.auth.decorators import login_required
 from vei_platform.models.profile import get_user_profile
 from django.shortcuts import render, redirect
 
-from vei_platform.forms import BankAccountForm, BankAccountDepositForm
+from vei_platform.forms import BankAccountForm, BankAccountDepositForm, PlatformWithdrawForm
 from vei_platform.models.finance_modeling import BankAccount, BankTransaction
 from vei_platform.models.legal import find_legal_entity
 from vei_platform.models.factory import ElectricityFactory
 from vei_platform.models.platform import PlatformLegalEntity
 
-from django.contrib import messages
+from . import get_balance, get_user_profile
 
+from django.contrib import messages
 from decimal import Decimal
 
 def legal_entities_pk_for_user(user):
@@ -106,4 +107,18 @@ def view_deposit_bank_account(request, pk=None):
 @login_required(login_url='/oidc/authenticate/')
 def view_withdraw_bank_account(request, pk=None):
     context = common_context(request)
-    return render(request, "bank_account_deposit.html", context)
+    bank_account = BankAccount.objects.get(pk=pk)
+    context['bank_account'] = bank_account
+    c = bank_account.currency
+    balances = get_balance(get_user_profile(request.user))
+    availabe = Decimal(0)
+    for cur, val in balances:
+        if cur == c:
+            availabe = val
+    context['availabe'] = availabe
+    form = PlatformWithdrawForm(request.POST)
+    if request.method == "POST":
+        if form.is_valid():
+            pass
+    context['form'] = form
+    return render(request, "bank_account_withdraw.html", context)

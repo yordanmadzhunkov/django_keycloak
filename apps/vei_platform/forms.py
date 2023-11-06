@@ -254,7 +254,33 @@ class BankAccountDepositForm(forms.ModelForm):
         dest_iban = forms.ChoiceField(label="IBAN", choices=bank_accounts)
         self.fields['dest_iban'] = dest_iban 
 
+class PlatformWithdrawForm(forms.Form):
 
+    amount = forms.CharField(initial='0',
+                             required=False,
+                             widget=forms.TextInput(attrs={
+                                 'class': 'form-control',
+                                 'autocomplete': 'off',
+                                 'pattern': '[0-9\.]+',
+                                 'style': 'width:9ch',
+                                 'title': 'Enter numbers Only'}))
+    occured_at = forms.DateTimeField(initial=datetime.today(),
+                               required=True,
+                               widget=BootstrapDatePicker(attrs={
+                'class': 'form-control',
+                'title': 'Date of transaction',
+                'style': 'width:12ch',
+                'data-date-autoclose': 'true',
+                'data-date-clear-btn': 'false',
+                'data-date-today-btn': 'linked',
+                'data-date-today-highlight': 'true'
+                }))
+    
+    def __init__(self, user, *args, **kwargs):
+        super (PlatformWithdrawForm, self).__init__(*args, **kwargs) # populates the post
+        #bank_accounts = [(t.pk, str(t)) for t in platform_bank_accounts(bank_account.currency)]
+        #dest_iban = forms.ChoiceField(label="IBAN", choices=bank_accounts)
+        #self.fields['dest_iban'] = dest_iban 
 
 
 class NumberPerMonthForm(forms.Form):
