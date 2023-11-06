@@ -8,7 +8,9 @@ from vei_platform.forms import BankAccountForm, BankAccountDepositForm, Platform
 from vei_platform.models.finance_modeling import BankAccount, BankTransaction
 from vei_platform.models.legal import find_legal_entity
 from vei_platform.models.factory import ElectricityFactory
-from vei_platform.models.platform import PlatformLegalEntity
+from vei_platform.models.platform import PlatformLegalEntity, platform_bank_accounts
+
+from vei_platform.templatetags.vei_platform_utils import balance_from_transactions
 
 from . import get_balance, get_user_profile
 
@@ -119,6 +121,18 @@ def view_withdraw_bank_account(request, pk=None):
     form = PlatformWithdrawForm(request.POST)
     if request.method == "POST":
         if form.is_valid():
-            pass
+            requested_amount = Decimal(form.cleaned_data['amount'])
+            if requested_amount <= availabe:
+                messages.info(request, "You can withdraw %s" % str(requested_amount))
+                accounts = platform_bank_accounts(c)
+                for account in accounts:
+                    balance = balance_from_transactions(account)
+                    if balance >= requested_amount:
+                        print("do it %s->%s" % (account.iban, bank_account))
+            else:
+                messages.error(request, "Not enough money in you account")
+        else:
+            messages.error(request, "Invalid form")
+
     context['form'] = form
     return render(request, "bank_account_withdraw.html", context)
