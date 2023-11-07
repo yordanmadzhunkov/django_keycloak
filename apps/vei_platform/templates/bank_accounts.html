@@ -40,12 +40,18 @@ Bank Accounts
             </td>
             <td>
                 {%for action in account.actions %}
-                <form action="{{ action.url }}" method="post">
+                {% if action.method == "POST" %}
+                <form action="{{ action.url }}" method="{{action.method }}">
                     {% csrf_token %}
                     <input type="submit" class="btn btn-link btn-rounded btn-sm fw-bold" data-mdb-ripple-color="dark"
                         value="{{action.value}}">
                 </form>
+                {%else%}
+                <a href={{action.url}} class="btn btn-link btn-rounded btn-sm fw-bold"
+                    data-mdb-ripple-color="dark">{{action.value}}</a>
+                {%endif%}
                 {%endfor%}
+
             </td>
         </tr>
         {% endfor %}

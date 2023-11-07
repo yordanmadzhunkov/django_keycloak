@@ -1,19 +1,16 @@
-from . import common_context
+from . import common_context, get_balance, get_user_profile
 
-from django.contrib.auth.decorators import login_required
 from vei_platform.models.profile import get_user_profile
-from django.shortcuts import render, redirect
-
 from vei_platform.forms import BankAccountForm, BankAccountDepositForm, PlatformWithdrawForm
 from vei_platform.models.finance_modeling import BankAccount, BankTransaction
 from vei_platform.models.legal import find_legal_entity
 from vei_platform.models.factory import ElectricityFactory
 from vei_platform.models.platform import PlatformLegalEntity, platform_bank_accounts
-
 from vei_platform.templatetags.vei_platform_utils import balance_from_transactions
 
-from . import get_balance, get_user_profile
-
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.db import transaction
 from django.contrib import messages
 from decimal import Decimal
 
@@ -104,15 +101,17 @@ def view_deposit_bank_account(request, pk=None):
                 form.clean()
     context['transactions'] = BankTransaction.objects.filter(account=bank_account)
     context['form'] = form
+    context['profile_balance'] = get_balance(get_user_profile(request.user))
     return render(request, "bank_account_deposit.html", context)
 
 @login_required(login_url='/oidc/authenticate/')
 def view_withdraw_bank_account(request, pk=None):
     context = common_context(request)
-    bank_account = BankAccount.objects.get(pk=pk)
-    context['bank_account'] = bank_account
-    c = bank_account.currency
-    balances = get_balance(get_user_profile(request.user))
+    investor_bank_account = BankAccount.objects.get(pk=pk)
+    context['bank_account'] = investor_bank_account
+    c = investor_bank_account.currency
+    profile = get_user_profile(request.user)
+    balances = get_balance(profile)
     availabe = Decimal(0)
     for cur, val in balances:
         if cur == c:
@@ -122,17 +121,42 @@ def view_withdraw_bank_account(request, pk=None):
     if request.method == "POST":
         if form.is_valid():
             requested_amount = Decimal(form.cleaned_data['amount'])
+            occured_at = form.cleaned_data['occured_at']
             if requested_amount <= availabe:
                 messages.info(request, "You can withdraw %s" % str(requested_amount))
                 accounts = platform_bank_accounts(c)
-                for account in accounts:
-                    balance = balance_from_transactions(account)
-                    if balance >= requested_amount:
-                        print("do it %s->%s" % (account.iban, bank_account))
+                for platform_account in accounts:
+                    with transaction.atomic():                    
+                        balance = balance_from_transactions(platform_account)
+                        if balance >= requested_amount:
+                            destination_account = investor_bank_account
+                            source_account = platform_account
+                            amount = requested_amount
+                            description = 'Client withdraw %s' % profile.get_display_name()
+                            withdraw = BankTransaction(
+                                account = source_account,
+                                amount = -Decimal(form.cleaned_data['amount']),
+                                fee = Decimal(0.0),
+                                other_account_iban = destination_account.iban,
+                                occured_at = occured_at,
+                                description = description)
+                            accepted_withdraw = BankTransaction(
+                                account = destination_account,
+                                amount = amount,
+                                fee = Decimal(0.0),
+                                other_account_iban = source_account.iban,
+                                occured_at = occured_at,
+                                description = description)
+                            withdraw.save()
+                            accepted_withdraw.save()
+                            messages.info(request, "Withdraw %s %s %s->%s" % (amount, c, platform_account.iban, investor_bank_account.iban))
+                            form.clean()
+                            break
             else:
                 messages.error(request, "Not enough money in you account")
         else:
             messages.error(request, "Invalid form")
-
+    context['transactions'] = BankTransaction.objects.filter(account=investor_bank_account)
     context['form'] = form
+    context['profile_balance'] = get_balance(profile)
     return render(request, "bank_account_withdraw.html", context)

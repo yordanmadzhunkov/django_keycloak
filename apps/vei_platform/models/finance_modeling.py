@@ -97,10 +97,10 @@ class BankAccount(models.Model):
     def actions(self):
         actions = []
         if self.status == BankAccount.AccountStatus.UNVERIFIED:
-            actions.append({'url': '/bank_accounts/verify/%s' % self.pk, 'value': 'Verify'})
+            actions.append({'url': '/bank_accounts/verify/%s' % self.pk, 'value': 'Verify', 'method': 'POST'})
         elif self.status == BankAccount.AccountStatus.ACTIVE:
-            actions.append({'url': '/bank_accounts/deposit/%s' % self.pk, 'value': 'Deposit'})
-            actions.append({'url': '/bank_accounts/withdraw/%s' % self.pk, 'value': 'Withdraw'})
+            actions.append({'url': '/bank_accounts/deposit/%s' % self.pk, 'value': 'Deposit', 'method': 'GET'})
+            actions.append({'url': '/bank_accounts/withdraw/%s' % self.pk, 'value': 'Withdraw', 'method': 'GET'})
         return actions
 
     def badge(self):
