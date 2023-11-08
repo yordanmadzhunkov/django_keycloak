@@ -1,9 +1,15 @@
--r ../../requirements_django_oidc.txt
+#-r ../../requirements_django_oidc.txt
 
 # Expected from requirements_django_oidc
 #Django
 #python-decouple
 #psycopg2
+
+Django>=4.2.4
+mozilla-django-oidc==3.0.0
+python-decouple>=3.8
+psycopg2
+
 
 autopep8==1.4.4
 pep8==1.7.1

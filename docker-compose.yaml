@@ -3,6 +3,13 @@ services: # the different images that will be running as containers
 
   show_users:
     build: . 
-    image: dataintensive/show_users:${DJANGO_GIT_TAG}
+    image: dataintensive/vei_platform:${DJANGO_GIT_TAG}
+    env_file:
+      - .env
+
+  django_q:
+    build: .
+    image: dataintensive/vei_platform:${DJANGO_GIT_TAG}
+    command: cd apps && python manage.py qcluster
     env_file:
       - .env
