@@ -56,9 +56,10 @@ def common_context(request):
         if request.user:
             if request.user.is_authenticated:
                 profile = get_user_profile(request.user)
-                context['profile'] = profile
-                if profile.show_balance:
-                    context['profile_balance'] = get_balance(profile)
+                if profile:
+                    context['profile'] = profile
+                    if profile.show_balance:
+                        context['profile_balance'] = get_balance(profile)
     return context
 
 
