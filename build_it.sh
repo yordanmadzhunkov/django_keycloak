@@ -10,9 +10,11 @@ echo "" >> .env
 SECRET=$(python -c 'import secrets; print(secrets.token_urlsafe())')
 echo "DJANGO_SECRET_KEY=\"${SECRET}\"" >> .env
 
+echo 'DJANGO_SETTINGS_MODULE="vei_platform.settings.production"' >> .env
+
 DJANGO_GIT_TAG=$(git describe --tags --dirty --long)
 echo "DJANGO_GIT_TAG=\"${DJANGO_GIT_TAG}\"" >> .env
 cat oidc.env >> .env
 
 echo "Starting build .. "
-docker compose build show_users
+docker compose build vei_platform
