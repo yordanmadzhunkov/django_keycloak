@@ -37,6 +37,7 @@ COPY ./apps/ $APP_PATH
 
 # entrypoint, must be executable file chmod +x entrypoint.sh
 COPY entrypoint.sh /entrypoint/
+COPY entrypoint_qcluster.sh /entrypoint/
 
 
 WORKDIR $APP_PATH/
