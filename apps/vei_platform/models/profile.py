@@ -2,6 +2,10 @@ from django.db import models
 from django.contrib.auth.models import User
 from decimal import Decimal
 
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+
+
 def user_profile_image_upload_directory_path(instance, filename):
     # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
     return "images/user_{0}/{1}".format(str(instance.user.username), filename)
@@ -44,9 +48,9 @@ def get_user_profile(user):
     return profile
 
 
-# def create_user_profile(sender, instance, created, **kwargs):
-#    if created:
-#        UserProfile.objects.create(user=instance)
 
-
-# post_save.connect(create_user_profile, sender=User)
+@receiver(post_save, sender=User)
+def create_or_update_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
+    instance.profile.save()

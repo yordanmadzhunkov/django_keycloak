@@ -24,7 +24,7 @@ def view_my_profile(request):
     user = User.objects.get(username=request.user)
     user_profile_form = UserProfileForm(request.POST or None, request.FILES or None, 
                                         initial={
-                                            'show_balance': profile.show_balance,
+                                            'show_balance': (profile.show_balance if profile else False),
                                             'last_name': user.last_name,
                                             'first_name': user.first_name,
                                         })
