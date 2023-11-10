@@ -154,3 +154,5 @@ Q_CLUSTER = {
 
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240  # higher than the count of fields
+
+VEI_PLATFORM_IMAGE = config("VEI_PLATFORM_IMAGE", default="unspecified image")

@@ -25,7 +25,7 @@ from vei_platform.models.factory import ElectricityFactory
 from vei_platform.models.finance_modeling import BankAccount
 from decimal import Decimal
 from vei_platform.templatetags.vei_platform_utils import balance_from_transactions
-
+from vei_platform.settings.base import VEI_PLATFORM_IMAGE
 
 def get_balance(profile):
     legal_entities_pk = []
@@ -55,6 +55,8 @@ def common_context(request):
     if request:
         if request.user:
             if request.user.is_authenticated:
+                if request.user.is_superuser:
+                    context['platform_image'] = VEI_PLATFORM_IMAGE
                 profile = get_user_profile(request.user)
                 if profile:
                     context['profile'] = profile
