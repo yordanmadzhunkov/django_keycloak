@@ -5,7 +5,6 @@ from vei_platform.models.profile import get_user_profile
 from django.shortcuts import render
 
 
-@login_required(login_url='/oidc/authenticate/')
 def view_home(request):
     context = common_context(request)
     return render(request, "home.html", context)

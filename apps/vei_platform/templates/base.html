@@ -24,9 +24,9 @@
 <body id="page-top">
     <!-- Page Wrapper -->
     <div id="wrapper">
-        {% if request.user.is_authenticated %}
+        
         {% include "snippets/sidebar.html" %}
-        {% endif %}
+        
         <!-- Content Wrapper -->
         <div id="content-wrapper" class="d-flex flex-column">
             {% if request.user.is_authenticated %}

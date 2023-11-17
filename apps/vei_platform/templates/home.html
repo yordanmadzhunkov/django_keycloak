@@ -17,6 +17,9 @@
         <input type="submit" value="logout">
     </form>
     {% else %}
-        <a href="{% url 'oidc_authentication_init' %}">Login</a>
+        <a href="{% url 'oidc_authentication_init' %}">Вход</a>
+        и  
+        <a href="{% url 'oidc_authentication_init' %}">Регистрация</a>
+
     {% endif %}
 {% endblock content %}

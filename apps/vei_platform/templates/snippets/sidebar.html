@@ -16,23 +16,24 @@
     <li class="nav-item active">
         <a class="nav-link" href="{% url 'dashboard' %}">
             <i class="fas fa-fw fa-tachometer-alt"></i>
-            <span>Dashboard</span></a>
+            <span>Моето табло</span></a>
 
     </li>
 
     <li class="nav-item active">
         <a class="nav-link" href="{% url 'factories_list'  %}">
             <i class="fas fa-fw fa-warehouse"></i>
-            <span>Invest</span>
+            <span>Оферти за инвестори</span>
         </a>
     </li>
 
     <li class="nav-item active">
-        <a class="nav-link" href="{% url 'bank_accounts'  %}">
-            <i class="fas fa-fw fa-money-check"> </i>
-            <span>Bank accounts</span>
+        <a class="nav-link" href="{% url 'factories_list'  %}">
+            <i class="fas fa-fw fa-warehouse"></i>
+            <span>Предложи твоята ФЕЦ</span>
         </a>
     </li>
+
 
     {% if user.is_superuser %}
     <!-- Nav Item - Profile Collapse Menu -->
@@ -56,23 +57,31 @@
 
     <!-- Divider -->
     <hr class="sidebar-divider">
-
+    {% if request.user.is_authenticated %}
     <!-- Nav Item - Profile Collapse Menu -->
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities"
             aria-expanded="true" aria-controls="collapseUtilities">
             <i class="fas fa-fw fa-user"></i>
-            <span>Profile</span>
+            <span>Профил</span>
         </a>
         <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
                 <!-- <h6 class="collapse-header">Custom Utilities:</h6> -->
-                <a class="collapse-item" href="{% url 'my_profile'    %}">Profile </a>
-                <a class="collapse-item" href="{% url 'my_entity'     %}">My Tax ID </a>
-                <a class="collapse-item" href="{% url 'oidc_logout'   %}">Logout </a>
+                <a class="collapse-item" href="{% url 'my_profile'    %}">Моя профил </a>
+                <a class="collapse-item" href="{% url 'my_entity'     %}">Моето физическо лице</a>
+                <a class="collapse-item" href="{% url 'oidc_logout'   %}">Изход </a>
             </div>
         </div>
     </li>
+    {% else %}
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'my_profile'  %}">
+            <i class="fas fa-fw fa-money-check"> </i>
+            <span>Вход или Регистрация</span>
+        </a>
+    </li>
+    {% endif %}
 
     <!-- Divider -->
     <hr class="sidebar-divider d-none d-md-block">
