@@ -49,7 +49,8 @@ def get_balance(profile):
 
 def common_context(request):
     context = {
-        'platform_name': 'Solar Estates',
+        'platform_name': 'Fraction Energy',
+        'platform_logo': '/static/img/Fraction_Energy_logo.png',
         'copyright': 'Data Intensive 2023',
     }
     if request:

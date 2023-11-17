@@ -19,7 +19,7 @@ def total_amount_listed(factory):
     for o in  SolarEstateListing.objects.filter(factory=factory):
         total += o.amount
     res = '{:,}'.format(total)  # For Python ≥2.7
-    print(res)
+    # print(res)
     return res
 
 @register.filter(is_safe=True)

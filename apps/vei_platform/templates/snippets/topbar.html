@@ -10,14 +10,22 @@
     {% comment %}
     {% include "snippets/topbar_search.html" %}
     {% endcomment %}
+    <ul class="navbar-nav ml-auto">
+        <a href="/">
+            <img class="img-fluid" style="width: auto; height: 80px;" src={{platform_logo}} </img>
+        </a>
+    </ul>
+
     <!-- Topbar Navbar -->
     <ul class="navbar-nav ml-auto">
         {% comment %}
         {% include "snippets/topbar_search_toggle.html" %}
         {% endcomment %}
+        {% comment %}
         {% include "snippets/topbar_alerts.html" %}
         {% include "snippets/topbar_messages.html" %}
         {% include "snippets/topbar_balance.html" %}
+        {% endcomment %}
         <div class="topbar-divider d-none d-sm-block"></div>
         {% include "snippets/topbar_user.html" %}
     </ul>
