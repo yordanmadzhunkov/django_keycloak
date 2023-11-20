@@ -4,11 +4,12 @@
 VEI - DASHBOARD
 {% endblock%}
 {% block content %}
-<section style="background-color: #eee;">
     <div class="container py-5">
-        <h3>Electric factory for renewable sources</h3>
+        <div class="text-center text-primary">
+            <h2> Електроцентали от възобновяеми източници на енергия</h2>
+            <br>
+        </div>
         {% include "snippets/factories_list.html" %}
         {% include "snippets/pagination.html" %}
     </div>
-</section>
 {% endblock content %}

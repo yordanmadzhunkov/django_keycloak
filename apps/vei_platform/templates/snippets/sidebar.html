@@ -28,21 +28,21 @@
     </li>
 
     <li class="nav-item active">
-        <a class="nav-link" href="{% url 'factories_list'  %}">
+        <a class="nav-link" href="{% url 'my_factories'  %}">
             <i class="fas fa-fw fa-warehouse"></i>
-            <span>Предложи твоята ФЕЦ</span>
+            <span>Предложи твоята Електроцентрала</span>
         </a>
     </li>
 
+    {% if user.is_superuser %}
     <li class="nav-item active">
-        <a class="nav-link" href="{% url 'factories_list'  %}">
+        <a class="nav-link" href="{% url 'factories_list_all'  %}">
             <i class="fas fa-fw fa-warehouse"></i>
             <span>Списък с фабрики</span>
         </a>
     </li>
 
 
-    {% if user.is_superuser %}
     <!-- Nav Item - Profile Collapse Menu -->
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#admin_collapseUtilities"
