@@ -16,7 +16,28 @@ from datetime import date
 from django import template
 
 
-def view_factories_list(request):
+def view_offered_factories():
+    listings = SolarEstateListing.objects.order_by('factory')
+    prev = None
+    listed = []
+    for l in listings:
+        if prev != l.factory.pk:
+            #print(l.factory.name)
+            listed.append(l.factory.pk)
+        prev = l.factory.pk
+    return listed
+        
+def view_offered_factories_paganated(request):
+    listed = view_offered_factories()
+    factories_list = ElectricityFactory.objects.filter(pk__in=listed).order_by('pk')
+    paginator = Paginator(factories_list, 5)  # Show 25 contacts per page.
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    context = common_context(request)
+    context['page_obj'] = page_obj
+    return render(request, "factories_list.html", context)
+
+def view_all_factories_paganated(request):
     factories_list = ElectricityFactory.objects.all().order_by('pk')
     paginator = Paginator(factories_list, 5)  # Show 25 contacts per page.
     page_number = request.GET.get('page')
