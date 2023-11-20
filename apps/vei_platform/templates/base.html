@@ -24,14 +24,12 @@
 <body id="page-top">
     <!-- Page Wrapper -->
     <div id="wrapper">
-        
+
         {% include "snippets/sidebar.html" %}
-        
+
         <!-- Content Wrapper -->
         <div id="content-wrapper" class="d-flex flex-column">
-            {% if request.user.is_authenticated %}
             {% include "snippets/topbar.html" %}
-            {% endif %}
             {% include "snippets/messages.html" %}
             <!-- Main Content -->
             <div id="content">

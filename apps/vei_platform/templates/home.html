@@ -1,25 +1,23 @@
-
 {% extends 'base.html' %}
-{% load static %} 
+{% load static %}
 
 {% block head_title %}
-    Home
+Home
 {% endblock%}
 {% block content %}
-    {% if user.is_authenticated %}
-    <p>Current user: {{ user.email }}</p>
-    <p>First name: {{ user.first_name }}</p>
-    <p>Last name: {{ user.last_name }}</p>
-    <p>Staff: {{ user.is_staff }}</p>
-    <p>Admin: {{ user.is_superuser }}</p>
-    <form action="{% url 'oidc_logout' %}" method="post">
-        {% csrf_token %}
-        <input type="submit" value="logout">
-    </form>
-    {% else %}
-        <a href="{% url 'oidc_authentication_init' %}">Вход</a>
-        и  
-        <a href="{% url 'oidc_authentication_init' %}">Регистрация</a>
-
-    {% endif %}
+{% if user.is_authenticated %}
+<p>Current user: {{ user.email }}</p>
+<p>First name: {{ user.first_name }}</p>
+<p>Last name: {{ user.last_name }}</p>
+<p>Staff: {{ user.is_staff }}</p>
+<p>Admin: {{ user.is_superuser }}</p>
+<form action="{% url 'oidc_logout' %}" method="post">
+    {% csrf_token %}
+    <input type="submit" value="logout">
+</form>
+{% else %}
+<a href="{% url 'oidc_authentication_init' %}">Вход</a>
+и
+<a href="{% url 'oidc_authentication_init' %}">Регистрация</a>
+{% endif %}
 {% endblock content %}

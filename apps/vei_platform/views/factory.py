@@ -16,7 +16,6 @@ from datetime import date
 from django import template
 
 
-@login_required(login_url='/oidc/authenticate/')
 def view_factories_list(request):
     factories_list = ElectricityFactory.objects.all().order_by('pk')
     paginator = Paginator(factories_list, 5)  # Show 25 contacts per page.
