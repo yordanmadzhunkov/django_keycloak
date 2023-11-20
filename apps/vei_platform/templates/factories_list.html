@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
 
 {% block head_title%}
 VEI - DASHBOARD
@@ -9,6 +11,9 @@ VEI - DASHBOARD
             <h2> Електроцентали от възобновяеми източници на енергия</h2>
             <br>
         </div>
+        {% if form %}
+        {% crispy form %}
+        {% endif %}
         {% include "snippets/factories_list.html" %}
         {% include "snippets/pagination.html" %}
     </div>

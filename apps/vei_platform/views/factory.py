@@ -5,7 +5,7 @@ from vei_platform.models.factory import ElectricityFactory, FactoryProductionPla
 from vei_platform.models.finance_modeling import SolarEstateListing
 from vei_platform.models.finance_modeling import ElectricityPricePlan, BankLoan
 from vei_platform.models.profile import get_user_profile
-from vei_platform.forms import SolarEstateListingForm, FactoryFinancialPlaningForm
+from vei_platform.forms import SolarEstateListingForm, FactoryFinancialPlaningForm, FactoryModelForm
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
@@ -45,6 +45,7 @@ def view_all_factories_of_user_paganated(request):
     page_obj = paginator.get_page(page_number)
     context = common_context(request)
     context['page_obj'] = page_obj
+    context['form'] = FactoryModelForm()
     return render(request, "factories_list.html", context)
 
 def view_all_factories_paganated(request):

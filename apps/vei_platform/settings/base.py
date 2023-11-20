@@ -19,7 +19,9 @@ INSTALLED_APPS = [
     'django.contrib.sites',
 
     'django_extensions',
-
+    'crispy_forms',
+    "crispy_bootstrap4",
+    
     # Health checks
     'health_check',
     'health_check.db',
@@ -156,3 +158,8 @@ Q_CLUSTER = {
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240  # higher than the count of fields
 
 VEI_PLATFORM_IMAGE = config("VEI_PLATFORM_IMAGE", default="unspecified image")
+
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
+
+CRISPY_TEMPLATE_PACK = "bootstrap4"
