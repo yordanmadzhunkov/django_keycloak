@@ -35,6 +35,7 @@ def view_offered_factories_paganated(request):
     page_obj = paginator.get_page(page_number)
     context = common_context(request)
     context['page_obj'] = page_obj
+    context['factory_list_title'] = 'Електроцентали от възобновяеми източници на енергия'
     return render(request, "factories_list.html", context)
 
 @login_required(login_url='/oidc/authenticate/')
@@ -46,7 +47,62 @@ def view_all_factories_of_user_paganated(request):
     context = common_context(request)
     context['page_obj'] = page_obj
     context['form'] = FactoryModelForm()
+    context['factory_list_title'] = 'Мойте електроцентали'
     return render(request, "factories_list.html", context)
+
+@login_required(login_url='/oidc/authenticate/')
+def view_add_factory(request):
+    context = common_context(request)
+    if request.method == 'POST':
+        form = FactoryModelForm(request.POST,  request.FILES)
+        if form.is_valid():
+            #{'name': 'Голямата Кофа за Фотони 2', 
+            # 'factory_type': 'FEV', 
+            # 'location': 'България', 
+            # 'opened': datetime.date(2023, 11, 15), 
+            # 'capacity_in_mw': Decimal('2'), 
+            # 'image': None, 
+            # 'tax_id': '5932945923', 
+            # 'owner_name': 'Гошо ЕООД'}
+
+            print( form.cleaned_data)
+
+            factory = ElectricityFactory(
+                name=form.cleaned_data['name'],
+                factory_type=form.cleaned_data['factory_type'],
+                manager=request.user,
+                location=form.cleaned_data['location'],
+                opened=form.cleaned_data['opened'],
+                capacity_in_mw=form.cleaned_data['capacity_in_mw'],
+                primary_owner=None,
+                tax_id=form.cleaned_data['tax_id'],
+                owner_name=form.cleaned_data['owner_name'],
+            )
+        
+            factory.save()
+            #context['form_data'] = form.cleaned_data
+            #amount = form.cleaned_data['amount']
+            #persent_from_profit = form.cleaned_data['persent_from_profit']
+            #start_date = form.cleaned_data['start_date']
+            #duration = form.cleaned_data['duration']
+            #commision = form.cleaned_data['commision']
+            #listing = SolarEstateListing(
+            #        start_date=start_date, 
+            #        amount=Decimal(amount).quantize(Decimal('1.')), 
+            #        persent_from_profit=Decimal(persent_from_profit).quantize(Decimal('99.99')),
+            #        duration=Decimal(duration).quantize(Decimal('1.')), 
+            #        commision=Decimal(commision).quantize(Decimal('99.99')),
+            #        factory=factory
+            #)
+            #listing.save()
+            messages.success(request, "Електроцентралата е добавена")
+        else:
+            messages.error(request, "Невалидни данни, моля опитайте отново")
+    else:
+        form = FactoryModelForm()
+    context['form'] = form
+    return render(request, "factory_add.html", context)
+
 
 def view_all_factories_paganated(request):
     factories_list = ElectricityFactory.objects.all().order_by('pk')
@@ -55,6 +111,7 @@ def view_all_factories_paganated(request):
     page_obj = paginator.get_page(page_number)
     context = common_context(request)
     context['page_obj'] = page_obj
+    context['factory_list_title'] = 'Електроцентали от възобновяеми източници на енергия'
     return render(request, "factories_list.html", context)
 
 @login_required(login_url='/oidc/authenticate/')

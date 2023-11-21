@@ -25,7 +25,7 @@ class BootstrapDatePicker(forms.DateInput):
         Most options can be provided via data-attributes. An option can be
         converted to a data-attribute by taking its name, replacing each
         uppercase letter with its lowercase equivalent preceded by a dash, and
-        prepending "data-date-" to the result. For example, startDate would be
+        prepending 'data-date-' to the result. For example, startDate would be
         data-date-start-date, format would be data-date-format, and
         daysOfWeekDisabled would be data-date-days-of-week-disabled.
         '''
@@ -71,8 +71,8 @@ class FactoryFinancialPlaningForm(forms.Form):
                                         initial=53000,
                                         widget=forms.widgets.NumberInput(
                                             attrs={
-                                                "class": "input",
-                                                "inputmode": "decimal",
+                                                'class': 'input',
+                                                'inputmode': 'decimal',
                                             }
                                         ))
     start_date = forms.DateField(initial=date(2023, 6, 1))
@@ -98,7 +98,7 @@ class FactoryFinancialPlaningForm(forms.Form):
         super(FactoryFinancialPlaningForm, self).__init__(*args, **kwargs)
         production_plan_choise = [
             (t.pk, t.name) for t in FactoryProductionPlan.objects.filter(factory=factory)]
-        self.fields['production_plan'] = forms.ChoiceField(label="работни часове",
+        self.fields['production_plan'] = forms.ChoiceField(label='работни часове',
                                                            choices=production_plan_choise)
 
         electricity_prices = [(t.pk, t.name)
@@ -108,13 +108,13 @@ class FactoryFinancialPlaningForm(forms.Form):
 
         bank_loans = [(t.pk, str(t)) for t in BankLoan.objects.all()]
         self.fields['bank_loan'] = forms.ChoiceField(
-            label="Банково финансиране", choices=bank_loans)
+            label='Банково финансиране', choices=bank_loans)
 
 
 class PricePlanForm(forms.ModelForm):
     class Meta:
         model = ElectricityPricePlan
-        fields = "__all__"
+        fields = '__all__'
         labels = {
             'name': 'Име на план',
             'start_year': 'Начало',
@@ -139,13 +139,13 @@ class PricePlanForm(forms.ModelForm):
 class BankLoanForm(forms.ModelForm):
     class Meta:
         model = BankLoan
-        fields = "__all__"
+        fields = '__all__'
         labels = {
             'start_date': 'Дата на отпускане',
             'amount': 'Размер',
             'duration': 'Период [месеци]',
         }
-        exclude = ["factory"]
+        exclude = ['factory']
         widgets = {
             'start_date': forms.DateInput(attrs={
                 'class': 'form-control',
@@ -163,7 +163,7 @@ class BankLoanForm(forms.ModelForm):
 class LegalEntityForm(forms.ModelForm):
     class Meta:
         model = LegalEntity
-        fields = "__all__"
+        fields = '__all__'
         exclude = ['legal_form', 'person']
         labels = {
             'founded': 'Рожденна дата',
@@ -197,7 +197,7 @@ class LegalEntityForm(forms.ModelForm):
 class BankAccountForm(forms.ModelForm):
     class Meta:
         model = BankAccount
-        fields = "__all__"
+        fields = '__all__'
         exclude = ['initial_balance', 'status']
         widgets = {
             'iban': forms.TextInput(attrs={
@@ -219,7 +219,7 @@ class BankAccountForm(forms.ModelForm):
 class BankAccountDepositForm(forms.ModelForm):
     class Meta:
         model = BankTransaction
-        fields = "__all__"
+        fields = '__all__'
         exclude = ['account', 'other_account_iban', 'fee']
         widgets = {
             'iban': forms.TextInput(attrs={
@@ -252,7 +252,7 @@ class BankAccountDepositForm(forms.ModelForm):
     def __init__(self, bank_account, *args, **kwargs):
         super (BankAccountDepositForm, self).__init__(*args,**kwargs) # populates the post
         bank_accounts = [(t.pk, str(t)) for t in platform_bank_accounts(bank_account.currency)]
-        dest_iban = forms.ChoiceField(label="IBAN", choices=bank_accounts)
+        dest_iban = forms.ChoiceField(label='IBAN', choices=bank_accounts)
         self.fields['dest_iban'] = dest_iban 
 
 class PlatformWithdrawForm(forms.Form):
@@ -280,7 +280,7 @@ class PlatformWithdrawForm(forms.Form):
     #def __init__(self, user, *args, **kwargs):
         #super (PlatformWithdrawForm, self).__init__(*args, **kwargs) # populates the post
         #bank_accounts = [(t.pk, str(t)) for t in platform_bank_accounts(bank_account.currency)]
-        #dest_iban = forms.ChoiceField(label="IBAN", choices=bank_accounts)
+        #dest_iban = forms.ChoiceField(label='IBAN', choices=bank_accounts)
         #self.fields['dest_iban'] = dest_iban 
 
 
@@ -304,7 +304,7 @@ class UserProfileForm(forms.Form):
     first_name = forms.CharField(required=False)
     last_name = forms.CharField(required=False)
     show_balance = forms.BooleanField(required=False, 
-                                      label="Show balance", 
+                                      label='Show balance', 
                                       widget=forms.CheckboxInput(attrs={
                                         'class': 'form-control form-control-user',})
                                       )
@@ -344,8 +344,8 @@ class SolarEstateListingForm(forms.Form):
                                         initial=1000,
                                         widget=forms.widgets.NumberInput(
                                             attrs={
-                                                "class": "form-control",
-                                                "inputmode": "decimal",
+                                                'class': 'form-control',
+                                                'inputmode': 'decimal',
                                             }
                                         ))
 
@@ -353,8 +353,8 @@ class SolarEstateListingForm(forms.Form):
                                         initial=10.0,
                                         widget=forms.widgets.NumberInput(
                                             attrs={
-                                                "class": "form-control",
-                                                "inputmode": "decimal",
+                                                'class': 'form-control',
+                                                'inputmode': 'decimal',
                                             }
                                         ))
 
@@ -366,7 +366,7 @@ class SolarEstateListingForm(forms.Form):
                 'title': 'Дата на придобиване'})
                                     )
 
-    duration = forms.CharField(initial="180",
+    duration = forms.CharField(initial='180',
                                label='Продължителност',
                              required=False,
                              widget=forms.widgets.TextInput(attrs={
@@ -389,18 +389,84 @@ class SolarEstateListingForm(forms.Form):
                                  )
                                         
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit                                        
+from crispy_forms.layout import Submit, Layout, Row, Column, HTML                                        
 class FactoryModelForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(FactoryModelForm, self).__init__(*args, **kwargs)
 
+        FACTORY_TYPE_CHOISES = (
+            (ElectricityFactory.PHOTOVOLTAIC, 'ФЕЦ'),
+            (ElectricityFactory.WIND_TURBINE, 'ВтЕЦ'),
+            (ElectricityFactory.HYDROPOWER, 'ВЕЦ'),
+            (ElectricityFactory.BIOMASS, 'БиоЕЦ'),
+            (ElectricityFactory.REN_GAS, 'БиоГЕЦ'),
+        )
+
+        factory_type = forms.TypedChoiceField( 
+                   choices = FACTORY_TYPE_CHOISES, 
+                   label= 'Вид електроцентрала',
+                   coerce = str
+                  ) 
+        self.fields['factory_type'] = factory_type
+
         # If you pass FormHelper constructor a form instance
         # It builds a default layout with all its fields
         self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Row(
+                Column('factory_type', css_class='form-group col-md-2 mb-0'),
+                Column('name', css_class='form-group col-md-10 mb-0'),
+                css_class='form-row'
+            ),
+            Row(
+                Column('opened', css_class='form-group col-md-2 mb-0'),
+                Column('capacity_in_mw', css_class='form-group col-md-2 mb-0'),
+                Column('location', css_class='form-group col-md-8 mb-0'),
+                css_class='form-row'
+            ),
+            Row(
+                Column('owner_name', css_class='form-group col-md-8 mb-0'),
+                Column('tax_id', css_class='form-group col-md-4 mb-0'),
+                css_class='form-row'
+            ),
+            Row(
+                Column('image'),
+                 #css_class='form-row'
 
-        # You can dynamically adjust your layout
-        self.helper.layout.append(Submit('save', 'save'))
+            ),
+            Submit('add', 'Добави')
+        )
 
     class Meta:
         model = ElectricityFactory
-        
+        fields = '__all__'
+        exclude = ['manager', 'primary_owner']
+        labels = {
+            'name': 'Име на електроцентралата',
+            'location': 'Местоположение',
+            'opened': 'в експлотация от',
+            'capacity_in_mw': 'капацитет [в MW]',
+            'tax_id': 'ЕИК',
+            'owner_name': 'Юридическо лице собственик на централата',
+            'factory_type': 'Вид електроцентрала',
+            'image': "Снимка"
+        }
+#        help_texts = {
+#            'client_id': (
+#                'Um identificador exclusivo de formato livre da chave. 50 caracteres no máximo'
+#            ),
+#        }
+        widgets = {
+            'opened': BootstrapDatePicker(attrs={
+                'class': 'form-control',
+                'title': 'Date of transaction',
+                'style': 'width:18ch',
+                'data-date-autoclose': 'true',
+                'data-date-clear-btn': 'false',
+                'data-date-today-btn': 'linked',
+                'data-date-today-highlight': 'true'
+                }),
+
+            'image': forms.ClearableFileInput(attrs={
+                                    'onchange': 'showImage(this);',})
+        }

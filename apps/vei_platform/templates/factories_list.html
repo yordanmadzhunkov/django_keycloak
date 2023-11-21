@@ -6,15 +6,12 @@
 VEI - DASHBOARD
 {% endblock%}
 {% block content %}
-    <div class="container py-5">
-        <div class="text-center text-primary">
-            <h2> Електроцентали от възобновяеми източници на енергия</h2>
-            <br>
-        </div>
-        {% if form %}
-        {% crispy form %}
-        {% endif %}
-        {% include "snippets/factories_list.html" %}
-        {% include "snippets/pagination.html" %}
+<div class="container py-5">
+    <div class="text-center text-primary">
+        <h2> {{factory_list_title}}</h2>
+        <br>
     </div>
+    {% include "snippets/factories_list.html" %}
+    {% include "snippets/pagination.html" %}
+</div>
 {% endblock content %}

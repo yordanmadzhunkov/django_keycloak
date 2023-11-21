@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+
+{% block head_title%}
+VEI - DASHBOARD
+{% endblock%}
+{% block content %}
+
+<!-- To display image -->
+<img id="myimage" src="" width="256" height="256">
+
+<div class="container py-5">
+    {% crispy form %}
+</div>
+
+
+<script>
+    function showImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                $('#myimage').attr('src', e.target.result);
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }   
+</script>
+{% endblock content %}
