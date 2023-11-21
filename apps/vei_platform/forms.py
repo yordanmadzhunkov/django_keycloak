@@ -389,7 +389,14 @@ class SolarEstateListingForm(forms.Form):
                                  )
                                         
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit, Layout, Row, Column, HTML                                        
+from crispy_forms.layout import Submit, Layout, Row, Column, HTML
+
+from crispy_forms.layout import Field
+
+class CustomImageField(Field):
+    template = 'layout/image_thumbnail.html'
+
+                             
 class FactoryModelForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(FactoryModelForm, self).__init__(*args, **kwargs)
@@ -429,11 +436,15 @@ class FactoryModelForm(forms.ModelForm):
                 Column('tax_id', css_class='form-group col-md-4 mb-0'),
                 css_class='form-row'
             ),
+            
             Row(
-                Column('image'),
-                 #css_class='form-row'
-
+                Column(CustomImageField('image'), css_class='form-group col-md-6'),
+                css_class='form-row'
             ),
+            #Row(
+            #    Column('image'),
+                 #css_class='form-row'
+            #),
             Submit('add', 'Добави')
         )
 
@@ -466,7 +477,4 @@ class FactoryModelForm(forms.ModelForm):
                 'data-date-today-btn': 'linked',
                 'data-date-today-highlight': 'true'
                 }),
-
-            'image': forms.ClearableFileInput(attrs={
-                                    'onchange': 'showImage(this);',})
         }

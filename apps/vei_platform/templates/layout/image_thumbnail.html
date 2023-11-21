@@ -1,0 +1,34 @@
+
+{% load crispy_forms_field %}
+<!-- PREVIEW IMAGE -->
+<div class="fileupload fileupload-new" data-provides="fileupload">
+    <div class="row">
+        <div class="col-md-12">
+            <img id="output" class="img-thumbnail img-fluid w-100" {% if field.value %} src="{{ field.value.url }}"  {% endif %} />
+            {% if field.value %}
+                <input type="checkbox" name="{{ field.name }}-clear" id="{{ field.name }}-clear_id">
+                <label for="{{field.name}}-clear_id">Clear</label><br>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<!-- INPUT -->
+<div class="input-group mb-3">
+    <div class="custom-file">
+      <input type="file" name="{{field.name}}" accept="image/*" class="custom-file-input" id="inputGroupFile01" onchange="loadFile(event)" aria-describedby="inputGroupFileAddon01">
+      <label class="custom-file-label" id="inputFileLabel">Image</label>
+    </div>
+</div>
+{% include 'bootstrap4/layout/help_text_and_errors.html' %}
+
+<script>
+    // preview image
+    var loadFile = function(event) {
+      var output = document.getElementById('output');
+      output.src = URL.createObjectURL(event.target.files[0]);
+      output.onload = function() {
+        URL.revokeObjectURL(output.src)
+      }   
+      document.getElementById("inputFileLabel").innerHTML = "" + event.target.files[0].name;
+    };
+</script>

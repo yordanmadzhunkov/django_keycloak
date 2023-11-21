@@ -65,8 +65,6 @@ def view_add_factory(request):
             # 'tax_id': '5932945923', 
             # 'owner_name': 'Гошо ЕООД'}
 
-            print( form.cleaned_data)
-
             factory = ElectricityFactory(
                 name=form.cleaned_data['name'],
                 factory_type=form.cleaned_data['factory_type'],
@@ -77,25 +75,11 @@ def view_add_factory(request):
                 primary_owner=None,
                 tax_id=form.cleaned_data['tax_id'],
                 owner_name=form.cleaned_data['owner_name'],
+                image=form.cleaned_data['image']
             )
-        
             factory.save()
-            #context['form_data'] = form.cleaned_data
-            #amount = form.cleaned_data['amount']
-            #persent_from_profit = form.cleaned_data['persent_from_profit']
-            #start_date = form.cleaned_data['start_date']
-            #duration = form.cleaned_data['duration']
-            #commision = form.cleaned_data['commision']
-            #listing = SolarEstateListing(
-            #        start_date=start_date, 
-            #        amount=Decimal(amount).quantize(Decimal('1.')), 
-            #        persent_from_profit=Decimal(persent_from_profit).quantize(Decimal('99.99')),
-            #        duration=Decimal(duration).quantize(Decimal('1.')), 
-            #        commision=Decimal(commision).quantize(Decimal('99.99')),
-            #        factory=factory
-            #)
-            #listing.save()
             messages.success(request, "Електроцентралата е добавена")
+            return redirect(factory.get_absolute_url())
         else:
             messages.error(request, "Невалидни данни, моля опитайте отново")
     else:
