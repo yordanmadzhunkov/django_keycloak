@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+
+{% block head_title%}
+VEI - DASHBOARD
+{% endblock%}
+{% block content %}
+<div class="container py-5">
+    <div class="text-center text-primary">
+        <div class="row justify-content-center mb-3">
+            <div class="col-md-12 col-xl-10">
+                <div class="row">
+                    <div class="col-md-12 col-lg-3 col-xl-3 mb-4 mb-lg-0">
+                    </div>
+                    <div class="col-md-6 col-lg-6 col-xl-6">
+                        <h2><a href="#">Мойте електроцентали</a></h2>
+                    </div>
+                    <div class="col-md-6 col-lg-3 col-xl-3 border-sm-start-none border-start">
+                      <div class="text-success">
+                        <button class="btn btn-success" type="button" onclick="window.location.href='/factory/add';">Добави нова</button>
+                        <span><br></span>
+                      </div>
+                    </div>
+                  </div>
+            </div>
+        </div>
+        <br>
+    </div>
+    {% include "snippets/factories_list.html" %}
+    {% include "snippets/pagination.html" %}
+</div>
+{% endblock content %}

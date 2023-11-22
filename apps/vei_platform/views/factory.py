@@ -39,7 +39,7 @@ def view_offered_factories_paganated(request):
     return render(request, "factories_list.html", context)
 
 @login_required(login_url='/oidc/authenticate/')
-def view_all_factories_of_user_paganated(request):
+def view_my_factories(request):
     factories_list = ElectricityFactory.objects.filter(manager=request.user).order_by('pk')
     paginator = Paginator(factories_list, 5)  # Show 25 contacts per page.
     page_number = request.GET.get('page')
@@ -47,8 +47,7 @@ def view_all_factories_of_user_paganated(request):
     context = common_context(request)
     context['page_obj'] = page_obj
     context['form'] = FactoryModelForm()
-    context['factory_list_title'] = 'Мойте електроцентали'
-    return render(request, "factories_list.html", context)
+    return render(request, "my_factories.html", context)
 
 @login_required(login_url='/oidc/authenticate/')
 def view_add_factory(request):

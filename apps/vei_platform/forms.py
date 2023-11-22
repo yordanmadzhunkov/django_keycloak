@@ -7,6 +7,9 @@ from .models.legal import LegalEntity, find_legal_entity
 from .models.platform import platform_bank_accounts
 
 
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Submit, Layout, Row, Column, Field
+
 import re
 from django.conf import settings
 from django.utils.translation import get_language
@@ -341,6 +344,7 @@ class SearchForm(forms.Form):
 
 class SolarEstateListingForm(forms.Form):
     amount = forms.DecimalField(label='Капитализация',
+                                help_text='Общата сума на електроцентралата в лева',
                                         initial=1000,
                                         widget=forms.widgets.NumberInput(
                                             attrs={
@@ -350,6 +354,7 @@ class SolarEstateListingForm(forms.Form):
                                         ))
 
     persent_from_profit = forms.DecimalField(label='Дял от централата[%]',
+                                        help_text='Който искате да продадете. Сумата, която ще получите е капитализацията по дяла минус комисионната на платформата',
                                         initial=10.0,
                                         widget=forms.widgets.NumberInput(
                                             attrs={
@@ -360,14 +365,23 @@ class SolarEstateListingForm(forms.Form):
 
 
     start_date = forms.DateField(label='Влизане в сила',
+                                 help_text='Дата на която ще се разделите с вашият дял, ако съберем нужното количество инвестирори',
                                  initial=date(2023, 6, 1),
-                                 widget= forms.widgets.SelectDateWidget(attrs={
-                'class': 'form-control',
-                'title': 'Дата на придобиване'})
+                                 widget=BootstrapDatePicker(attrs={
+                                    'title': 'Дата',
+                                    'class': 'form-control',
+                                    'style': 'width:18ch',
+                                    'data-date-autoclose': 'true',
+                                    'data-date-clear-btn': 'false',
+                                    'data-date-today-btn': 'linked',
+                                    'data-date-today-highlight': 'true'
+                                    }),
                                     )
 
     duration = forms.CharField(initial='180',
                                label='Продължителност',
+                               help_text='Броя месеци в който инвеститорите ще получават съответстващият им дял от печалбите. След изтичане на периода, цялата собственост се връща на оригинатора. 15 години или 180 месеца е добър срок',
+
                              required=False,
                              widget=forms.widgets.TextInput(attrs={
                                  'class': 'form-control',
@@ -376,7 +390,8 @@ class SolarEstateListingForm(forms.Form):
                                  'style': 'width:9ch',
                                  'title': 'Enter numbers Only'}))
 
-    commision = forms.DecimalField(label='Комисионна за Солар Естайет [%]',
+    commision = forms.DecimalField(label='Комисионна [%]',
+                                   help_text='% комисионна за платформата. Удържа се веднъж при първоначалното инвестиране, както и при бъдещите разплащания от елекроцентралата към ивеститорите. ',
                                         initial=1.5,
                                         widget=forms.widgets.TextInput(attrs={
                                             'class': 'form-control',
@@ -387,11 +402,9 @@ class SolarEstateListingForm(forms.Form):
                                             'readonly': True,}
                                         )
                                  )
-                                        
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit, Layout, Row, Column, HTML
+    
+            
 
-from crispy_forms.layout import Field
 
 class CustomImageField(Field):
     template = 'layout/image_thumbnail.html'
@@ -436,15 +449,10 @@ class FactoryModelForm(forms.ModelForm):
                 Column('tax_id', css_class='form-group col-md-4 mb-0'),
                 css_class='form-row'
             ),
-            
             Row(
-                Column(CustomImageField('image'), css_class='form-group col-md-6'),
+                Column(CustomImageField('image'), css_class='form-group col-md-12'),
                 css_class='form-row'
             ),
-            #Row(
-            #    Column('image'),
-                 #css_class='form-row'
-            #),
             Submit('add', 'Добави')
         )
 

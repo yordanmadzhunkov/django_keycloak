@@ -1,21 +1,24 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
 {% block head_title%}
 Solar Estates - DASHBOARD
 {% endblock%}
 {% block content %}
 <section style="background-color: #eee;">
   <div class="container py-5">
-    {% include "factory_header.html" %}
-
+    {% include "snippets/factory_card.html"%}
+    <div class="row justify-content-center mb-3">
+      <div class="col-md-12 col-xl-10">
     {% if factory_is_listed %}
     <div>
       <table class="table align-middle mb-0 bg-white">
         <thead class="bg-light">
-          <th>Start</th>
-          <th>Amount</th>
-          <th>Share[%]</th>
-          <th>Available</th>
-          <th>Price per kW</th>
+          <th>Начална дата</th>
+          <th>Сума</th>
+          <th>Дял[%]</th>
+          <th>Налични за инвестирорите</th>
+          <th>Цена на kW</th>
         </thead>
         {%for item in listings %}
         <tr class="bg-light">
@@ -30,33 +33,20 @@ Solar Estates - DASHBOARD
     </div>
     {% else %}
 
+
     <form method="post">
       <table class="table align-middle mb-0 bg-white">
         {% csrf_token %}
-        {{ formset.management_form }}
-        <tr>
-          <td> Manager </td>
-          {% if manager_profile %}
-          <td> <a href={{manager_profile.get_href}}> {{ manager_profile.get_display_name }} </a> </td>
-          <td>
-            <img class="img-profile rounded-circle topbar nav-item nav-link " src={{ manager_profile.get_avatar_url }}>
-          </td>
-          {% else%}
-          <td> - </td>
-          <td> <input type="submit" value="take" name="_become_manager" class="btn btn-secondary btn-sm"> </td>
-          {% endif%}
-        </tr>
         <div>{{create_listing_form}}</div>
-        <td></td>
-        <td></td>
-
         <td>
-          <input type="submit" value="Sell to investors" name="_do_it" class="btn btn-primary btn-sm">
+          <input type="submit" value="Предложи на инвестирорите" name="_do_it" class="btn btn-primary btn-sm">
         </td>
-
       </table>
     </form>
     {% endif %}
+  </div>
+</div>
+    
 
 
 

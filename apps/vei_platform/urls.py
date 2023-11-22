@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.generic.base import TemplateView
 
-from .views.factory import view_all_factories_paganated, view_factory_detail, view_factory_production, view_factory_offer_shares, view_offered_factories_paganated, view_all_factories_of_user_paganated, view_add_factory
+from .views.factory import view_all_factories_paganated, view_factory_detail, view_factory_production, view_factory_offer_shares, view_offered_factories_paganated, view_my_factories, view_add_factory
 from .views.dashboard import view_dashboard
 from .views.home import view_home
 from .views.profile import view_my_profile, view_user_profile
@@ -24,7 +24,7 @@ urlpatterns = [
     path('profile/<int:pk>', view_user_profile, name='user_profile'),
     path('invest/', view_offered_factories_paganated, name='invest'),
     
-    path('factory/', view_all_factories_of_user_paganated, name='my_factories'),
+    path('factory/', view_my_factories, name='my_factories'),
     path('factory/<int:pk>', view_factory_detail, name='view_factory'),
     path('factory/add', view_add_factory, name='view_add_factory'),
 
