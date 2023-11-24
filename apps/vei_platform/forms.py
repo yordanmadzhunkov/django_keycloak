@@ -342,7 +342,7 @@ class SearchForm(forms.Form):
                                       'title': 'Text to search'}))
 
 
-class SolarEstateListingForm(forms.Form):
+class FactoryListingForm(forms.Form):
     amount = forms.DecimalField(label='Капитализация',
                                 help_text='Общата сума на електроцентралата в лева',
                                         initial=1000,
@@ -403,8 +403,28 @@ class SolarEstateListingForm(forms.Form):
                                         )
                                  )
     
-            
-
+class DecalareInterestListingForm(forms.Form):
+    amount = forms.DecimalField(label='Инвестиция',
+                                help_text='Общата сума, която искате да ивестирате в централата',
+                                        initial=1000,
+                                        widget=forms.widgets.NumberInput(
+                                            attrs={
+                                                'class': 'form-control',
+                                                'inputmode': 'decimal',
+                                            }
+                                        ))
+    def __init__(self, *args, **kwargs):
+        super(DecalareInterestListingForm, self).__init__(*args, **kwargs)
+        # If you pass FormHelper constructor a form instance
+        # It builds a default layout with all its fields
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Row(
+                Column('amount', css_class='form-group'),
+                css_class='form-row'
+            ),
+            Submit('add', 'Заяви интерес')
+        )
 
 class CustomImageField(Field):
     template = 'layout/image_thumbnail.html'

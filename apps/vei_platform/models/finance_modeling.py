@@ -6,6 +6,7 @@ from datetime import date
 from django.core.validators import MaxValueValidator, MinValueValidator
 from .factory import ElectricityFactory, FactoryProductionPlan
 from .legal import LegalEntity
+from .profile import UserProfile
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -243,7 +244,7 @@ class BankLoanInterest(models.Model):
     loan = models.ForeignKey(BankLoan, on_delete=models.CASCADE)
 
 
-class SolarEstateListing(models.Model):
+class FactoryListing(models.Model):
     start_date = models.DateField()
     amount = models.DecimalField(max_digits=16, decimal_places=2)
     persent_from_profit = models.DecimalField(max_digits=4, decimal_places=2)
@@ -257,16 +258,50 @@ class SolarEstateListing(models.Model):
         
     @staticmethod
     def is_listed(factory):
-        return len(SolarEstateListing.objects.filter(factory=factory)) > 0
+        return len(FactoryListing.objects.filter(factory=factory)) > 0
+    
+    def total_amount_interested(self):
+        total = InvestementInListing.objects.filter(listing=self).aggregate(total=models.Sum(models.F('amount')))
+        r = Decimal(100) * (total['total'] / self.amount)
+        if r > Decimal(100):
+            r = Decimal(100)
+        total['percent'] = r.quantize(Decimal('1')) 
+        return total
+    
 
-class SolarEstateInvestor(models.Model):
-    name = models.CharField(max_length=128)
+class InvestementInListing(models.Model):
+    class InvestementStatus(models.TextChoices):
+        INTERESTED = 'IN', ('Interested')
+        CANCELED = 'CA', ('Canceled')
+        COMPLETED = 'CO', ('Completed')
+        
+    #name = models.CharField(max_length=128)
+    investor_profile = models.ForeignKey(UserProfile, null=False, blank=False, on_delete=models.DO_NOTHING)
+    listing = models.ForeignKey(
+        FactoryListing, null=True, blank=True, default=None, on_delete=models.DO_NOTHING)
     amount = models.DecimalField(
         default=10000, max_digits=12, decimal_places=2)
-    solar_estates = models.ForeignKey(
-        SolarEstateListing, null=True, blank=True, on_delete=models.DO_NOTHING)
 
-
+    status = models.CharField(
+        max_length=2,
+        choices=InvestementStatus.choices,
+        default=InvestementStatus.INTERESTED,
+    )
+    
+    def share_from_factory(self):
+        return ((self.amount * self.listing.persent_from_profit)/ self.listing.amount).quantize(Decimal('.01'))
+    
+    
+    def status_str(self):
+        if self.status == InvestementInListing.InvestementStatus.INTERESTED:
+            return 'Заявен интерес'
+        if self.status == InvestementInListing.InvestementStatus.CANCELED:
+            return 'Отменен'
+        if self.status == InvestementInListing.InvestementStatus.COMPLETED:
+            return 'Завършен'
+        return 'Unknown'
+        
+    
 class FinancialPlan(models.Model):
     name = models.TextField()
     factory = models.ForeignKey(
@@ -278,7 +313,7 @@ class FinancialPlan(models.Model):
     loan = models.ForeignKey(
         BankLoan, null=True, blank=True, on_delete=models.DO_NOTHING)
     solar_estates = models.ForeignKey(
-        SolarEstateListing, null=True, blank=True, on_delete=models.DO_NOTHING)
+        FactoryListing, null=True, blank=True, on_delete=models.DO_NOTHING)
     working_hours = models.ForeignKey(
         FactoryProductionPlan, null=True, blank=True, on_delete=models.DO_NOTHING)
     prices = models.ForeignKey(

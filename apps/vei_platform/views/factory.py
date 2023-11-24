@@ -2,10 +2,10 @@ from django.core.paginator import Paginator
 
 from . import common_context
 from vei_platform.models.factory import ElectricityFactory, FactoryProductionPlan, ElectricityWorkingHoursPerMonth
-from vei_platform.models.finance_modeling import SolarEstateListing
+from vei_platform.models.finance_modeling import FactoryListing
 from vei_platform.models.finance_modeling import ElectricityPricePlan, BankLoan
 from vei_platform.models.profile import get_user_profile
-from vei_platform.forms import SolarEstateListingForm, FactoryFinancialPlaningForm, FactoryModelForm
+from vei_platform.forms import FactoryListingForm, FactoryFinancialPlaningForm, FactoryModelForm
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
@@ -17,7 +17,7 @@ from django import template
 
 
 def view_offered_factories():
-    listings = SolarEstateListing.objects.order_by('factory')
+    listings = FactoryListing.objects.order_by('factory')
     prev = None
     listed = []
     for l in listings:
@@ -103,9 +103,9 @@ def view_factory_offer_shares(request, pk=None):
     factory = ElectricityFactory.objects.get(pk=pk)
     context['factory'] = factory
     context['manager_profile'] = None if factory.manager is None else get_user_profile(factory.manager)
-    context['factory_is_listed'] = SolarEstateListing.is_listed(factory)
+    context['factory_is_listed'] = FactoryListing.is_listed(factory)
 
-    listings = SolarEstateListing.objects.filter(factory=factory)
+    listings = FactoryListing.objects.filter(factory=factory)
     total_amount = Decimal(0)
     total_listed_persent = Decimal(0)
     total_available = Decimal(0)
@@ -125,7 +125,7 @@ def view_factory_offer_shares(request, pk=None):
     if context['manager_profile']:
         capacity = factory.get_capacity_in_kw()
         fraction = Decimal(0.5)
-        form = SolarEstateListingForm(initial={
+        form = FactoryListingForm(initial={
             'amount': Decimal(1500) * capacity * fraction,
             'persent_from_profit': fraction * Decimal(100),
             'start_date': date(2023,12,1),
@@ -134,7 +134,7 @@ def view_factory_offer_shares(request, pk=None):
         })
 
     if request.method == 'POST':
-        form = SolarEstateListingForm(data=request.POST)
+        form = FactoryListingForm(data=request.POST)
         if form.is_valid():
             context['form_data'] = form.cleaned_data
             amount = form.cleaned_data['amount']
@@ -142,7 +142,7 @@ def view_factory_offer_shares(request, pk=None):
             start_date = form.cleaned_data['start_date']
             duration = form.cleaned_data['duration']
             commision = form.cleaned_data['commision']
-            listing = SolarEstateListing(
+            listing = FactoryListing(
                     start_date=start_date, 
                     amount=Decimal(amount).quantize(Decimal('1.')), 
                     persent_from_profit=Decimal(persent_from_profit).quantize(Decimal('99.99')),

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block head_title%}
+Solar Estates - DASHBOARD
+{% endblock%}
+{% block content %}
+<section style="background-color: #eee;">
+  <div class="container py-5">
+    {% include "snippets/factory_card.html"%}
+    <div class="row justify-content-center mb-3">
+      <div class="col-md-12 col-xl-10">
+            <table class="table table-striped custom-table">
+                <tbody>
+                <tr>
+                    <td> Начална дата </td>
+                    <td>  {{listing.start_date}}</td>
+                    <td> </td>
+                </tr>
+                <tr>
+                    <td> Продължителност </td>
+                    <td> {{listing.duration}} </td>
+                    <td> месеца </td>
+                </tr>
+                <tr>
+                    <td> Общо предложени на платформата </td>
+                    <td> {{listing.amount}} </td>
+                    <td> лв </td>
+                </tr>
+                <tr>
+                    <td> Общ дял от централата </td>
+                    <td> {{listing.persent_from_profit}} </td>
+                    <td> % </td>
+                </tr>
+                <tr>
+                    <td> Комисионна в за платформата </td>
+                    <td> {{listing.commision}} </td>
+                    <td> % </td>
+                </tr>
+                <tr>
+                    <td> Цена на kW от капацитета </td>
+                    <td> {{listing.price_per_kw}} </td>
+                    <td> лв </td>
+                </tr>
+                <tbody>
+            </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock content %}
