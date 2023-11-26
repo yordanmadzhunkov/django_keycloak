@@ -10,7 +10,8 @@ def view_dashboard(request):
     context = common_context(request)
     if request.user:
         context['my_legal_entity'] = find_legal_entity(user=request.user)
-        profile = get_user_profile(request.user)
-        my_investments = InvestementInListing.objects.filter(investor_profile=profile)
-        context['my_investments'] = my_investments
+        if request.user.is_authenticated:
+            profile = get_user_profile(request.user)
+            my_investments = InvestementInListing.objects.filter(investor_profile=profile)
+            context['my_investments'] = my_investments
     return render(request, "dashboard.html", context)
