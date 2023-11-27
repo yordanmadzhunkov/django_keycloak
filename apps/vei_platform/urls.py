@@ -13,7 +13,7 @@ from .views.electricity_prices import view_electricity_prices
 from .views.loan import view_bank_loan_detail
 from .views.bank_account import view_bank_accounts, view_verify_bank_account, view_deposit_bank_account, view_withdraw_bank_account
 from .views.scriping_tools import view_scriping_tools
-from .views.invest import view_investment_opportunity
+from .views.invest import view_investment_opportunity, view_investment
 
 urlpatterns = [
     path('', view_home, name="home"),
@@ -25,6 +25,7 @@ urlpatterns = [
     path('profile/<int:pk>', view_user_profile, name='user_profile'),
     path('invest/', view_offered_factories_paganated, name='invest'),
     path('invest/<int:pk>', view_investment_opportunity, name='invest_opportunity'),
+    path('investment/<int:pk>', view_investment, name='view_investment'),
     path('factory/', view_my_factories, name='my_factories'),
     path('factory/<int:pk>', view_factory_detail, name='view_factory'),
     path('factory/add', view_add_factory, name='view_add_factory'),

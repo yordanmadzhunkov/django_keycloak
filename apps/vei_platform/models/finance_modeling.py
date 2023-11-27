@@ -261,7 +261,9 @@ class FactoryListing(models.Model):
         return len(FactoryListing.objects.filter(factory=factory)) > 0
     
     def total_amount_interested(self):
-        total = InvestementInListing.objects.filter(listing=self).aggregate(total=models.Sum(models.F('amount')))
+        total = InvestementInListing.objects.filter(listing=self, status='IN').aggregate(total=models.Sum(models.F('amount')))
+        if total['total'] is None:
+            total['total'] = Decimal(0)
         r = Decimal(100) * (total['total'] / self.amount)
         if r > Decimal(100):
             r = Decimal(100)
@@ -300,7 +302,23 @@ class InvestementInListing(models.Model):
         if self.status == InvestementInListing.InvestementStatus.COMPLETED:
             return 'Завършен'
         return 'Unknown'
-        
+    
+
+    def status_color(self):
+        if self.status == InvestementInListing.InvestementStatus.INTERESTED:
+            return 'blue'
+        if self.status == InvestementInListing.InvestementStatus.CANCELED:
+            return 'red'
+        if self.status == InvestementInListing.InvestementStatus.COMPLETED:
+            return 'green'
+        return 'blue'
+    
+    def show_link_in_dashboard(self):
+        return self.status != InvestementInListing.InvestementStatus.CANCELED
+
+    def get_absolute_url(self):
+        return "/investment/%s" % self.pk
+       
     
 class FinancialPlan(models.Model):
     name = models.TextField()

@@ -1,7 +1,7 @@
 from django import forms
 from datetime import date, datetime
 from .models.factory import FactoryProductionPlan, ElectricityFactory
-from .models.finance_modeling import ElectricityPricePlan, BankLoan, BankAccount, BankTransaction
+from .models.finance_modeling import ElectricityPricePlan, BankLoan, BankAccount, BankTransaction, InvestementInListing
 from .models.profile import UserProfile
 from .models.legal import LegalEntity, find_legal_entity
 from .models.platform import platform_bank_accounts
@@ -403,7 +403,7 @@ class FactoryListingForm(forms.Form):
                                         )
                                  )
     
-class DecalareInterestListingForm(forms.Form):
+class CreateInvestmentForm(forms.Form):
     amount = forms.DecimalField(label='Инвестиция',
                                 help_text='Общата сума, която искате да ивестирате в централата',
                                         initial=1000,
@@ -414,7 +414,7 @@ class DecalareInterestListingForm(forms.Form):
                                             }
                                         ))
     def __init__(self, *args, **kwargs):
-        super(DecalareInterestListingForm, self).__init__(*args, **kwargs)
+        super(CreateInvestmentForm, self).__init__(*args, **kwargs)
         # If you pass FormHelper constructor a form instance
         # It builds a default layout with all its fields
         self.helper = FormHelper(self)
@@ -425,6 +425,30 @@ class DecalareInterestListingForm(forms.Form):
             ),
             Submit('add', 'Заяви интерес')
         )
+
+class EditInvestmentForm(forms.ModelForm):
+    class Meta:
+        model = InvestementInListing
+        fields = ('amount',)
+    
+    def __init__(self, *args, **kwargs):
+        super(EditInvestmentForm, self).__init__(*args, **kwargs)
+        # If you pass FormHelper constructor a form instance
+        # It builds a default layout with all its fields
+        self.helper = FormHelper(self)
+        cancel = Submit('cancel', 'Отмяна')
+        cancel.field_classes = 'btn btn-danger'
+        save = Submit('save', 'Запази')
+        save.field_classes = 'btn btn-warning'
+        self.helper.layout = Layout(
+            Row(
+                Column('amount', css_class='form-group'),
+                css_class='form-row'
+            ),
+            save,
+            cancel,
+        )
+
 
 class CustomImageField(Field):
     template = 'layout/image_thumbnail.html'
