@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 # Create your models here.
 from decimal import Decimal
-from datetime import date
+from datetime import date, datetime
 from django.core.validators import MaxValueValidator, MinValueValidator
 from .factory import ElectricityFactory, FactoryProductionPlan
 from .legal import LegalEntity
@@ -269,6 +269,38 @@ class FactoryListing(models.Model):
             r = Decimal(100)
         total['percent'] = r.quantize(Decimal('1')) 
         return total
+    
+    def count_investitors(self):
+        return InvestementInListing.objects.filter(listing=self, status='IN').count()
+
+    def get_absolute_url(self):
+        return "/invest/%s" % self.pk        
+    
+    def status_str(self, now=datetime.now()):
+        if now < datetime(year=self.start_date.year,
+                          month=self.start_date.month,
+                          day=self.start_date.day,
+                          hour=8, minute=0, second=0):
+            return 'Активен'
+        return 'Неясно'
+    
+    def get_investors(self, show_users):
+        investors = InvestementInListing.objects.filter(listing=self)
+        res = []
+        count = 1
+        for investor in investors:
+            res.append({
+                'status': investor.status_str(),
+                'amount': investor.amount,
+                'user_profile': ("Инвеститор %d" % count) if not show_users else investor.investor_profile.get_display_name(),
+                'user_profile_link': '' if not show_users else investor.investor_profile.get_href(),
+                'user_profile_avatar': '/static/img/undraw_profile.svg' if not show_users else investor.investor_profile.get_avatar_url(),
+            })
+            count = count + 1
+        return res
+
+        
+        
     
 
 class InvestementInListing(models.Model):

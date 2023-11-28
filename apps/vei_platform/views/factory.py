@@ -3,7 +3,7 @@ from django.core.paginator import Paginator
 from . import common_context
 from vei_platform.models.factory import ElectricityFactory, FactoryProductionPlan, ElectricityWorkingHoursPerMonth
 from vei_platform.models.finance_modeling import FactoryListing
-from vei_platform.models.finance_modeling import ElectricityPricePlan, BankLoan
+from vei_platform.models.finance_modeling import ElectricityPricePlan, BankLoan, FactoryListing
 from vei_platform.models.profile import get_user_profile
 from vei_platform.forms import FactoryListingForm, FactoryFinancialPlaningForm, FactoryModelForm
 
@@ -163,6 +163,8 @@ def view_factory_offer_shares(request, pk=None):
 def view_factory_detail(request, pk=None):
     context = common_context(request)
     factory = ElectricityFactory.objects.get(pk=pk)
+    listings = FactoryListing.objects.filter(factory=factory)
+    context['listings'] = listings
     context['factory'] = ElectricityFactory.objects.get(pk=pk)
     context['production_plans'] = FactoryProductionPlan.objects.filter(
         factory=factory)

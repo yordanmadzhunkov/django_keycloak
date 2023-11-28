@@ -5,7 +5,17 @@
 {% block content %}
 <section style="background-color: #eee;">
   <div class="container py-5">
-    {% include "factory_header.html" %}
+    {% include "snippets/factory_card.html"%}
+  </div>
+</section>
+<section style="background-color: #eee;">
+  <div class="container py-5">
+    {% include "factory_listings.html" %}
+  </div>
+</section>
+
+<section style="background-color: #eee;">
+  <div class="container py-5">
     <form method="post">
       <table>
         {% csrf_token %}

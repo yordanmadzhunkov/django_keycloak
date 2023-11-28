@@ -40,6 +40,7 @@ def view_investment_opportunity(request, pk):
     context['show_invest_form'] = True
     context['factory'] = factory
     context['listing'] = listing
+    context['investors'] = listing.get_investors(show_users=True)
     context['invest_form'] = form
     return render(request, "invest_listing.html", context)
 

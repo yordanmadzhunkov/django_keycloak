@@ -48,5 +48,36 @@ Solar Estates - DASHBOARD
     </div>
 
   </div>
+
+  <div class="container py-5">
+    <div class="row justify-content-center mb-3">
+        <h2 class="text-center" >Инвеститори</h2>
+
+  <div class="col-md-12 col-xl-10">
+    <table class="table table-striped custom-table table-secondary table-bordered">
+        <thead>
+            <th> Статус</th>
+            <th> Сума </th>
+            <th> Аватар</th>
+            <th> Инвестирор</th>
+        </thead>
+        <tbody>
+            {% for investment in investors %}
+          <tr>
+            <td>{{ investment.status }}</td>
+            <td>{{ investment.amount }}</td>
+            <td>
+                <img class="img-profile rounded-circle topbar nav-item nav-link " src={{ investment.user_profile_avatar }}>
+              </td>
+            <td> <a href={{ investment.user_profile_link }}> {{ investment.user_profile }} </a> </td>
+
+          </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
 </section>
 {% endblock content %}
