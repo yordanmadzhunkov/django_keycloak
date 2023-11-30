@@ -279,7 +279,7 @@ class Campaign(models.Model):
 
 
     def total_amount_interested(self):
-        total = InvestementInCampaign.objects.filter(listing=self, status='IN').aggregate(total=models.Sum(models.F('amount')))
+        total = InvestementInCampaign.objects.filter(campaign=self, status='IN').aggregate(total=models.Sum(models.F('amount')))
         if total['total'] is None:
             total['total'] = Decimal(0)
         r = Decimal(100) * (total['total'] / self.amount)
@@ -289,7 +289,7 @@ class Campaign(models.Model):
         return total
     
     def count_investitors(self):
-        return InvestementInCampaign.objects.filter(listing=self, status='IN').count()
+        return InvestementInCampaign.objects.filter(campaign=self, status='IN').count()
 
     def get_absolute_url(self):
         return "/campaign/%s" % self.pk        
@@ -303,7 +303,7 @@ class Campaign(models.Model):
         return 'Неясно'
     
     def get_investors(self, show_users):
-        investors = InvestementInCampaign.objects.filter(listing=self)
+        investors = InvestementInCampaign.objects.filter(campaign=self)
         res = []
         count = 1
         for investor in investors:
@@ -329,7 +329,7 @@ class InvestementInCampaign(models.Model):
         
     #name = models.CharField(max_length=128)
     investor_profile = models.ForeignKey(UserProfile, null=False, blank=False, on_delete=models.DO_NOTHING)
-    listing = models.ForeignKey(
+    campaign = models.ForeignKey(
         Campaign, null=True, blank=True, default=None, on_delete=models.DO_NOTHING)
     amount = models.DecimalField(
         default=10000, max_digits=12, decimal_places=2)
@@ -341,7 +341,7 @@ class InvestementInCampaign(models.Model):
     )
     
     def share_from_factory(self):
-        return ((self.amount * self.listing.persent_from_profit)/ self.listing.amount).quantize(Decimal('.01'))
+        return ((self.amount * self.campaign.persent_from_profit)/ self.campaign.amount).quantize(Decimal('.01'))
     
     
     def status_str(self):
@@ -366,8 +366,6 @@ class InvestementInCampaign(models.Model):
     def show_link_in_dashboard(self):
         return self.status != InvestementInCampaign.Status.CANCELED
 
-    def get_absolute_url(self):
-        return "/investment/%s" % self.pk
        
     
 class FinancialPlan(models.Model):

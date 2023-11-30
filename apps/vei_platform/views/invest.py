@@ -13,7 +13,90 @@ from decimal import Decimal#, DecimalException
 #from django import template
 
 
-def view_investment_opportunity(request, pk):
+def view_campaign_as_manager(request, pk, context, campaign, factory):
+    form = CampaingEditForm()
+    if request.method == 'POST':
+        if 'cancel' in request.POST:
+            form = CampaingEditForm(request.POST)
+            campaign.status = Campaign.Status.CANCELED;
+            campaign.save()
+            messages.success(request, "Кампанияте беше прекратена")
+
+        if 'complete' in request.POST:
+            form = CampaingEditForm(request.POST)
+            if campaign.total_amount_interested()['percent'] >= Decimal(100):
+                campaign.status = Campaign.Status.COMPLETED;
+                campaign.save()
+                messages.success(request, "Приключване")
+            else:
+                messages.error(request, "Все още няма достатъчно предварителен интерес от инвеститорите")
+
+    context['show_invest_form'] = True
+    context['factory'] = factory
+    context['campaign'] = campaign
+    context['investors'] = campaign.get_investors(show_users=True)
+    context['invest_form'] = form
+    return render(request, "campaign.html", context)
+
+
+def view_campaign_as_investor(request, pk, context, campaign, factory):
+    profile = get_user_profile(request.user)        
+    my_investments = InvestementInCampaign.objects.filter(campaign=campaign, 
+                                                          investor_profile=profile, 
+                                                          status=InvestementInCampaign.Status.INTERESTED)
+    if len(my_investments) == 0:
+        form = CreateInvestmentForm()
+        if request.method == 'POST':
+            if 'invest' in request.POST:
+                form = CreateInvestmentForm(request.POST)
+                if form.is_valid():
+                    amount = form.cleaned_data['amount']
+                    investment = InvestementInCampaign(
+                                amount= amount,
+                                campaign=campaign,
+                                investor_profile=profile,
+                                status=InvestementInCampaign.Status.INTERESTED
+                    )
+                    investment.save()
+                    form = EditInvestmentForm(instance=investment)
+
+                    messages.success(request, "Заявихте инвестиционнен интерес в размер на %d в %s" % (amount, factory.name))
+                else:
+                    messages.error(request, "Невалидни данни, моля опитайте отново")        
+    else:
+        form = EditInvestmentForm(instance=my_investments[0])
+        if request.method == 'POST':
+            if 'cancel' in request.POST:
+                my_investments[0].status = InvestementInCampaign.Status.CANCELED
+                my_investments[0].save()
+                messages.success(request, "Инвестиционния ви интерес беше отменен")
+                form = CreateInvestmentForm()
+
+                
+            if 'save' in request.POST:
+                form = EditInvestmentForm(request.POST)
+                if form.is_valid():
+                    my_investments[0].amount = form.cleaned_data['amount']
+                    my_investments[0].save()
+                    messages.success(request, "Инвестиционния ви интерес беше променен на %d" % my_investments[0].amount)
+                else:
+                    messages.error(request, "Възникна грешка при промяна на сумата")
+
+    context['show_invest_form'] = True
+    context['factory'] = factory
+    context['campaign'] = campaign
+    context['investors'] = campaign.get_investors(show_users=False)
+    context['invest_form'] = form
+    return render(request, "campaign.html", context)
+    
+    
+    
+    return render(request, "campaign.html", context)
+
+def vire_campaign_as_anon(request, pk, context, campaign, factory):
+    return render(request, "campaign.html", context)
+
+def view_campaign(request, pk):
     context = common_context(request)
     campaign = Campaign.objects.get(pk=pk)
     factory = campaign.factory
@@ -21,57 +104,21 @@ def view_investment_opportunity(request, pk):
     if request.user:
         if request.user.is_authenticated:
             is_manager = factory.get_manager_profile() == get_user_profile(request.user)
-            if request.method == 'POST':
-                print(request.POST)
-                if 'invest' in request.POST:
-                    form = CreateInvestmentForm(request.POST)
-                    if form.is_valid():
-                        amount = form.cleaned_data['amount']
-                        profile = get_user_profile(request.user)        
-                        investment = InvestementInCampaign(
-                            amount= amount,
-                            listing=campaign,
-                            investor_profile=profile,
-                            status=InvestementInCampaign.Status.INTERESTED
-                        )
-                        investment.save()
-                        messages.success(request, "Заявихте инвестиционнен интерес в размер на %d в %s" % (amount, factory.name))
-                    else:
-                        messages.error(request, "Невалидни данни, моля опитайте отново")
-
-                if 'cancel' in request.POST:
-                    form = CampaingEditForm(request.POST)
-                    campaign.status = Campaign.Status.CANCELED;
-                    campaign.save()
-                    messages.success(request, "Кампанияте беше прекратена")
-
-                if 'complete' in request.POST:
-                    form = CampaingEditForm(request.POST)
-                    if campaign.total_amount_interested()['percent'] >= Decimal(100):
-                        campaign.status = Campaign.Status.COMPLETED;
-                        campaign.save()
-                        messages.success(request, "Приключване")
-                    else:
-                        messages.error(request, "Все още няма достатъчно предварителен интерес от инвеститорите")
+            if is_manager:
+                return view_campaign_as_manager(request, pk, context, campaign, factory)
+            else:
+                return view_campaign_as_investor(request, pk, context, campaign, factory)
+    return vire_campaign_as_anon(request, pk, context, campaign, factory)
 
 
-
-    if form is None:
-        form = CampaingEditForm() if is_manager else CreateInvestmentForm()
-    context['show_invest_form'] = True
-    context['factory'] = factory
-    context['campaign'] = campaign
-    context['investors'] = campaign.get_investors(show_users=True)
-    context['invest_form'] = form
-    return render(request, "invest_listing.html", context)
 
 
 @login_required(login_url='/oidc/authenticate/')
 def view_investment(request, pk):
     context = common_context(request)
     investment = InvestementInCampaign.objects.get(pk=pk)
-    context['factory'] = investment.listing.factory
-    context['listing'] = investment.listing
+    context['factory'] = investment.campaign.factory
+    context['campaign'] = investment.campaign
     context['investment'] = investment
     context['show_invest_form'] = True
     if request.method == "POST":
@@ -94,6 +141,6 @@ def view_investment(request, pk):
                 messages.error(request, 'Не може да се откажете от инвестицията в този етап')
     
     if investment.status == InvestementInCampaign.Status.CANCELED:
-        return redirect('campaign', pk=investment.listing.pk)
+        return redirect('campaign', pk=investment.campaign.pk)
     context['invest_form'] = EditInvestmentForm(instance=investment)
     return render(request, "investment.html", context)
