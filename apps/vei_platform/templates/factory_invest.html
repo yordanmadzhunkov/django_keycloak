@@ -17,7 +17,7 @@ Solar Estates - DASHBOARD
           <th>Available</th>
           <th>Price per kW</th>
         </thead>
-        {%for item in listings %}
+        {%for item in campaigns %}
         <tr class="bg-light">
           <td>{{item.start_date}}</td>
           <td>{{item.amount}}</td>
@@ -46,7 +46,7 @@ Solar Estates - DASHBOARD
           <td> <input type="submit" value="take" name="_become_manager" class="btn btn-secondary btn-sm"> </td>
           {% endif%}
         </tr>
-        <div>{{create_listing_form}}</div>
+        <div>{{new_campaign_form}}</div>
         <td></td>
         <td></td>
 

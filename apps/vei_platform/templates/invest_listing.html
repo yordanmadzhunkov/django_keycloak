@@ -10,40 +10,45 @@ Solar Estates - DASHBOARD
     {% include "snippets/factory_card.html"%}
     <div class="row justify-content-center mb-3">
       <div class="col-md-12 col-xl-10">
-            <table class="table table-striped custom-table">
-                <tbody>
-                <tr>
-                    <td> Начална дата </td>
-                    <td>  {{listing.start_date}}</td>
-                    <td> </td>
-                </tr>
-                <tr>
-                    <td> Продължителност </td>
-                    <td> {{listing.duration}} </td>
-                    <td> месеца </td>
-                </tr>
-                <tr>
-                    <td> Общо предложени на платформата </td>
-                    <td> {{listing.amount}} </td>
-                    <td> лв </td>
-                </tr>
-                <tr>
-                    <td> Общ дял от централата </td>
-                    <td> {{listing.persent_from_profit}} </td>
-                    <td> % </td>
-                </tr>
-                <tr>
-                    <td> Комисионна в за платформата </td>
-                    <td> {{listing.commision}} </td>
-                    <td> % </td>
-                </tr>
-                <tr>
-                    <td> Цена на kW от капацитета </td>
-                    <td> {{listing.price_per_kw}} </td>
-                    <td> лв </td>
-                </tr>
-                <tbody>
-            </table>
+        <table class="table table-striped custom-table">
+          <tbody>
+            <tr>
+              <td> Статус </td>
+              <td> {{campaign.status_str}}</td>
+              <td> </td>
+            </tr>
+            <tr>
+              <td> Начална дата </td>
+              <td> {{campaign.start_date}}</td>
+              <td> </td>
+            </tr>
+            <tr>
+              <td> Продължителност </td>
+              <td> {{campaign.duration}} </td>
+              <td> месеца </td>
+            </tr>
+            <tr>
+              <td> Общо предложени на платформата </td>
+              <td> {{campaign.amount}} </td>
+              <td> лв </td>
+            </tr>
+            <tr>
+              <td> Общ дял от централата </td>
+              <td> {{campaign.persent_from_profit}} </td>
+              <td> % </td>
+            </tr>
+            <tr>
+              <td> Комисионна в за платформата </td>
+              <td> {{campaign.commision}} </td>
+              <td> % </td>
+            </tr>
+            <tr>
+              <td> Цена на kW от капацитета </td>
+              <td> {{campaign.price_per_kw}} </td>
+              <td> лв </td>
+            </tr>
+          <tbody>
+        </table>
       </div>
     </div>
 
@@ -51,33 +56,34 @@ Solar Estates - DASHBOARD
 
   <div class="container py-5">
     <div class="row justify-content-center mb-3">
-        <h2 class="text-center" >Инвеститори</h2>
+      <h2 class="text-center">Инвеститори</h2>
 
-  <div class="col-md-12 col-xl-10">
-    <table class="table table-striped custom-table table-secondary table-bordered">
-        <thead>
+      <div class="col-md-12 col-xl-10">
+        <table class="table table-striped custom-table table-secondary table-bordered">
+          <thead>
             <th> Статус</th>
             <th> Сума </th>
             <th> Аватар</th>
             <th> Инвестирор</th>
-        </thead>
-        <tbody>
+          </thead>
+          <tbody>
             {% for investment in investors %}
-          <tr>
-            <td>{{ investment.status }}</td>
-            <td>{{ investment.amount }}</td>
-            <td>
-                <img class="img-profile rounded-circle topbar nav-item nav-link " src={{ investment.user_profile_avatar }}>
+            <tr>
+              <td>{{ investment.status }}</td>
+              <td>{{ investment.amount }}</td>
+              <td>
+                <img class="img-profile rounded-circle topbar nav-item nav-link"
+                  src="{{ investment.user_profile_avatar}}">
               </td>
-            <td> <a href={{ investment.user_profile_link }}> {{ investment.user_profile }} </a> </td>
+              <td> <a href={{ investment.user_profile_link }}> {{ investment.user_profile }} </a> </td>
 
-          </tr>
+            </tr>
             {% endfor %}
-        </tbody>
-    </table>
-</div>
-</div>
-</div>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
 </section>
 {% endblock content %}

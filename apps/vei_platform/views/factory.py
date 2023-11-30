@@ -2,8 +2,8 @@ from django.core.paginator import Paginator
 
 from . import common_context
 from vei_platform.models.factory import ElectricityFactory, FactoryProductionPlan, ElectricityWorkingHoursPerMonth
-from vei_platform.models.finance_modeling import FactoryListing
-from vei_platform.models.finance_modeling import ElectricityPricePlan, BankLoan, FactoryListing
+from vei_platform.models.finance_modeling import Campaign
+from vei_platform.models.finance_modeling import ElectricityPricePlan, BankLoan, Campaign
 from vei_platform.models.profile import get_user_profile
 from vei_platform.forms import FactoryListingForm, FactoryFinancialPlaningForm, FactoryModelForm
 
@@ -17,10 +17,10 @@ from django import template
 
 
 def view_offered_factories():
-    listings = FactoryListing.objects.order_by('factory')
+    campaigns = Campaign.objects.order_by('factory')
     prev = None
     listed = []
-    for l in listings:
+    for l in campaigns:
         if prev != l.factory.pk:
             #print(l.factory.name)
             listed.append(l.factory.pk)
@@ -97,30 +97,40 @@ def view_all_factories_paganated(request):
     context['factory_list_title'] = 'Електроцентали от възобновяеми източници на енергия'
     return render(request, "factories_list.html", context)
 
+def view_campaign_active(request, pk):
+    context = common_context(request)
+    factory = ElectricityFactory.objects.get(pk=pk)
+    campaign = Campaign.get_active(factory)
+    if campaign:
+        return redirect(campaign.get_absolute_url())
+    return render(request, "campaign_create.html", context)
+
+
+
 @login_required(login_url='/oidc/authenticate/')
-def view_factory_offer_shares(request, pk=None):
+def view_campaign_create(request, pk=None):
     context = common_context(request)
     factory = ElectricityFactory.objects.get(pk=pk)
     context['factory'] = factory
     context['manager_profile'] = None if factory.manager is None else get_user_profile(factory.manager)
-    context['factory_is_listed'] = FactoryListing.is_listed(factory)
+    context['factory_is_listed'] = Campaign.is_listed(factory)
 
-    listings = FactoryListing.objects.filter(factory=factory)
+    campaigns = Campaign.objects.filter(factory=factory)
     total_amount = Decimal(0)
     total_listed_persent = Decimal(0)
     total_available = Decimal(0)
-    for listing in listings:
-        total_amount += listing.amount
-        total_listed_persent += listing.persent_from_profit
+    for campaign in campaigns:
+        total_amount += campaign.amount
+        total_listed_persent += campaign.persent_from_profit
         total_available += 0
 
-    context['listings_total'] = {
+    context['campaigns_total'] = {
         'amount': total_amount,
         'available': total_available,
         'listed': total_listed_persent,
     }
 
-    context['listings'] = listings
+    context['campaigns'] = campaigns
 
     if context['manager_profile']:
         capacity = factory.get_capacity_in_kw()
@@ -142,7 +152,7 @@ def view_factory_offer_shares(request, pk=None):
             start_date = form.cleaned_data['start_date']
             duration = form.cleaned_data['duration']
             commision = form.cleaned_data['commision']
-            listing = FactoryListing(
+            campaign = Campaign(
                     start_date=start_date, 
                     amount=Decimal(amount).quantize(Decimal('1.')), 
                     persent_from_profit=Decimal(persent_from_profit).quantize(Decimal('99.99')),
@@ -150,21 +160,21 @@ def view_factory_offer_shares(request, pk=None):
                     commision=Decimal(commision).quantize(Decimal('99.99')),
                     factory=factory
             )
-            listing.save()
+            campaign.save()
             messages.success(request, "You listed your factory")
         else:
             messages.error(request, "Form is not valid, please retry")
 
-    context['create_listing_form'] = form
-    return render(request, "factory_offer_shares.html", context)
+    context['new_campaign_form'] = form
+    return render(request, "campaign_create.html", context)
 
 
 @login_required(login_url='/oidc/authenticate/')
 def view_factory_detail(request, pk=None):
     context = common_context(request)
     factory = ElectricityFactory.objects.get(pk=pk)
-    listings = FactoryListing.objects.filter(factory=factory)
-    context['listings'] = listings
+    campaigns = Campaign.objects.filter(factory=factory)
+    context['campaigns'] = campaigns
     context['factory'] = ElectricityFactory.objects.get(pk=pk)
     context['production_plans'] = FactoryProductionPlan.objects.filter(
         factory=factory)

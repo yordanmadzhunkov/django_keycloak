@@ -3,107 +3,113 @@
 
 
 <div class="row justify-content-center mb-3">
-    <div class="col-md-12 col-xl-10">
-      <div class="card shadow-0 border rounded-3">
-        <div class="card-body">
-          <div class="row">
-            <div class="col-md-12 col-lg-3 col-xl-3 mb-4 mb-lg-0">
-              <div class="bg-image hover-zoom ripple rounded ripple-surface">
-                <img src="{{ factory.get_image_url }}" class="img-fluid img-thumbnail" />
-                <a href="#!">
-                  <div class="hover-overlay">
-                    <div class="mask" style="background-color: rgba(253, 253, 253, 0.15);"></div>
-                  </div>
-                </a>
-              </div>
-            </div>
-            <div class="col-md-6 col-lg-6 col-xl-6">
-              <h5><a href=/factory/{{factory.pk}}> {{ factory.name }}<a></h5>
-              <div class="d-flex flex-row">
-                <span> Manager:
-                  <a href={{factory.get_manager_profile.get_href}}>
-                    {{factory.get_manager_profile.get_display_name}}
-                  </a>
-                  <br />
-                </span>
-              </div>
-              <div class="mt-1 mb-0 text-muted small">
-                {% if factory.primary_owner %}
-                <span> Owner <a href="/entity/{{ factory.primary_owner.pk}}"> {{ factory.owner_name}} </a> <br /></span>
-                {% else %}
-                <span> Owner {{ factory.owner_name}} <br /></span>
-                <span> Tax ID {{ factory.tax_id }} <br /></span>
-                {% endif%}
-                <span>Location {{ factory.location}} <br /></span>
-                <span> Source {{ factory.get_factory_type_display}} <br /></span>
-                <span> Capacity {{ factory.capacity_in_mw }} MW <br /></span>
-                <span> Opened {{ factory.opened }} <br /></span>
-              </div>
-            </div>
-  
-            <div class="col-md-6 col-lg-3 col-xl-3 border-sm-start-none border-start">
-              {% if show_invest_form %}
-                {% if request.user.is_authenticated %}
-                  {% crispy invest_form %}
-                {% else %} <!--request.user.is_authenticated-->
-                <div class="row justify-content-center mb-3">
-                  <div class="col-md-12 col-xl-10 text-center">
-                  <hr>
-                  За да инвестирате е неободхимо да влезете във вашият профил. 
-                  <a href="{% url 'oidc_authentication_init' %}">Вход</a> тук.
-                  </div>
+  <div class="col-md-12 col-xl-10">
+    <div class="card shadow-0 border rounded-3">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-12 col-lg-3 col-xl-3 mb-4 mb-lg-0">
+            <div class="bg-image hover-zoom ripple rounded ripple-surface">
+              <img src="{{ factory.get_image_url }}" class="img-fluid img-thumbnail" />
+              <a href="#!">
+                <div class="hover-overlay">
+                  <div class="mask" style="background-color: rgba(253, 253, 253, 0.15);"></div>
                 </div>
-                {% endif %} <!--request.user.is_authenticated-->
-              {% else %} <!--show_invest_form-->
-                {% if factory|is_listed %}
-                  {% if request.user.is_authenticated %}
-                    <!-- Factory is listed, user is authenticated-->
-                    {% if factory.get_manager_profile == profile %}
-                    <div class="d-flex flex-column mt-4">
-                      <button class="btn btn-info" type="button"
-                        onclick="window.location.href='/factory/offer_shares/{{factory.pk}}';">Детайли за текущата кампания по инвестиране</button>
-                    </div>
-                    {% else %}<!--factory.get_manager_profile == profile-->
-                    <div class="text-success">
-                      <button class="btn btn-success" type="button"
-                        onclick="window.location.href='/invest/{{factory|get_active_listing_pk}}';">Инвестирай до 
-                        {{factory|total_amount_listed }} лв</button>
-                      <span><br /></span>
-                    </div>
-                    {% endif %}<!--factory.get_manager_profile == profile-->
-                  {% else %}<!--request.user.is_authenticated-->
-                  <!-- Factory is listed, user is NOT authenticated-->
-                  <div class="text-success">
-                    <button class="btn btn-success" type="button"
-                      onclick="window.location.href='/invest/{{factory|get_active_listing_pk}}';">Инвестирай до 
-                      {{factory|total_amount_listed }} лв</button>
-                    <span><br /></span>
-                  </div>
-                  {% endif%}<!--request.user.is_authenticated-->
-                {% else %} <!--factory|is_listed-->
-                  {% if request.user.is_authenticated %}
-                  <!-- Factory not listed, user is authenticated-->
-                    {% if factory.get_manager_profile == profile %}
-                    <div class="d-flex flex-column mt-4">
-                      <button class="btn btn-success" type="button"
-                        onclick="window.location.href='/factory/offer_shares/{{factory.pk}}';">Предложи за инвестиране</button>
-                    </div>
-                    {% else %}<!--factory.get_manager_profile == profile-->
-                      <div class="d-flex flex-row align-items-center mb-1">
-                      <h4 class="mb-1 me-1">В момента няма активна възможност за инвестиране</h4>
-                      </div>
-                    {% endif %}<!--factory.get_manager_profile == profile-->
-
-                  {% else %}<!--request.user.is_authenticated-->
-                    <div class="d-flex flex-row align-items-center mb-1">
-                      <h4 class="mb-1 me-1">В момента няма активна възможност за инвестиране</h4>
-                    </div>
-                  {% endif%}<!--request.user.is_authenticated-->
-                {%endif%} <!--factory|is_listed-->
-              {% endif %} <!--show_invest_form-->
+              </a>
             </div>
+          </div>
+          <div class="col-md-6 col-lg-6 col-xl-6">
+            <h5><a href={{factory.get_absolute_url}}> {{ factory.name }}<a></h5>
+            <div class="d-flex flex-row">
+              <span> Manager:
+                <a href={{factory.get_manager_profile.get_href}}>
+                  {{factory.get_manager_profile.get_display_name}}
+                </a>
+                <br />
+              </span>
+            </div>
+            <div class="mt-1 mb-0 text-muted small">
+              {% if factory.primary_owner %}
+              <span> Owner <a href="/entity/{{ factory.primary_owner.pk}}"> {{ factory.owner_name}} </a> <br /></span>
+              {% else %}
+              <span> Owner {{ factory.owner_name}} <br /></span>
+              <span> Tax ID {{ factory.tax_id }} <br /></span>
+              {% endif%}
+              <span>Location {{ factory.location}} <br /></span>
+              <span> Source {{ factory.get_factory_type_display}} <br /></span>
+              <span> Capacity {{ factory.capacity_in_mw }} MW <br /></span>
+              <span> Opened {{ factory.opened }} <br /></span>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-lg-3 col-xl-3 border-sm-start-none border-start">
+            {% if show_invest_form %}
+            {% if request.user.is_authenticated %}
+            {% crispy invest_form %}
+            {% else %} <!--request.user.is_authenticated-->
+            <div class="row justify-content-center mb-3">
+              <div class="col-md-12 col-xl-10 text-center">
+                <hr>
+                За да инвестирате е неободхимо да влезете във вашият профил.
+                <a href="{% url 'oidc_authentication_init' %}">Вход</a> тук.
+              </div>
+            </div>
+            {% endif %} <!--request.user.is_authenticated-->
+            {% else %} <!--show_invest_form-->
+            {% if factory|is_listed %}
+            {% if request.user.is_authenticated %}
+            <!-- Factory is listed, user is authenticated-->
+            {% if factory.get_manager_profile == profile %}
+            <div class="d-flex flex-column mt-4">
+              <a href="{% url 'campaign_active' pk=factory.pk %}">
+                <button class="btn btn-info" type="button">Текущата кампания за
+                  инвестиране</button>
+              </a>
+            </div>
+            {% else %}<!--factory.get_manager_profile == profile-->
+            <div class="text-success">
+              <a href="{% url 'campaign_active' pk=factory.pk %}">
+
+                <button class="btn btn-success" type="button">
+                  Инвестирай до {{factory|total_amount_listed }} лв
+                </button>
+              </a>
+            </div>
+            {% endif %}<!--factory.get_manager_profile == profile-->
+            {% else %}<!--request.user.is_authenticated-->
+            <!-- Factory is listed, user is NOT authenticated-->
+            <div class="text-success">
+              <a href="{% url 'campaign_active' pk=factory.pk %}">
+                <button class="btn btn-success" type="button">
+                  Инвестирай до {{factory|total_amount_listed }} лв
+                </button>
+              </a>
+            </div>
+            {% endif%}<!--request.user.is_authenticated-->
+            {% else %} <!--factory|is_listed-->
+            {% if request.user.is_authenticated %}
+            <!-- Factory not listed, user is authenticated-->
+            {% if factory.get_manager_profile == profile %}
+            <div class="d-flex flex-column mt-4">
+              <a href="{% url 'campaign_create' pk=factory.pk %}">
+                <button class="btn btn-success" type="button">Предложи за инвестиране</button>
+              </a>
+            </div>
+            {% else %}<!--factory.get_manager_profile == profile-->
+            <div class="d-flex flex-row align-items-center mb-1">
+              <h4 class="mb-1 me-1">В момента няма активна възможност за инвестиране</h4>
+            </div>
+            {% endif %}<!--factory.get_manager_profile == profile-->
+
+            {% else %}<!--request.user.is_authenticated-->
+            <div class="d-flex flex-row align-items-center mb-1">
+              <h4 class="mb-1 me-1">В момента няма активна възможност за инвестиране</h4>
+            </div>
+            {% endif%}<!--request.user.is_authenticated-->
+            {%endif%} <!--factory|is_listed-->
+            {% endif %} <!--show_invest_form-->
           </div>
         </div>
       </div>
     </div>
   </div>
+</div>

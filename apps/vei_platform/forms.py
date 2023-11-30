@@ -1,7 +1,7 @@
 from django import forms
 from datetime import date, datetime
 from .models.factory import FactoryProductionPlan, ElectricityFactory
-from .models.finance_modeling import ElectricityPricePlan, BankLoan, BankAccount, BankTransaction, InvestementInListing
+from .models.finance_modeling import ElectricityPricePlan, BankLoan, BankAccount, BankTransaction, InvestementInCampaign
 from .models.profile import UserProfile
 from .models.legal import LegalEntity, find_legal_entity
 from .models.platform import platform_bank_accounts
@@ -423,12 +423,31 @@ class CreateInvestmentForm(forms.Form):
                 Column('amount', css_class='form-group'),
                 css_class='form-row'
             ),
-            Submit('add', 'Заяви интерес')
+            Submit('invest', 'Заяви интерес')
+        )
+
+class CampaingEditForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super(CampaingEditForm, self).__init__(*args, **kwargs)
+        # If you pass FormHelper constructor a form instance
+        # It builds a default layout with all its fields
+        self.helper = FormHelper(self)
+        cancel = Submit('cancel', 'Отмяна')
+        cancel.field_classes = 'btn btn-danger'
+        complete = Submit('complete', 'Завърши')
+        complete.field_classes = 'btn btn-success'
+        self.helper.layout = Layout(
+            Row(
+                Column('amount', css_class='form-group'),
+                css_class='form-row'
+            ),
+            complete,
+            cancel,
         )
 
 class EditInvestmentForm(forms.ModelForm):
     class Meta:
-        model = InvestementInListing
+        model = InvestementInCampaign
         fields = ('amount',)
     
     def __init__(self, *args, **kwargs):

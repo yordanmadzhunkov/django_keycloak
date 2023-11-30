@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block head_title%}
+Solar Estates - DASHBOARD
+{% endblock%}
+{% block content %}
+<section style="background-color: #eee;">
+  <div class="container py-5">
+    {% include "snippets/factory_card.html"%}
+    {% if factory_is_listed %}
+    {% include "campaigns.html" %}
+    {% else %}
+
+    <div class="row justify-content-center mb-3">
+      <div class="col-md-12 col-xl-10">
+        <form method="post">
+          <table class="table align-middle mb-0 bg-white">
+            {% csrf_token %}
+            <div>{{new_campaign_form}}</div>
+            <td>
+              <input type="submit" value="Предложи на инвестирорите" name="_do_it" class="btn btn-primary btn-sm">
+            </td>
+          </table>
+        </form>
+      </div>
+    </div>
+
+    {% endif %}
+
+
+
+
+  </div>
+</section>
+
+
+
+{% endblock content %}

@@ -244,7 +244,12 @@ class BankLoanInterest(models.Model):
     loan = models.ForeignKey(BankLoan, on_delete=models.CASCADE)
 
 
-class FactoryListing(models.Model):
+class Campaign(models.Model):
+    class Status(models.TextChoices):
+        INITIALIZED = 'UN', ('Under review')
+        ACTIVE = 'Ac', ('Active')
+        CANCELED = 'CA', ('Canceled')
+        COMPLETED = 'CO', ('Completed')
     start_date = models.DateField()
     amount = models.DecimalField(max_digits=16, decimal_places=2)
     persent_from_profit = models.DecimalField(max_digits=4, decimal_places=2)
@@ -252,16 +257,29 @@ class FactoryListing(models.Model):
     commision = models.DecimalField(
         default=1.5, max_digits=4, decimal_places=2)
     factory = models.ForeignKey(ElectricityFactory, null=True, blank=True, on_delete=models.DO_NOTHING)
-
+    status = models.CharField(
+        max_length=2,
+        choices=Status.choices,
+        default=Status.INITIALIZED,
+    )
     def price_per_kw(self):
         return Decimal(self.amount / (self.factory.get_capacity_in_kw() * self.persent_from_profit * Decimal('0.01'))).quantize(Decimal('1.00'))
         
     @staticmethod
     def is_listed(factory):
-        return len(FactoryListing.objects.filter(factory=factory)) > 0
+        return len(Campaign.objects.filter(factory=factory)) > 0
     
+    @staticmethod
+    def get_active(factory):
+        campaigns = Campaign.objects.filter(factory=factory)
+        for c in campaigns:
+            if c.status == Campaign.Status.ACTIVE or c.status == Campaign.Status.INITIALIZED:
+                return c
+        return None
+
+
     def total_amount_interested(self):
-        total = InvestementInListing.objects.filter(listing=self, status='IN').aggregate(total=models.Sum(models.F('amount')))
+        total = InvestementInCampaign.objects.filter(listing=self, status='IN').aggregate(total=models.Sum(models.F('amount')))
         if total['total'] is None:
             total['total'] = Decimal(0)
         r = Decimal(100) * (total['total'] / self.amount)
@@ -271,10 +289,10 @@ class FactoryListing(models.Model):
         return total
     
     def count_investitors(self):
-        return InvestementInListing.objects.filter(listing=self, status='IN').count()
+        return InvestementInCampaign.objects.filter(listing=self, status='IN').count()
 
     def get_absolute_url(self):
-        return "/invest/%s" % self.pk        
+        return "/campaign/%s" % self.pk        
     
     def status_str(self, now=datetime.now()):
         if now < datetime(year=self.start_date.year,
@@ -285,7 +303,7 @@ class FactoryListing(models.Model):
         return 'Неясно'
     
     def get_investors(self, show_users):
-        investors = InvestementInListing.objects.filter(listing=self)
+        investors = InvestementInCampaign.objects.filter(listing=self)
         res = []
         count = 1
         for investor in investors:
@@ -303,8 +321,8 @@ class FactoryListing(models.Model):
         
     
 
-class InvestementInListing(models.Model):
-    class InvestementStatus(models.TextChoices):
+class InvestementInCampaign(models.Model):
+    class Status(models.TextChoices):
         INTERESTED = 'IN', ('Interested')
         CANCELED = 'CA', ('Canceled')
         COMPLETED = 'CO', ('Completed')
@@ -312,14 +330,14 @@ class InvestementInListing(models.Model):
     #name = models.CharField(max_length=128)
     investor_profile = models.ForeignKey(UserProfile, null=False, blank=False, on_delete=models.DO_NOTHING)
     listing = models.ForeignKey(
-        FactoryListing, null=True, blank=True, default=None, on_delete=models.DO_NOTHING)
+        Campaign, null=True, blank=True, default=None, on_delete=models.DO_NOTHING)
     amount = models.DecimalField(
         default=10000, max_digits=12, decimal_places=2)
 
     status = models.CharField(
         max_length=2,
-        choices=InvestementStatus.choices,
-        default=InvestementStatus.INTERESTED,
+        choices=Status.choices,
+        default=Status.INTERESTED,
     )
     
     def share_from_factory(self):
@@ -327,26 +345,26 @@ class InvestementInListing(models.Model):
     
     
     def status_str(self):
-        if self.status == InvestementInListing.InvestementStatus.INTERESTED:
+        if self.status == InvestementInCampaign.Status.INTERESTED:
             return 'Заявен интерес'
-        if self.status == InvestementInListing.InvestementStatus.CANCELED:
+        if self.status == InvestementInCampaign.Status.CANCELED:
             return 'Отменен'
-        if self.status == InvestementInListing.InvestementStatus.COMPLETED:
+        if self.status == InvestementInCampaign.Status.COMPLETED:
             return 'Завършен'
         return 'Unknown'
     
 
     def status_color(self):
-        if self.status == InvestementInListing.InvestementStatus.INTERESTED:
+        if self.status == InvestementInCampaign.Status.INTERESTED:
             return 'blue'
-        if self.status == InvestementInListing.InvestementStatus.CANCELED:
+        if self.status == InvestementInCampaign.Status.CANCELED:
             return 'red'
-        if self.status == InvestementInListing.InvestementStatus.COMPLETED:
+        if self.status == InvestementInCampaign.Status.COMPLETED:
             return 'green'
         return 'blue'
     
     def show_link_in_dashboard(self):
-        return self.status != InvestementInListing.InvestementStatus.CANCELED
+        return self.status != InvestementInCampaign.Status.CANCELED
 
     def get_absolute_url(self):
         return "/investment/%s" % self.pk
@@ -363,7 +381,7 @@ class FinancialPlan(models.Model):
     loan = models.ForeignKey(
         BankLoan, null=True, blank=True, on_delete=models.DO_NOTHING)
     solar_estates = models.ForeignKey(
-        FactoryListing, null=True, blank=True, on_delete=models.DO_NOTHING)
+        Campaign, null=True, blank=True, on_delete=models.DO_NOTHING)
     working_hours = models.ForeignKey(
         FactoryProductionPlan, null=True, blank=True, on_delete=models.DO_NOTHING)
     prices = models.ForeignKey(
