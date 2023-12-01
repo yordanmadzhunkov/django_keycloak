@@ -56,6 +56,16 @@
             {% endif %} <!--request.user.is_authenticated-->
             {% else %} <!--show_invest_form-->
             {% if factory|is_listed %}
+            <div>
+              <span>
+              Събираме {{factory|total_amount_listed }} лв
+              </span>
+            </div>
+            <div class="progress">
+              <div class="progress-bar" role="progressbar" style="width: {{factory|get_campaign_progress_percent}}%"
+                aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <br>
             {% if request.user.is_authenticated %}
             <!-- Factory is listed, user is authenticated-->
             {% if factory.get_manager_profile == profile %}
@@ -68,9 +78,8 @@
             {% else %}<!--factory.get_manager_profile == profile-->
             <div class="text-success">
               <a href="{% url 'campaign_active' pk=factory.pk %}">
-
                 <button class="btn btn-success" type="button">
-                  Инвестирай до {{factory|total_amount_listed }} лв
+                  Инвестирай
                 </button>
               </a>
             </div>

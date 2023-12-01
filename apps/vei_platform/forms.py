@@ -463,6 +463,7 @@ class EditInvestmentForm(forms.ModelForm):
             save,
             cancel,
         )
+        self.fields['amount'].label = 'Вашата инвестиция'
 
 
 class CustomImageField(Field):

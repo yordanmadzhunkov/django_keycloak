@@ -26,6 +26,10 @@ def total_amount_listed(factory):
 def get_active_campaign(factory):
     return Campaign.get_active(factory)
  
+@register.filter(is_safe=True)
+def get_campaign_progress_percent(factory):
+    return Campaign.get_active(factory).progress()['percent']
+    
 
 @register.filter(is_safe=True)
 def balance_from_transactions(account):
