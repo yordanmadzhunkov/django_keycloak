@@ -37,11 +37,10 @@ DASHBOARD
           <td>{{investment.share_from_factory}}</td>
           <td>
             <div class="progress">
-              <div class="progress-bar" role="progressbar"
-                style="width: {{investment.campaign.total_amount_interested.percent}}%" aria-valuenow="25"
-                aria-valuemin="0" aria-valuemax="100"></div>
+              <div class="progress-bar" role="progressbar" style="width: {{investment.campaign.progress.percent}}%"
+                aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
             </div>
-            {{investment.campaign.total_amount_interested.total}} от
+            {{investment.campaign.progress.total}} от
             {{investment.campaign.amount}}
 
           </td>

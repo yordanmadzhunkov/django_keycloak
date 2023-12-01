@@ -40,7 +40,7 @@
               <span> Opened {{ factory.opened }} <br /></span>
             </div>
           </div>
-
+          {%if not hide_link_buttons %}
           <div class="col-md-6 col-lg-3 col-xl-3 border-sm-start-none border-start">
             {% if show_invest_form %}
             {% if request.user.is_authenticated %}
@@ -96,18 +96,19 @@
             </div>
             {% else %}<!--factory.get_manager_profile == profile-->
             <div class="d-flex flex-row align-items-center mb-1">
-              <h4 class="mb-1 me-1">В момента няма активна възможност за инвестиране</h4>
+              <h4 class="mb-1 me-1">Няма активна кампания за инвестиране</h4>
             </div>
             {% endif %}<!--factory.get_manager_profile == profile-->
 
             {% else %}<!--request.user.is_authenticated-->
             <div class="d-flex flex-row align-items-center mb-1">
-              <h4 class="mb-1 me-1">В момента няма активна възможност за инвестиране</h4>
+              <h4 class="mb-1 me-1">Няма активна кампания за инвестиране</h4>
             </div>
             {% endif%}<!--request.user.is_authenticated-->
             {%endif%} <!--factory|is_listed-->
             {% endif %} <!--show_invest_form-->
           </div>
+          {%endif%}
         </div>
       </div>
     </div>

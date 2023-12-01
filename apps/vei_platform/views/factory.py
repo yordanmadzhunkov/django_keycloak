@@ -103,7 +103,7 @@ def view_campaign_active(request, pk):
     campaign = Campaign.get_active(factory)
     if campaign:
         return redirect(campaign.get_absolute_url())
-    return render(request, "campaign_create.html", context)
+    return redirect(factory.get_absolute_url() + '/campaign')
 
 
 
@@ -161,11 +161,13 @@ def view_campaign_create(request, pk=None):
                     factory=factory
             )
             campaign.save()
-            messages.success(request, "You listed your factory")
+            messages.success(request, "Успешно стартирахте кампания за набиране на инвеститори до %s" % (start_date))
+            return redirect(campaign.get_absolute_url())
         else:
-            messages.error(request, "Form is not valid, please retry")
+            messages.error(request, "Невалидни данни, моля опитайте отново")
 
     context['new_campaign_form'] = form
+    context['hide_link_buttons'] = True
     return render(request, "campaign_create.html", context)
 
 

@@ -437,10 +437,6 @@ class CampaingEditForm(forms.Form):
         complete = Submit('complete', 'Завърши')
         complete.field_classes = 'btn btn-success'
         self.helper.layout = Layout(
-            Row(
-                Column('amount', css_class='form-group'),
-                css_class='form-row'
-            ),
             complete,
             cancel,
         )

@@ -21,10 +21,10 @@
         <td>{{campaign.persent_from_profit}}</td>
         <td>
           <div class="progress">
-            <div class="progress-bar" role="progressbar" style="width: {{campaign.total_amount_interested.percent}}%"
+            <div class="progress-bar" role="progressbar" style="width: {{campaign.progress.percent}}%"
               aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
           </div>
-          {{campaign.total_amount_interested.total}} от
+          {{campaign.progress.total}} от
           {{campaign.amount}}
         </td>
         <td><a href={{campaign.get_absolute_url}}> {{campaign.count_investitors}}</a></td>

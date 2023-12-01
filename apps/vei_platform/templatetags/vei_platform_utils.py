@@ -11,7 +11,7 @@ register = template.Library()
 
 @register.filter(is_safe=True)
 def is_listed(factory):
-    return len(Campaign.objects.filter(factory=factory)) > 0
+    return Campaign.is_listed(factory)
 
 @register.filter(is_safe=True)
 def total_amount_listed(factory):
@@ -24,11 +24,8 @@ def total_amount_listed(factory):
 
 @register.filter(is_safe=True)
 def get_active_campaign(factory):
-    obj = Campaign.objects.filter(factory=factory)
-    if len(obj) > 0:
-        return obj[0].pk
-    return None
-
+    return Campaign.get_active(factory)
+ 
 
 @register.filter(is_safe=True)
 def balance_from_transactions(account):

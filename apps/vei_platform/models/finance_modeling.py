@@ -250,6 +250,8 @@ class Campaign(models.Model):
         ACTIVE = 'Ac', ('Active')
         CANCELED = 'CA', ('Canceled')
         COMPLETED = 'CO', ('Completed')
+        TIMEOUT = 'To', ('Timeout')
+
     start_date = models.DateField()
     amount = models.DecimalField(max_digits=16, decimal_places=2)
     persent_from_profit = models.DecimalField(max_digits=4, decimal_places=2)
@@ -267,18 +269,22 @@ class Campaign(models.Model):
         
     @staticmethod
     def is_listed(factory):
-        return len(Campaign.objects.filter(factory=factory)) > 0
+        return Campaign.get_active(factory) != None
     
     @staticmethod
-    def get_active(factory):
+    def get_active(factory, when=datetime.now()):
         campaigns = Campaign.objects.filter(factory=factory)
         for c in campaigns:
-            if c.status == Campaign.Status.ACTIVE or c.status == Campaign.Status.INITIALIZED:
+            time_ok = when < datetime(year=c.start_date.year,
+                          month=c.start_date.month,
+                          day=c.start_date.day,
+                          hour=8, minute=0, second=0)
+            status_ok = c.status == Campaign.Status.ACTIVE or c.status == Campaign.Status.INITIALIZED
+            if time_ok and status_ok:
                 return c
         return None
 
-
-    def total_amount_interested(self):
+    def progress(self):
         total = InvestementInCampaign.objects.filter(campaign=self, status='IN').aggregate(total=models.Sum(models.F('amount')))
         if total['total'] is None:
             total['total'] = Decimal(0)
@@ -294,13 +300,32 @@ class Campaign(models.Model):
     def get_absolute_url(self):
         return "/campaign/%s" % self.pk        
     
-    def status_str(self, now=datetime.now()):
-        if now < datetime(year=self.start_date.year,
+    def status_str(self, when=datetime.now()):
+        if when < datetime(year=self.start_date.year,
                           month=self.start_date.month,
                           day=self.start_date.day,
                           hour=8, minute=0, second=0):
-            return 'Активен'
-        return 'Неясно'
+            if self.status == Campaign.Status.INITIALIZED:
+                return 'Стартирана'
+            if self.status == Campaign.Status.ACTIVE:
+                return 'Активена'
+            if self.status == Campaign.Status.CANCELED:
+                return 'Отменена'
+            if self.status == Campaign.Status.COMPLETED:
+                return 'Приключила'
+        return 'Изтекла'
+
+    def accept_investments(self, when=datetime.now()):
+        if when < datetime(year=self.start_date.year,
+                          month=self.start_date.month,
+                          day=self.start_date.day,
+                          hour=8, minute=0, second=0):
+            
+            if self.status == Campaign.Status.INITIALIZED:
+                return True
+            if self.status == Campaign.Status.ACTIVE:
+                return True
+        return False
     
     def get_investors(self, show_users):
         investors = InvestementInCampaign.objects.filter(campaign=self)

@@ -14,28 +14,29 @@ from decimal import Decimal#, DecimalException
 
 
 def view_campaign_as_manager(request, pk, context, campaign, factory):
-    form = CampaingEditForm()
-    if request.method == 'POST':
-        if 'cancel' in request.POST:
-            form = CampaingEditForm(request.POST)
-            campaign.status = Campaign.Status.CANCELED;
-            campaign.save()
-            messages.success(request, "Кампанияте беше прекратена")
-
-        if 'complete' in request.POST:
-            form = CampaingEditForm(request.POST)
-            if campaign.total_amount_interested()['percent'] >= Decimal(100):
-                campaign.status = Campaign.Status.COMPLETED;
+    if campaign.accept_investments():
+        form = CampaingEditForm()
+        if request.method == 'POST':
+            if 'cancel' in request.POST:
+                form = CampaingEditForm(request.POST)
+                campaign.status = Campaign.Status.CANCELED;
                 campaign.save()
-                messages.success(request, "Приключване")
-            else:
-                messages.error(request, "Все още няма достатъчно предварителен интерес от инвеститорите")
+                messages.success(request, "Кампанияте беше прекратена")
 
-    context['show_invest_form'] = True
+            if 'complete' in request.POST:
+                form = CampaingEditForm(request.POST)
+                if campaign.progress()['percent'] >= Decimal(100):
+                    campaign.status = Campaign.Status.COMPLETED;
+                    campaign.save()
+                    messages.success(request, "Приключване")
+                else:
+                    messages.error(request, "Все още няма достатъчно предварителен интерес от инвеститорите")
+
+        context['invest_form'] = form
+    context['show_invest_form'] = campaign.accept_investments()
     context['factory'] = factory
     context['campaign'] = campaign
     context['investors'] = campaign.get_investors(show_users=True)
-    context['invest_form'] = form
     return render(request, "campaign.html", context)
 
 
@@ -90,9 +91,6 @@ def view_campaign_as_investor(request, pk, context, campaign, factory):
     return render(request, "campaign.html", context)
     
     
-    
-    return render(request, "campaign.html", context)
-
 def vire_campaign_as_anon(request, pk, context, campaign, factory):
     return render(request, "campaign.html", context)
 
@@ -110,37 +108,3 @@ def view_campaign(request, pk):
                 return view_campaign_as_investor(request, pk, context, campaign, factory)
     return vire_campaign_as_anon(request, pk, context, campaign, factory)
 
-
-
-
-@login_required(login_url='/oidc/authenticate/')
-def view_investment(request, pk):
-    context = common_context(request)
-    investment = InvestementInCampaign.objects.get(pk=pk)
-    context['factory'] = investment.campaign.factory
-    context['campaign'] = investment.campaign
-    context['investment'] = investment
-    context['show_invest_form'] = True
-    if request.method == "POST":
-        if 'save' in request.POST.keys():
-            if investment.status == InvestementInCampaign.Status.INTERESTED:
-                form = EditInvestmentForm(request.POST)
-                if form.is_valid():
-                    investment.amount = form.cleaned_data['amount']
-                    investment.save()
-                    messages.success(request, 'Сумата е променена на %d' % investment.amount)    
-                else:
-                    messages.error(request, 'Грешна сума')    
-
-        if 'cancel' in request.POST.keys():
-            if investment.status == InvestementInCampaign.Status.INTERESTED:
-                investment.status = InvestementInCampaign.Status.CANCELED
-                investment.save()
-                messages.success(request, 'Вашата заявка за инвестиране в централата е отменена')    
-            else:
-                messages.error(request, 'Не може да се откажете от инвестицията в този етап')
-    
-    if investment.status == InvestementInCampaign.Status.CANCELED:
-        return redirect('campaign', pk=investment.campaign.pk)
-    context['invest_form'] = EditInvestmentForm(instance=investment)
-    return render(request, "investment.html", context)
