@@ -327,17 +327,18 @@ class Campaign(models.Model):
                 return True
         return False
     
-    def get_investors(self, show_users):
+    def get_investors(self, show_users, investor_profile = None):
         investors = InvestementInCampaign.objects.filter(campaign=self)
         res = []
         count = 1
         for investor in investors:
+            show = show_users or investor.investor_profile == investor_profile
             res.append({
                 'status': investor.status_str(),
                 'amount': investor.amount,
-                'user_profile': ("Инвеститор %d" % count) if not show_users else investor.investor_profile.get_display_name(),
-                'user_profile_link': '' if not show_users else investor.investor_profile.get_href(),
-                'user_profile_avatar': '/static/img/undraw_profile.svg' if not show_users else investor.investor_profile.get_avatar_url(),
+                'user_profile': ("Инвеститор %d" % count) if not show else investor.investor_profile.get_display_name(),
+                'user_profile_link': '' if not show else investor.investor_profile.get_href(),
+                'user_profile_avatar': '/static/img/undraw_profile.svg' if not show else investor.investor_profile.get_avatar_url(),
             })
             count = count + 1
         return res
@@ -370,22 +371,34 @@ class InvestementInCampaign(models.Model):
     
     
     def status_str(self):
-        if self.status == InvestementInCampaign.Status.INTERESTED:
-            return 'Заявен интерес'
-        if self.status == InvestementInCampaign.Status.CANCELED:
-            return 'Отменен'
-        if self.status == InvestementInCampaign.Status.COMPLETED:
-            return 'Завършен'
+        if self.campaign.accept_investments():
+            if self.status == InvestementInCampaign.Status.INTERESTED:
+                return 'Заявен интерес'
+            if self.status == InvestementInCampaign.Status.CANCELED:
+                return 'Отменен'
+            if self.status == InvestementInCampaign.Status.COMPLETED:
+                return 'Завършен'
+        else:
+            if self.campaign.status == Campaign.Status.COMPLETED:
+                return 'Очакваме депозит' 
+            else:
+                return 'Кампанията е изтекла'
         return 'Unknown'
     
 
     def status_color(self):
-        if self.status == InvestementInCampaign.Status.INTERESTED:
-            return 'blue'
-        if self.status == InvestementInCampaign.Status.CANCELED:
-            return 'red'
-        if self.status == InvestementInCampaign.Status.COMPLETED:
-            return 'green'
+        if self.campaign.accept_investments():
+            if self.status == InvestementInCampaign.Status.INTERESTED:
+                return 'blue'
+            if self.status == InvestementInCampaign.Status.CANCELED:
+                return 'red'
+            if self.status == InvestementInCampaign.Status.COMPLETED:
+                return 'green'
+        else:
+            if self.campaign.status == Campaign.Status.COMPLETED:
+                return 'green' 
+            else:
+                return 'red'
         return 'blue'
     
     def show_link_in_dashboard(self):

@@ -83,10 +83,10 @@ def view_campaign_as_investor(request, pk, context, campaign, factory):
                 else:
                     messages.error(request, "Възникна грешка при промяна на сумата")
 
-    context['show_invest_form'] = True
+    context['show_invest_form'] = campaign.accept_investments()
     context['factory'] = factory
     context['campaign'] = campaign
-    context['investors'] = campaign.get_investors(show_users=False)
+    context['investors'] = campaign.get_investors(show_users=False, investor_profile=profile)
     context['invest_form'] = form
     return render(request, "campaign.html", context)
     
