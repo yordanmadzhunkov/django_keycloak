@@ -52,6 +52,7 @@ def common_context(request):
         'platform_name': 'Fraction Energy',
         'platform_logo': '/static/img/Fraction_Energy_logo.png',
         'copyright': 'Data Intensive 2023',
+        'head_title': 'Fraction Energy',
     }
     if request:
         if request.user:
