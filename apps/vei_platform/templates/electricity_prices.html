@@ -1,35 +1,35 @@
 {% extends 'base.html' %}
 {% block head_title%}
-Solar Estates - DASHBOARD
+{{head_title}}
 {% endblock%}
 {% block content %}
-    <section style="background-color: #eee;">
-      <div class="container py-5">
-        <form method="post">
-          {% csrf_token %}
-          {{ plan_formset.management_form }}
-          {{ plan_formset.as_table }}
-          {{ numbers_formset.management_form }}
-          <input type="submit" value="Save"/>
-          <table class="table-striped table-bordered table-sm">
-            <thead>
-                {% for label in table.labels %}
-                  <th>{{ label }}</th> 
-                {% endfor %}
-          </thead>
-          <tbody>
+<section style="background-color: #eee;">
+  <div class="container py-5">
+    <form method="post">
+      {% csrf_token %}
+      {{ plan_formset.management_form }}
+      {{ plan_formset.as_table }}
+      {{ numbers_formset.management_form }}
+      <input type="submit" value="Save" />
+      <table class="table-striped table-bordered table-sm">
+        <thead>
+          {% for label in table.labels %}
+          <th>{{ label }}</th>
+          {% endfor %}
+        </thead>
+        <tbody>
           {% for row in table.rows %}
           <tr>
             {% for data in row %}
-              {% autoescape off %}
-                <td> {{data}} </td>
-              {% endautoescape %}
+            {% autoescape off %}
+            <td> {{data}} </td>
+            {% endautoescape %}
             {% endfor %}
           </tr>
           {% endfor %}
         </tbody>
-        </table>
-      </form>
-      </div>
+      </table>
+    </form>
+  </div>
 </section>
 {% endblock content %}
