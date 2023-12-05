@@ -15,12 +15,11 @@ def is_listed(factory):
 
 @register.filter(is_safe=True)
 def total_amount_listed(factory):
-    total = Decimal(0)
-    for o in  Campaign.objects.filter(factory=factory):
-        total += o.amount
-    res = '{:,}'.format(total) 
-    # print(res)
-    return res
+    campaing = Campaign.get_active(factory)
+    if campaing:
+        return campaing.amount
+    return Decimal(0)
+
 
 @register.filter(is_safe=True)
 def get_active_campaign(factory):

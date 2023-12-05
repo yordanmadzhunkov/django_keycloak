@@ -1,0 +1,17 @@
+{% load vei_platform_utils %}
+
+<div class="text-success">
+    <a href="{% url 'campaign_active' pk=factory.pk %}">
+        <button class="btn btn-success" type="button">
+            Инвестирай
+        </button>
+    </a>
+</div>
+
+<div class="text-success">
+    <a href="{% url 'campaign_active' pk=factory.pk %}">
+        <button class="btn btn-success" type="button">
+            Инвестирай до {{factory|total_amount_listed }} лв
+        </button>
+    </a>
+</div>

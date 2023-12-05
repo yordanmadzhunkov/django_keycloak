@@ -432,13 +432,13 @@ class CampaingEditForm(forms.Form):
         # If you pass FormHelper constructor a form instance
         # It builds a default layout with all its fields
         self.helper = FormHelper(self)
-        cancel = Submit('cancel', 'Отмяна')
+        cancel = Submit('cancel', 'Отмяна на кампанията')
         cancel.field_classes = 'btn btn-danger'
-        complete = Submit('complete', 'Завърши')
+        complete = Submit('complete', 'Приключи кампанията')
         complete.field_classes = 'btn btn-success'
         self.helper.layout = Layout(
-            complete,
-            cancel,
+            Row(complete),
+            Row(cancel),
         )
 
 class EditInvestmentForm(forms.ModelForm):
