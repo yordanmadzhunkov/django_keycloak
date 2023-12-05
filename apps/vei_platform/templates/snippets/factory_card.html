@@ -46,38 +46,33 @@
             {% if request.user.is_authenticated %}
             {% crispy invest_form %}
             {% else %} <!--request.user.is_authenticated-->
-            {% include "factory_card_no_campaign.html "%}
+            {% include "snippets/factory_card_no_campaign.html "%}
             {% endif %} <!--request.user.is_authenticated-->
             {% else %} <!--show_invest_form-->
             {% if factory|is_listed %}
             {% if request.user.is_authenticated %}
             <!-- Factory is listed, user is authenticated-->
             {% if factory.get_manager_profile == profile %}
-            <div class="d-flex flex-column mt-4">
-              <a href="{% url 'campaign_active' pk=factory.pk %}">
-                <button class="btn btn-info" type="button">Текущата кампания за
-                  инвестиране</button>
-              </a>
-            </div>
+            {% include "snippets/factory_card_link_to_active_campaign.html" %}
             {% else %}<!--factory.get_manager_profile == profile-->
-            {% include "factory_card_offer_toinvest.html" %}
+            {% include "snippets/factory_card_offer_to_invest.html" %}
             {% endif %}<!--factory.get_manager_profile == profile-->
             {% else %}<!--request.user.is_authenticated-->
             <!-- Factory is listed, user is NOT authenticated-->
-            {% include "factory_card_offer_toinvest.html" %}
+            {% include "snippets/factory_card_offer_to_invest.html" %}
             {% endif%}<!--request.user.is_authenticated-->
             {% else %} <!--factory|is_listed-->
             {% if request.user.is_authenticated %}
             <!-- Factory not listed, user is authenticated-->
             {% if factory.get_manager_profile == profile %}
-            {% include "factory_card_offer_start_campaign.html" %}
+            {% include "snippets/factory_card_offer_start_campaign.html" %}
             {% else %}<!--factory.get_manager_profile == profile-->
-            {% include "factory_card_no_campaign.html" %}
+            {% include "snippets/factory_card_no_campaign.html" %}
             {% endif %}<!--factory.get_manager_profile == profile-->
             {% else %}<!--request.user.is_authenticated-->
-            {% include "factory_card_no_campaign.html" %}
+            {% include "snippets/factory_card_no_campaign.html" %}
             {% endif%}<!--request.user.is_authenticated-->
-            {%endif%} <!--factory|is_listed-->
+            {% endif %} <!--factory|is_listed-->
             {% endif %} <!--show_invest_form-->
           </div>
           {%endif%}
