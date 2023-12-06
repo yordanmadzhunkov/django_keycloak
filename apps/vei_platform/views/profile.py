@@ -37,7 +37,7 @@ def view_my_profile(request):
                 profile.avatar = avatar
             profile.save()
             messages.success(
-                request, '%s uploaded and set as profile picture successfully' % avatar)
+                request, '%s е запазан като ваш аватар' % avatar)
 
         first_name = user_profile_form.cleaned_data.get('first_name')
         last_name = user_profile_form.cleaned_data.get('last_name')
@@ -46,7 +46,7 @@ def view_my_profile(request):
             user.first_name = first_name
             user.last_name = last_name
             user.save()
-            messages.success(request, 'Name set to %s %s' %
+            messages.success(request, 'Запазени са вашите имена: %s %s' %
                              (first_name, last_name))
             context['user'] = user
 
