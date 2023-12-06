@@ -370,39 +370,33 @@ class InvestementInCampaign(models.Model):
         return ((self.amount * self.campaign.persent_from_profit)/ self.campaign.amount).quantize(Decimal('.01'))
     
     
+    def status_with_css_class(self):
+        if self.campaign.accept_investments():
+            if self.status == InvestementInCampaign.Status.INTERESTED:
+                return ('Заявен интерес', 'text-dark')
+            if self.status == InvestementInCampaign.Status.CANCELED:
+                return ('Отменен', 'text-error')
+            if self.status == InvestementInCampaign.Status.COMPLETED:
+                return ('Завършен', 'text-success')
+        else:
+            if self.campaign.status == Campaign.Status.COMPLETED:
+                return ('Очакваме депозит', 'text-success')
+            else:
+                return ('Кампанията е изтекла', 'text-muted')
+        return ('Unknown', 'text-error')
+    
     def status_str(self):
-        if self.campaign.accept_investments():
-            if self.status == InvestementInCampaign.Status.INTERESTED:
-                return 'Заявен интерес'
-            if self.status == InvestementInCampaign.Status.CANCELED:
-                return 'Отменен'
-            if self.status == InvestementInCampaign.Status.COMPLETED:
-                return 'Завършен'
-        else:
-            if self.campaign.status == Campaign.Status.COMPLETED:
-                return 'Очакваме депозит' 
-            else:
-                return 'Кампанията е изтекла'
-        return 'Unknown'
-    
+        status, css_class = self.status_with_css_class()
+        return status
 
-    def status_color(self):
-        if self.campaign.accept_investments():
-            if self.status == InvestementInCampaign.Status.INTERESTED:
-                return 'blue'
-            if self.status == InvestementInCampaign.Status.CANCELED:
-                return 'red'
-            if self.status == InvestementInCampaign.Status.COMPLETED:
-                return 'green'
-        else:
-            if self.campaign.status == Campaign.Status.COMPLETED:
-                return 'green' 
-            else:
-                return 'red'
-        return 'blue'
+    def status_css_class(self):
+        status, css_class = self.status_with_css_class()
+        print(css_class)
+        return css_class
     
-    def show_link_in_dashboard(self):
+    def show_in_dashboard(self):
         return self.status != InvestementInCampaign.Status.CANCELED
+   
 
        
     

@@ -21,15 +21,10 @@ DASHBOARD
           <th>Цена на kW</th>
         </thead>
         {%for investment in my_investments %}
+        {%if investment.show_in_dashboard %}
         <tr class="bg-light">
           <td>
-            {% if investment.show_link_in_dashboard %}
-            <a href={{investment.campaign.get_absolute_url}}>
-              {{investment.status_str}}</a>
-            {% else %}
-            <span style="color: {{ investment.status_color }};"> {{investment.status_str}}
-            </span>
-            {% endif %}
+              <span class="{{investment.status_css_class}}"> {{investment.status_str}}</span>
           </td>
           <td><a href={{investment.campaign.factory.get_absolute_url}}> {{ investment.campaign.factory.name }}</a></td>
           <td>{{investment.campaign.start_date}}</td>
@@ -46,6 +41,7 @@ DASHBOARD
           </td>
           <td>{{investment.campaign.price_per_kw}}</td>
         </tr>
+        {% endif %}
         {% endfor %}
       </table>
     </div>
