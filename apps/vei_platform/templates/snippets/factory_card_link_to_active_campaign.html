@@ -1,6 +1,20 @@
+{% load vei_platform_utils %}
+
+
 <div class="d-flex flex-column mt-4">
-    <a href="{% url 'campaign_active' pk=factory.pk %}">
-      <button class="btn btn-info" type="button">Текущата кампания за
-        инвестиране</button>
-    </a>
-  </div>
+  <a href="{% url 'campaign_active' pk=factory.pk %}">
+    <button class="btn btn-info btn-block" type="button">Текущата кампания</button>
+  </a>
+</div>
+
+<p class="mt-4 mb-1 text-center" style="font-size: .77rem;">
+  <span>Събрани до момента <strong>{{factory|get_campaign_progress_percent}}</strong> %</span>
+  <br>
+  <span>{{factory|get_campaign_progress_amount}} от
+    {{factory|total_amount_listed}}
+  </span>
+</p>
+<div class="progress rounded" style="height: 15px;">
+  <div class="progress-bar" role="progressbar" style="width: {{factory|get_campaign_progress_percent}}%"
+    aria-valuenow=" {{factory|get_campaign_progress_percent}}" aria-valuemin="0" aria-valuemax="100"></div>
+</div>
