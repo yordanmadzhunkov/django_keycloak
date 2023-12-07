@@ -7,4 +7,8 @@ from django.shortcuts import render
 
 def view_home(request):
     context = common_context(request)
+    context['members'] = [
+        {'name': 'Yordan'
+         }
+    ]
     return render(request, "home.html", context)

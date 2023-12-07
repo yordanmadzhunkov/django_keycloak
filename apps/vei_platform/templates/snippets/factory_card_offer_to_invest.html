@@ -2,16 +2,20 @@
 
 <div class="text-success">
     <a href="{% url 'campaign_active' pk=factory.pk %}">
-        <button class="btn btn-success" type="button">
+        <button class="btn btn-success btn-block" type="button">
             Инвестирай
         </button>
     </a>
 </div>
 
-<div class="text-success">
-    <a href="{% url 'campaign_active' pk=factory.pk %}">
-        <button class="btn btn-success" type="button">
-            Инвестирай до {{factory|total_amount_listed }} лв
-        </button>
-    </a>
+<p class="mt-4 mb-1 text-center" style="font-size: .77rem;">
+    <span>Събрани до момента <strong>{{factory|get_campaign_progress_percent}}</strong> %</span>
+    <br>
+    <span>{{factory|get_campaign_progress_amount}} от
+        {{factory|total_amount_listed}}
+    </span>
+</p>
+<div class="progress rounded" style="height: 15px;">
+    <div class="progress-bar" role="progressbar" style="width: {{factory|get_campaign_progress_percent}}%"
+        aria-valuenow=" {{factory|get_campaign_progress_percent}}" aria-valuemin="0" aria-valuemax="100"></div>
 </div>

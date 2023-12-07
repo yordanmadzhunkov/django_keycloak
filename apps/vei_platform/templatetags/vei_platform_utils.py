@@ -28,7 +28,15 @@ def get_active_campaign(factory):
 @register.filter(is_safe=True)
 def get_campaign_progress_percent(factory):
     return Campaign.get_active(factory).progress()['percent']
-    
+
+@register.filter(is_safe=True)
+def available_for_investment(factory):
+    return Campaign.get_active(factory).progress()['available']
+
+@register.filter(is_safe=True)
+def get_campaign_progress_amount(factory):
+    return Campaign.get_active(factory).progress()['total']
+
 
 @register.filter(is_safe=True)
 def balance_from_transactions(account):

@@ -292,6 +292,7 @@ class Campaign(models.Model):
         if r > Decimal(100):
             r = Decimal(100)
         total['percent'] = r.quantize(Decimal('1')) 
+        total['available'] = self.amount - total['total']
         return total
     
     def count_investitors(self):
@@ -391,7 +392,6 @@ class InvestementInCampaign(models.Model):
 
     def status_css_class(self):
         status, css_class = self.status_with_css_class()
-        print(css_class)
         return css_class
     
     def show_in_dashboard(self):

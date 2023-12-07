@@ -115,7 +115,7 @@ def view_campaign_create(request, pk=None):
     context['manager_profile'] = None if factory.manager is None else get_user_profile(factory.manager)
     context['factory_is_listed'] = Campaign.is_listed(factory)
 
-    campaigns = Campaign.objects.filter(factory=factory)
+    campaigns = Campaign.objects.filter(factory=factory).exclude(status=Campaign.Status.CANCELED)
     total_amount = Decimal(0)
     total_listed_persent = Decimal(0)
     total_available = Decimal(0)
@@ -175,7 +175,7 @@ def view_campaign_create(request, pk=None):
 def view_factory_detail(request, pk=None):
     context = common_context(request)
     factory = ElectricityFactory.objects.get(pk=pk)
-    campaigns = Campaign.objects.filter(factory=factory)
+    campaigns = Campaign.objects.filter(factory=factory).exclude(status=Campaign.Status.CANCELED)
     context['campaigns'] = campaigns
     context['factory'] = ElectricityFactory.objects.get(pk=pk)
     context['production_plans'] = FactoryProductionPlan.objects.filter(
