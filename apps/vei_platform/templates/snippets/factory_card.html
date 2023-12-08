@@ -44,7 +44,7 @@
           <div class="col-md-6 col-lg-3 col-xl-3 border-sm-start-none border-start">
             {% if show_invest_form %}
             {% if request.user.is_authenticated %}
-            {% crispy invest_form %}
+            {% include "snippets/factory_card_show_invest_form.html" %}
             {% else %} <!--request.user.is_authenticated-->
             {% include "snippets/factory_card_no_campaign.html "%}
             {% endif %} <!--request.user.is_authenticated-->

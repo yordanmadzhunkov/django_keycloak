@@ -283,6 +283,14 @@ class Campaign(models.Model):
             if time_ok and status_ok:
                 return c
         return None
+    
+    @staticmethod
+    def get_last_completed(factory):
+        campaigns = Campaign.objects.filter(factory=factory, status=Campaign.Status.COMPLETED).order_by('start_date')
+        if len(campaigns) > 0:
+            return campaigns[len(campaigns) - 1]
+        return None
+   
 
     def progress(self):
         total = InvestementInCampaign.objects.filter(campaign=self, status='IN').aggregate(total=models.Sum(models.F('amount')))
@@ -329,7 +337,7 @@ class Campaign(models.Model):
         return False
     
     def get_investors(self, show_users, investor_profile = None):
-        investors = InvestementInCampaign.objects.filter(campaign=self)
+        investors = InvestementInCampaign.objects.filter(campaign=self).exclude(status=InvestementInCampaign.Status.CANCELED)
         res = []
         count = 1
         for investor in investors:

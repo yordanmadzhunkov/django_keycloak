@@ -15,7 +15,8 @@ from decimal import Decimal#, DecimalException
 
 def view_campaign_as_manager(request, pk, context, campaign, factory):
     if campaign.accept_investments():
-        form = CampaingEditForm()
+        allow_finish = campaign.progress()['percent'] >= Decimal(100)
+        form = CampaingEditForm(allow_finish)
         if request.method == 'POST':
             if 'cancel' in request.POST:
                 form = CampaingEditForm(request.POST)
@@ -25,7 +26,7 @@ def view_campaign_as_manager(request, pk, context, campaign, factory):
 
             if 'complete' in request.POST:
                 form = CampaingEditForm(request.POST)
-                if campaign.progress()['percent'] >= Decimal(100):
+                if allow_finish:
                     campaign.status = Campaign.Status.COMPLETED;
                     campaign.save()
                     messages.success(request, "Приключване")

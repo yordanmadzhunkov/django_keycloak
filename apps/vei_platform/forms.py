@@ -445,7 +445,7 @@ class CreateInvestmentForm(forms.Form):
         )
 
 class CampaingEditForm(forms.Form):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, allow_finish, *args, **kwargs):
         super(CampaingEditForm, self).__init__(*args, **kwargs)
         # If you pass FormHelper constructor a form instance
         # It builds a default layout with all its fields
@@ -454,10 +454,8 @@ class CampaingEditForm(forms.Form):
         cancel.field_classes = 'btn btn-danger'
         complete = Submit('complete', 'Приключи кампанията')
         complete.field_classes = 'btn btn-success'
-        self.helper.layout = Layout(
-            Row(complete),
-            Row(cancel),
-        )
+        self.helper.layout = Layout(Row(complete), Row(cancel),) if allow_finish else Layout(Row(cancel),)
+        
 
 class EditInvestmentForm(forms.ModelForm):
     class Meta:

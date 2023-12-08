@@ -37,6 +37,17 @@ def available_for_investment(factory):
 def get_campaign_progress_amount(factory):
     return Campaign.get_active(factory).progress()['total']
 
+@register.filter(is_safe=True)
+def has_completed_campaign(factory):
+    return Campaign.get_last_completed(factory) != None
+
+@register.filter(is_safe=True)
+def last_completed_campaign_amount(factory):
+    return Campaign.get_last_completed(factory).progress()['total']
+
+@register.filter(is_safe=True)
+def last_completed_campaign_href(factory):
+    return Campaign.get_last_completed(factory).get_absolute_url()
 
 @register.filter(is_safe=True)
 def balance_from_transactions(account):
