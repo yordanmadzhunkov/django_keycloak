@@ -14,6 +14,7 @@ from .views.loan import view_bank_loan_detail
 from .views.bank_account import view_bank_accounts, view_verify_bank_account, view_deposit_bank_account, view_withdraw_bank_account
 from .views.scriping_tools import view_scriping_tools
 from .views.invest import view_campaign
+from .views.team import view_team
 
 urlpatterns = [
     path('', view_home, name="home"),
@@ -45,6 +46,7 @@ urlpatterns = [
     path('bank_accounts/verify/<int:pk>', view_verify_bank_account, name='verify_bank_account'),
     path('bank_accounts/deposit/<int:pk>', view_deposit_bank_account, name='deposit_bank_account'),
     path('bank_accounts/withdraw/<int:pk>', view_withdraw_bank_account, name='withdraw_bank_account'),
+    path('team', view_team, name='team'),
 ]
 
 if settings.DEBUG:

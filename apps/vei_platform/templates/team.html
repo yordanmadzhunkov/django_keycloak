@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head_title %}
+Home
+{% endblock%}
+{% block content %}
+<!-- ======= Team Section ======= -->
+<section id="team" class="team">
+    <div class="container">
+        <div class="section-title text-center">
+            <h1 class="text-dark">Нашият екип</h1>
+            <p>Макар и малък, нашият екип застава открито с лицата си, за спечелим и заслужим доверието на напите
+                инвеститори и клиенти.</p>
+        </div>
+        <hr>
+        <div class="row">
+            {% for member in members %}
+            <div class="col-lg-4 col-md-6 d-flex align-items-stretch" data-aos="zoom-in">
+                <div class="member">
+                    <img src="{{member.get_image_url}}" alt="" class="img-fluid">
+                    <a href={{member.profile.get_href}}>
+                        <h4>{{member.name}}</h4>
+                    </a>
+                    <span>{{member.role}}</span>
+                    <p>{{member.description}}</p>
+                    <div class="social">
+                        {% if member.twitter %}
+                        <a href="{{member.twitter}}"><i class="fab fa-twitter"></i></a>
+                        {% endif %}
+                        {% if member.facebook %}
+                        <a href="{{member.facebook}}"><i class="fab fa-facebook"></i></a>
+                        {% endif %}
+                        {% if member.instagram %}
+                        <a href="{{member.instagram}}"><i class="fab fa-instagram"></i></a>
+                        {% endif %}
+                        {% if member.linkedin %}
+                        <a href="{{member.linkedin}}"><i class="fab fa-linkedin"></i></a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section><!-- End Team Section -->
+{% endblock content %}
