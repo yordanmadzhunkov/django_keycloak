@@ -10,7 +10,6 @@ from vei_platform.models.profile import UserProfile, get_user_profile
 from vei_platform.forms import UserProfileForm
 
 
-@login_required(login_url='/oidc/authenticate/')
 def view_user_profile(request, pk=None):
     context = common_context(request)
     context['user_profile'] = UserProfile.objects.get(pk=pk)

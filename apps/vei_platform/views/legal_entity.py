@@ -12,7 +12,6 @@ from vei_platform.forms import LegalEntityForm, SearchForm
 from django.contrib import messages
 from django.forms.models import model_to_dict
 
-@login_required(login_url='/oidc/authenticate/')
 def view_entity_detail(request, pk=None):
     context = common_context(request)
     if pk is not None:

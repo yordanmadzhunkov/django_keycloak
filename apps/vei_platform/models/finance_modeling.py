@@ -307,7 +307,10 @@ class Campaign(models.Model):
         return InvestementInCampaign.objects.filter(campaign=self, status='IN').count()
 
     def get_absolute_url(self):
-        return "/campaign/%s" % self.pk        
+        return "/campaign/%s" % self.pk       
+
+    def show_in_dashboard(self):
+        return self.status != Campaign.Status.CANCELED 
     
     def status_str(self, when=datetime.now()):
         if when < datetime(year=self.start_date.year,
