@@ -178,7 +178,8 @@ class FactoryProductionPlan(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return "/production/%s" % self.pk
+        res = self.factory.get_absolute_url()
+        return res + '/production/%s' % self.pk
 
 
 class ElectricityWorkingHoursPerMonth(models.Model):
