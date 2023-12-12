@@ -5,7 +5,7 @@ from vei_platform.models.factory import ElectricityFactory, FactoryProductionPla
 from vei_platform.models.finance_modeling import Campaign
 from vei_platform.models.finance_modeling import ElectricityPricePlan, BankLoan, Campaign
 from vei_platform.models.profile import get_user_profile
-from vei_platform.forms import FactoryListingForm, FactoryFinancialPlaningForm, FactoryModelForm
+from vei_platform.forms import FactoryListingForm, FactoryFinancialPlaningForm, FactoryModelForm, ElectricityFactoryComponentsForm
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
@@ -14,6 +14,7 @@ from django.contrib import messages
 from decimal import Decimal, DecimalException
 from datetime import date
 from django import template
+from django.forms import formset_factory
 
 
 def view_offered_factories():
@@ -85,6 +86,15 @@ def view_add_factory(request):
         form = FactoryModelForm()
     context['form'] = form
     return render(request, "factory_add.html", context)
+
+def view_factory_components(request, pk):
+    context = common_context(request)
+    factory = ElectricityFactory.objects.get(pk=pk)
+    context['factory'] = factory
+    context['formset'] = formset_factory(ElectricityFactoryComponentsForm, extra=3)
+#ElectricityFactoryComponentsFormSet(factory)
+    return render(request, "factory_components.html", context)
+
 
 
 def view_all_factories_paganated(request):

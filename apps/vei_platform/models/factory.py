@@ -78,6 +78,7 @@ class ElectricityFactory(models.Model):
             return "/static/img/wickramanayaka.jpg"
         print('type = ' + self.factory_type + '\n')
         return None
+    
 
     def get_capacity_in_kw(self):
         return self.capacity_in_mw * Decimal(1000)
@@ -92,7 +93,33 @@ class ElectricityFactory(models.Model):
             return None
         
 
+class ElectricityFactoryComponents(models.Model):
+        # Factory type
+    PHOTO_PANEL = 'PAN'
+    INVERTOR   = 'INV'
+    CONNECTOR  = 'CON'
+    OTHER = 'OTH'
 
+    COMPONENT_TYPE_CHOISES = (
+        (PHOTO_PANEL, 'Photovoltaic Panel'),
+        (INVERTOR, 'Invertor'),
+        (CONNECTOR, 'Connector'),
+        (OTHER, 'Other'),
+    )
+
+    name = models.CharField(max_length=128)
+    component_type = models.CharField(
+        max_length=3,
+        choices=COMPONENT_TYPE_CHOISES,
+        default=OTHER,
+    )
+    factory = models.ForeignKey(ElectricityFactory, null=True, blank=True, default=None, on_delete=models.DO_NOTHING)
+    power_in_kw = models.DecimalField(null=True, blank=True, default=None, decimal_places=3, max_digits=9)
+    count = models.IntegerField(default=1)
+    
+    def __str__(self) -> str:
+        return '%s %s kW x %d'  (self.name, self.power_in_kw, self.count)
+        
 
 def parse_energy(x):
     map = {
