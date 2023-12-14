@@ -118,7 +118,7 @@ class ElectricityFactoryComponents(models.Model):
     count = models.IntegerField(default=1)
     
     def __str__(self) -> str:
-        return '%s %s kW x %d'  (self.name, self.power_in_kw, self.count)
+        return '%s %s kW x %d' % (self.name, self.power_in_kw, self.count)
         
 
 def parse_energy(x):

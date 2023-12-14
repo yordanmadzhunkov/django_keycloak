@@ -1,7 +1,7 @@
 from django.core.paginator import Paginator
 
 from . import common_context
-from vei_platform.models.factory import ElectricityFactory, FactoryProductionPlan, ElectricityWorkingHoursPerMonth
+from vei_platform.models.factory import ElectricityFactory, FactoryProductionPlan, ElectricityWorkingHoursPerMonth, ElectricityFactoryComponents
 from vei_platform.models.finance_modeling import Campaign
 from vei_platform.models.finance_modeling import ElectricityPricePlan, BankLoan, Campaign
 from vei_platform.models.profile import get_user_profile
@@ -10,11 +10,13 @@ from vei_platform.forms import FactoryListingForm, FactoryFinancialPlaningForm, 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.views.generic.edit import CreateView, UpdateView
 
 from decimal import Decimal, DecimalException
 from datetime import date
 from django import template
 from django.forms import formset_factory
+from django.forms.models import model_to_dict
 
 
 def view_offered_factories():
@@ -87,13 +89,7 @@ def view_add_factory(request):
     context['form'] = form
     return render(request, "factory_add.html", context)
 
-def view_factory_components(request, pk):
-    context = common_context(request)
-    factory = ElectricityFactory.objects.get(pk=pk)
-    context['factory'] = factory
-    context['formset'] = formset_factory(ElectricityFactoryComponentsForm, extra=3)
-#ElectricityFactoryComponentsFormSet(factory)
-    return render(request, "factory_components.html", context)
+
 
 
 
@@ -338,6 +334,88 @@ def view_factory_production(request, pk=None):
     return render(request, "factory_production.html", context)
 
 
+from django.urls import reverse_lazy
+from django.db import transaction
+from django.forms.models import inlineformset_factory
 
 
+class FactoryUpdate(UpdateView):
+    model = ElectricityFactory
+    template_name = 'factory_components.html'
+    form_class = FactoryModelForm
+    success_url = None
 
+    def get_context_data(self, **kwargs):
+        context = super(FactoryUpdate, self).get_context_data(**kwargs)
+        context.update(common_context(self.request))
+        context['factory'] = self.object
+        if self.request.POST:
+            form = FactoryModelForm(self.request.POST, instance=self.object)
+            context['form'] = form
+            FactoryComponentsFormSet = inlineformset_factory(           
+                ElectricityFactory, 
+                ElectricityFactoryComponents, 
+                form=ElectricityFactoryComponentsForm,
+                fields=['component_type', 'name', 'power_in_kw', 'count'], 
+                can_delete=True
+                )
+            context['formset'] = FactoryComponentsFormSet(self.request.POST, instance=self.object)
+        else:
+            context['form'] = FactoryModelForm(instance=self.object)
+            FactoryComponentsFormSet = inlineformset_factory(           
+                ElectricityFactory, 
+                ElectricityFactoryComponents, 
+                form=ElectricityFactoryComponentsForm,
+                fields=['component_type', 'name', 'power_in_kw', 'count'], 
+                extra=2, can_delete=True
+                )
+            context['formset'] = FactoryComponentsFormSet(instance=self.object)
+        return context
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        for component_form in context['formset']:
+            if component_form.is_valid():
+                d = component_form.cleaned_data
+                if 'id' in d.keys() and d['id'] is None:
+                    # CREATE
+                    new_comp = ElectricityFactoryComponents(
+                        name = d['name'],
+                        component_type =  d['component_type'],
+                        power_in_kw = d['power_in_kw'],
+                        factory = self.object,
+                        count = d['count'],
+                        )
+                    new_comp.save()
+
+                if 'id' in d.keys() and d['id'] is not None:
+                    comp = d['id'] 
+                    # DELETE HARD
+                    if 'DELETE' in d.keys() and d['DELETE']:
+                        comp.delete()
+                    else:
+                        needs_update = False
+                        if comp.name != d['name']:
+                            comp.name = d['name']
+                            needs_update = True
+
+                        if comp.component_type != d['component_type']:
+                            comp.component_type = d['component_type']
+                            needs_update = True
+
+                        if comp.power_in_kw != d['power_in_kw']:
+                            comp.power_in_kw = d['power_in_kw']
+                            needs_update = True
+
+                        if comp.count != d['count']:
+                            comp.count = d['count']
+                            needs_update = True
+
+                        if needs_update:
+                            comp.save()
+
+        return super(FactoryUpdate, self).form_valid(form)
+
+
+    def get_success_url(self):
+        return reverse_lazy('view_factory', kwargs={'pk': self.object.pk})

@@ -1,6 +1,6 @@
 from django import forms
 from datetime import date, datetime
-from .models.factory import FactoryProductionPlan, ElectricityFactory
+from .models.factory import FactoryProductionPlan, ElectricityFactory, ElectricityFactoryComponents
 from .models.finance_modeling import ElectricityPricePlan, BankLoan, BankAccount, BankTransaction, InvestementInCampaign
 from .models.profile import UserProfile
 from .models.legal import LegalEntity, find_legal_entity
@@ -8,7 +8,9 @@ from .models.platform import platform_bank_accounts
 
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit, Layout, Row, Column, Field
+from crispy_forms.layout import Submit, Layout, Row, Column, Field, HTML
+from .custom_layout_object import Formset
+
 
 import re
 from django.conf import settings
@@ -486,7 +488,53 @@ class CustomImageField(Field):
     template = 'layout/image_thumbnail.html'
 
                              
+
+
+class ElectricityFactoryComponentsForm(forms.ModelForm):
+    class Meta:
+        model = ElectricityFactoryComponents
+        fields = ('component_type', 'name', 'power_in_kw', 'count')
+        labels = {
+            'component_type': 'Тип компонент',
+            'name': 'Име на компонента',
+            'power_in_kw': 'Мощност kW',
+            'count': 'Бройки',
+        }
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'style': 'width:40ch',
+                'autocomplete': 'off',
+                'title': 'Plan name'}),
+            'power_in_kw': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'style': 'width:9ch',
+            }),
+            'count': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'style': 'width:9ch',
+            }),
+        }
+        
+    def __init__(self, *args, **kwargs):
+        super(ElectricityFactoryComponentsForm, self).__init__(*args, **kwargs)
+        # If you pass FormHelper constructor a form instance
+        # It builds a default layout with all its fields
+        self.helper = FormHelper(self)
+        self.helper.form_show_labels = False
+        self.helper.form_class = 'form-horizontal'
+        self.helper.layout = Layout(
+            Row(
+                Column('component_type', css_class='form-group col-md-2 mb-0'),
+                Column('name',           css_class='form-group col-md-6 mb-0'),
+                Column('power_in_kw', css_class='form-group col-md-2 mb-0'),
+                Column('count', css_class='form-group col-md-2 mb-0'),
+                css_class='form-row'
+            )
+        )        
+
 class FactoryModelForm(forms.ModelForm):
+  
     def __init__(self, *args, **kwargs):
         super(FactoryModelForm, self).__init__(*args, **kwargs)
 
@@ -500,11 +548,12 @@ class FactoryModelForm(forms.ModelForm):
 
         factory_type = forms.TypedChoiceField( 
                    choices = FACTORY_TYPE_CHOISES, 
-                   label= 'Вид електроцентрала',
+                   label = 'Вид електроцентрала',
                    coerce = str
                   ) 
         self.fields['factory_type'] = factory_type
-
+        save = Submit('save', 'Запази', css_class='btn btn-primary')
+        save.field_classes = 'btn btn-success'
         # If you pass FormHelper constructor a form instance
         # It builds a default layout with all its fields
         self.helper = FormHelper(self)
@@ -529,7 +578,9 @@ class FactoryModelForm(forms.ModelForm):
                 Column(CustomImageField('image'), css_class='form-group col-md-12'),
                 css_class='form-row'
             ),
-            Submit('add', 'Добави')
+            HTML('<h2>Техинически детайли за компонентите</h2>'),
+            Formset('formset'),
+            save,
         )
 
     class Meta:
@@ -563,49 +614,3 @@ class FactoryModelForm(forms.ModelForm):
                 }),
         }
 
-from django import forms
-from django.forms.models import inlineformset_factory
-from .models.factory import ElectricityFactoryComponents
-
-
-class ElectricityFactoryComponentsForm(forms.ModelForm):
-    class Meta:
-        model = ElectricityFactoryComponents
-        fields = ('component_type', 'name', 'power_in_kw', 'count')
-        labels = {
-            'component_type': 'Тип компонент',
-            'name': 'Име на компонента',
-            'power_in_kw': 'Мощност kW',
-            'count': 'Бройки',
-        }
-        widgets = {
-            'name': forms.TextInput(attrs={
-                'class': 'form-control',
-                'style': 'width:20ch',
-                'autocomplete': 'off',
-                'title': 'Plan name'}),
-            'power_in_kw': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'style': 'width:9ch',
-            }),
-            'count': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'style': 'width:9ch',
-            }),
-        }
-        
-    def __init__(self, *args, **kwargs):
-        super(ElectricityFactoryComponentsForm, self).__init__(*args, **kwargs)
-        # If you pass FormHelper constructor a form instance
-        # It builds a default layout with all its fields
-        self.helper = FormHelper(self)
-        self.helper.layout = Layout(
-            Row(
-                Column('component_type', css_class='form-group col-md-2 mb-0'),
-                Column('name',           css_class='form-group col-md-2 mb-0'),
-                Column('power_in_kw', css_class='form-group col-md-1 mb-0'),
-                Column('count', css_class='form-group col-md-1 mb-0'),
-                Submit('save', 'Запази',  css_class='btn btn-primary'),
-                css_class='form-row'
-            )
-        )        

@@ -7,12 +7,13 @@
 
 {% block content %}
 <section style="background-color: #eee;">
-    <div class="container py-5">
-      {% include "snippets/factory_card.html"%}
-    </div>
-    
-    {% for form in formset %}
-        {% crispy form form.helper %}
-    {% endfor %}
+  <div class="container py-5">
+    {% include "snippets/factory_card.html"%}
+  </div>
+</section>
+<section style="background-color: #eee;">
+  <div class="container py-5">
+    {% crispy form %}
+  </div>
 </section>
 {% endblock %}

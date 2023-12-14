@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.generic.base import TemplateView
 
-from .views.factory import view_all_factories_paganated, view_factory_detail, view_factory_production, view_campaign_create, view_campaign_active, view_offered_factories_paganated, view_my_factories, view_add_factory, view_factory_components
+from .views.factory import view_all_factories_paganated, view_factory_detail, view_factory_production, view_campaign_create, view_campaign_active, view_offered_factories_paganated, view_my_factories, view_add_factory, FactoryUpdate
 from .views.dashboard import view_dashboard
 from .views.home import view_home
 from .views.profile import view_my_profile, view_user_profile
@@ -31,7 +31,7 @@ urlpatterns = [
     path('factory/add', view_add_factory, name='view_add_factory'),
     path('factory/<int:pk>/active', view_campaign_active, name='campaign_active'),
     path('factory/<int:pk>/campaign', view_campaign_create, name='campaign_create'),
-    path('factory/<int:pk>/components', view_factory_components, name='factory_components'),
+    path('factory/<int:pk>/components', FactoryUpdate.as_view(), name='factory_components'),
     path('factory/all', view_all_factories_paganated, name='factories_list_all'),
     path('production/<int:pk>', view_factory_production,
          name='view_factory_production'),
