@@ -1,0 +1,25 @@
+{% if components|length > 0  %}
+<div class="row justify-content-center mb-3">
+    <div class="col-md-12 col-xl-10">
+      <h2 class="text-center">Данни за проекта</h2>
+      <table class="table align-middle mb-0 bg-white">
+        <thead class="bg-light">
+          <th>Тип</th>
+          <th>Име</th>
+          <th>Мощност kW</th>
+          <th>Брой</th>
+        </thead>
+        <tbody> 
+            {% for comp in components %}
+            <tr class="bg-light">
+                <td>{{comp.component_type}}</td>
+                <td>{{comp.name}}</td>
+                <td>{{comp.power_in_kw}}</td>
+                <td>{{comp.count}}</td>
+              </tr>
+            {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endif %}

@@ -147,9 +147,15 @@ def view_campaign_create(request, pk=None):
 def view_factory_detail(request, pk=None):
     context = common_context(request)
     factory = ElectricityFactory.objects.get(pk=pk)
+    context['factory'] = factory
+    
     campaigns = Campaign.objects.filter(factory=factory).exclude(status=Campaign.Status.CANCELED)
     context['campaigns'] = campaigns
-    context['factory'] = ElectricityFactory.objects.get(pk=pk)
+    
+    components = ElectricityFactoryComponents.objects.filter(factory=factory)
+    context['components'] = components
+
+    
     context['production_plans'] = FactoryProductionPlan.objects.filter(
         factory=factory)
     context['price_plans'] = ElectricityPricePlan.objects.all()
@@ -313,7 +319,7 @@ class FactoryUpdate(UpdateView):
     template_name = 'factory_components.html'
     form_class = FactoryModelForm
     success_url = None
-
+    
     def get_context_data(self, **kwargs):
         context = super(FactoryUpdate, self).get_context_data(**kwargs)
         context.update(common_context(self.request))
@@ -396,6 +402,7 @@ class FactoryCreate(CreateView):
     form_class = FactoryModelForm
     success_url = None
 
+    @login_required(login_url='/oidc/authenticate/')
     def get_context_data(self, **kwargs):
         context = super(FactoryCreate, self).get_context_data(**kwargs)
         context.update(common_context(self.request))
@@ -442,7 +449,6 @@ class FactoryCreate(CreateView):
     def get_success_url(self):
         return reverse_lazy('view_factory', kwargs={'pk': self.object.pk})
 
-@login_required(login_url='/oidc/authenticate/')
 def view_add_factory(request):
     context = common_context(request)
     if request.method == 'POST':
