@@ -11,19 +11,32 @@
             {% endfor %}
         </tr>
     </thead>
-    {% endif %}
-    <tr class="{% cycle row1 row2 %} formset_row">
-        {% for field in form.visible_fields %}
-        <td>
-            {# Include the hidden fields in the form #}
-            {% if forloop.first %}
-            {% for hidden in form.hidden_fields %}
-            {{ hidden }}
+    <tbody>
+        {% endif %}
+        <tr class="{% cycle row1 row2 %} formset_row">
+            {% for field in form.visible_fields %}
+            <td>
+                {# Include the hidden fields in the form #}
+                {% if forloop.first %}
+                {% for hidden in form.hidden_fields %}
+                {{ hidden }}
+                {% endfor %}
+                {% endif %}
+                {{ field | as_crispy_field }}
+            </td>
             {% endfor %}
-            {% endif %}
-            {{ field | as_crispy_field }}
-        </td>
-        {% endfor %}
-    </tr>
+        </tr>
+        {% if forloop.last %}
+    </tbody>
+    {% endif %}
     {% endfor %}
 </table>
+
+<script type="text/javascript">
+    $(function () {
+        $('.formset_row').formset({
+            addText: '<i class="fas fa-plus-circle"></i>',          // Text for the add link
+            deleteText: '<i class="fas fa-trash"></i>',            // Text for the delete link
+        });
+    })
+</script>

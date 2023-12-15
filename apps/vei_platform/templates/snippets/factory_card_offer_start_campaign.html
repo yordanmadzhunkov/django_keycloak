@@ -5,15 +5,20 @@
     <p class="mt-4 mb-1 text-center" style="font-size: 1.00rem;">
         <a href="{{factory|last_completed_campaign_href}}">
             <button class="btn btn-info btn-block" type="button">
-            Успешно приключила кампания за {{factory|last_completed_campaign_amount}} лв
+                Успешно приключила кампания за {{factory|last_completed_campaign_amount}} лв
             </button>
         </a>
     </p>
 </div>
-{% endif %} 
+{% endif %}
 
 <div class="d-flex flex-column mt-4">
     <a href="{% url 'campaign_create' pk=factory.pk %}">
         <button class="btn btn-success" type="button">Предложи за инвестиране</button>
+    </a>
+</div>
+<div class="d-flex flex-column mt-4">
+    <a href="{% url 'factory_edit' pk=factory.pk %}">
+        <button class="btn btn-warning" type="button">Редактирай електроцентралата</button>
     </a>
 </div>

@@ -52,42 +52,8 @@ def view_my_factories(request):
     context['form'] = FactoryModelForm()
     return render(request, "my_factories.html", context)
 
-@login_required(login_url='/oidc/authenticate/')
-def view_add_factory(request):
-    context = common_context(request)
-    if request.method == 'POST':
-        form = FactoryModelForm(request.POST,  request.FILES)
-        if form.is_valid():
-            #{'name': 'Голямата Кофа за Фотони 2', 
-            # 'factory_type': 'FEV', 
-            # 'location': 'България', 
-            # 'opened': datetime.date(2023, 11, 15), 
-            # 'capacity_in_mw': Decimal('2'), 
-            # 'image': None, 
-            # 'tax_id': '5932945923', 
-            # 'owner_name': 'Гошо ЕООД'}
 
-            factory = ElectricityFactory(
-                name=form.cleaned_data['name'],
-                factory_type=form.cleaned_data['factory_type'],
-                manager=request.user,
-                location=form.cleaned_data['location'],
-                opened=form.cleaned_data['opened'],
-                capacity_in_mw=form.cleaned_data['capacity_in_mw'],
-                primary_owner=None,
-                tax_id=form.cleaned_data['tax_id'],
-                owner_name=form.cleaned_data['owner_name'],
-                image=form.cleaned_data['image']
-            )
-            factory.save()
-            messages.success(request, "Електроцентралата е добавена")
-            return redirect(factory.get_absolute_url())
-        else:
-            messages.error(request, "Невалидни данни, моля опитайте отново")
-    else:
-        form = FactoryModelForm()
-    context['form'] = form
-    return render(request, "factory_add.html", context)
+
 
 
 
@@ -339,6 +305,9 @@ from django.db import transaction
 from django.forms.models import inlineformset_factory
 
 
+
+
+
 class FactoryUpdate(UpdateView):
     model = ElectricityFactory
     template_name = 'factory_components.html'
@@ -419,3 +388,93 @@ class FactoryUpdate(UpdateView):
 
     def get_success_url(self):
         return reverse_lazy('view_factory', kwargs={'pk': self.object.pk})
+
+
+class FactoryCreate(CreateView):
+    model = ElectricityFactory
+    template_name = 'factory_create.html'
+    form_class = FactoryModelForm
+    success_url = None
+
+    def get_context_data(self, **kwargs):
+        context = super(FactoryCreate, self).get_context_data(**kwargs)
+        context.update(common_context(self.request))
+        context['factory'] = self.object
+        if self.request.POST:
+            form = FactoryModelForm(self.request.POST, instance=self.object)
+            context['form'] = form
+        else:
+            context['form'] = FactoryModelForm(instance=self.object)
+            FactoryComponentsFormSet = inlineformset_factory(           
+                ElectricityFactory, 
+                ElectricityFactoryComponents, 
+                form=ElectricityFactoryComponentsForm,
+                fields=['component_type', 'name', 'power_in_kw', 'count'], 
+                extra=2, can_delete=True
+                )
+            context['formset'] = FactoryComponentsFormSet(instance=self.object)
+        return context
+
+
+    def form_valid(self, form):
+        form.instance.manager = self.request.user
+        created_factory = form.save(commit=False)
+        FactoryComponentsFormSet = inlineformset_factory(           
+                ElectricityFactory, 
+                ElectricityFactoryComponents, 
+                form=ElectricityFactoryComponentsForm,
+                fields=['component_type', 'name', 'power_in_kw', 'count'], 
+                can_delete=True
+                )
+        formset = FactoryComponentsFormSet(self.request.POST, instance=created_factory)
+        if formset.is_valid():
+            created_factory.save()
+            formset.save()
+        else:
+            messages.error(self.request, "Грешка при компонентите, моля опитайте пак")
+        messages.success(self.request, "Електроцентралата е добавена")
+        return super(FactoryCreate, self).form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Невалидни данни, моля опитайте отново")
+        return super(FactoryCreate).form_invalid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('view_factory', kwargs={'pk': self.object.pk})
+
+@login_required(login_url='/oidc/authenticate/')
+def view_add_factory(request):
+    context = common_context(request)
+    if request.method == 'POST':
+        form = FactoryModelForm(request.POST,  request.FILES)
+        if form.is_valid():
+            #{'name': 'Голямата Кофа за Фотони 2', 
+            # 'factory_type': 'FEV', 
+            # 'location': 'България', 
+            # 'opened': datetime.date(2023, 11, 15), 
+            # 'capacity_in_mw': Decimal('2'), 
+            # 'image': None, 
+            # 'tax_id': '5932945923', 
+            # 'owner_name': 'Гошо ЕООД'}
+
+            factory = ElectricityFactory(
+                name=form.cleaned_data['name'],
+                factory_type=form.cleaned_data['factory_type'],
+                manager=request.user,
+                location=form.cleaned_data['location'],
+                opened=form.cleaned_data['opened'],
+                capacity_in_mw=form.cleaned_data['capacity_in_mw'],
+                primary_owner=None,
+                tax_id=form.cleaned_data['tax_id'],
+                owner_name=form.cleaned_data['owner_name'],
+                image=form.cleaned_data['image']
+            )
+            factory.save()
+            messages.success(request, "Електроцентралата е добавена")
+            return redirect(factory.get_absolute_url())
+        else:
+            messages.error(request, "Невалидни данни, моля опитайте отново")
+    else:
+        form = FactoryModelForm()
+    context['form'] = form
+    return render(request, "factory_create.html", context)
