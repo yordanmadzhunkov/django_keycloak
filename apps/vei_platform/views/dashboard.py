@@ -23,6 +23,7 @@ def view_dashboard(request):
                 for c in factory_campaigns:
                     campaigns.append(c)
             context['campaigns'] = campaigns
-        else:
-            return redirect('home')
-    return render(request, "dashboard.html", context)
+            return render(request, "dashboard.html", context)
+        
+    return redirect('home')
+    
