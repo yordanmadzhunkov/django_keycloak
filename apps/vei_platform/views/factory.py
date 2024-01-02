@@ -331,17 +331,19 @@ class FactoryUpdate(UpdateView):
                 ElectricityFactory, 
                 ElectricityFactoryComponents, 
                 form=ElectricityFactoryComponentsForm,
-                fields=['component_type', 'name', 'power_in_kw', 'count'], 
+                fields=['component_type', 'name', 'power_in_kw', 'count', 'docfile'], 
                 can_delete=True
                 )
-            context['formset'] = FactoryComponentsFormSet(self.request.POST, instance=self.object)
+            context['formset'] = FactoryComponentsFormSet(data=self.request.POST, 
+                                                          files=self.request.FILES,
+                                                          instance=self.object)
         else:
             context['form'] = FactoryModelForm(instance=self.object)
             FactoryComponentsFormSet = inlineformset_factory(           
                 ElectricityFactory, 
                 ElectricityFactoryComponents, 
                 form=ElectricityFactoryComponentsForm,
-                fields=['component_type', 'name', 'power_in_kw', 'count'], 
+                fields=['component_type', 'name', 'power_in_kw', 'count', 'docfile'], 
                 extra=2, can_delete=True
                 )
             context['formset'] = FactoryComponentsFormSet(instance=self.object)
@@ -351,43 +353,44 @@ class FactoryUpdate(UpdateView):
         context = self.get_context_data()
         for component_form in context['formset']:
             if component_form.is_valid():
-                d = component_form.cleaned_data
-                if 'id' in d.keys() and d['id'] is None:
-                    # CREATE
-                    new_comp = ElectricityFactoryComponents(
-                        name = d['name'],
-                        component_type =  d['component_type'],
-                        power_in_kw = d['power_in_kw'],
-                        factory = self.object,
-                        count = d['count'],
-                        )
-                    new_comp.save()
+                component_form.save()
+#                d = component_form.cleaned_data
+#                if 'id' in d.keys() and d['id'] is None:
+#                    # CREATE
+#                    new_comp = ElectricityFactoryComponents(
+#                        name = d['name'],
+#                        component_type =  d['component_type'],
+#                        power_in_kw = d['power_in_kw'],
+#                        factory = self.object,
+#                        count = d['count'],
+#                        )
+#                    new_comp.save()
 
-                if 'id' in d.keys() and d['id'] is not None:
-                    comp = d['id'] 
-                    # DELETE HARD
-                    if 'DELETE' in d.keys() and d['DELETE']:
-                        comp.delete()
-                    else:
-                        needs_update = False
-                        if comp.name != d['name']:
-                            comp.name = d['name']
-                            needs_update = True
+#                if 'id' in d.keys() and d['id'] is not None:
+#                    comp = d['id'] 
+#                    # DELETE HARD
+#                    if 'DELETE' in d.keys() and d['DELETE']:
+#                        comp.delete()
+#                    else:
+#                        needs_update = False
+#                        if comp.name != d['name']:
+#                            comp.name = d['name']
+#                            needs_update = True
 
-                        if comp.component_type != d['component_type']:
-                            comp.component_type = d['component_type']
-                            needs_update = True
+#                        if comp.component_type != d['component_type']:
+#                            comp.component_type = d['component_type']
+#                            needs_update = True
 
-                        if comp.power_in_kw != d['power_in_kw']:
-                            comp.power_in_kw = d['power_in_kw']
-                            needs_update = True
+#                        if comp.power_in_kw != d['power_in_kw']:
+#                            comp.power_in_kw = d['power_in_kw']
+#                            needs_update = True
 
-                        if comp.count != d['count']:
-                            comp.count = d['count']
-                            needs_update = True
+#                        if comp.count != d['count']:
+#                            comp.count = d['count']
+#                            needs_update = True
 
-                        if needs_update:
-                            comp.save()
+#                        if needs_update:
+#                            comp.save()
 
         return super(FactoryUpdate, self).form_valid(form)
 
@@ -408,7 +411,9 @@ class FactoryCreate(CreateView):
         context.update(common_context(self.request))
         context['factory'] = self.object
         if self.request.POST:
-            form = FactoryModelForm(self.request.POST, instance=self.object)
+            form = FactoryModelForm(data=self.request.POST, 
+                                    files=self.request.FILES, 
+                                    instance=self.object)
             context['form'] = form
         else:
             context['form'] = FactoryModelForm(instance=self.object)
@@ -416,7 +421,7 @@ class FactoryCreate(CreateView):
                 ElectricityFactory, 
                 ElectricityFactoryComponents, 
                 form=ElectricityFactoryComponentsForm,
-                fields=['component_type', 'name', 'power_in_kw', 'count'], 
+                fields=['component_type', 'name', 'power_in_kw', 'count', 'docfile'], 
                 extra=2, can_delete=True
                 )
             context['formset'] = FactoryComponentsFormSet(instance=self.object)
@@ -430,10 +435,12 @@ class FactoryCreate(CreateView):
                 ElectricityFactory, 
                 ElectricityFactoryComponents, 
                 form=ElectricityFactoryComponentsForm,
-                fields=['component_type', 'name', 'power_in_kw', 'count'], 
+                fields=['component_type', 'name', 'power_in_kw', 'count', 'docfile'], 
                 can_delete=True
                 )
-        formset = FactoryComponentsFormSet(self.request.POST, instance=created_factory)
+        formset = FactoryComponentsFormSet(data=self.request.POST, 
+                                           files=self.request.FILES, 
+                                           instance=created_factory)
         if formset.is_valid():
             created_factory.save()
             formset.save()
@@ -452,7 +459,7 @@ class FactoryCreate(CreateView):
 def view_add_factory(request):
     context = common_context(request)
     if request.method == 'POST':
-        form = FactoryModelForm(request.POST,  request.FILES)
+        form = FactoryModelForm(request.POST, request.FILES)
         if form.is_valid():
             #{'name': 'Голямата Кофа за Фотони 2', 
             # 'factory_type': 'FEV', 

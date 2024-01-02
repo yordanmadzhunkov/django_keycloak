@@ -13,6 +13,8 @@ def user_image_upload_directory_path(instance, filename):
     # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
     return "images/user_{0}/{1}".format(str(instance.manager), filename)
 
+def user_file_upload_directory_path(instance, filename):
+    return "documents/user_{0}/factory_{1}/{2}".format(str(instance.factory.manager), instance.factory.pk, filename)
 
 class ElectricityFactory(models.Model):
     name = models.CharField(max_length=128)
@@ -116,6 +118,8 @@ class ElectricityFactoryComponents(models.Model):
     factory = models.ForeignKey(ElectricityFactory, null=True, blank=True, default=None, on_delete=models.DO_NOTHING)
     power_in_kw = models.DecimalField(null=True, blank=True, default=None, decimal_places=3, max_digits=9)
     count = models.IntegerField(default=1)
+    docfile = models.FileField(
+        upload_to=user_file_upload_directory_path, default=None, null=True, blank=True)
     
     def __str__(self) -> str:
         return '%s %s kW x %d' % (self.name, self.power_in_kw, self.count)

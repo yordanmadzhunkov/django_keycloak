@@ -493,12 +493,13 @@ class CustomImageField(Field):
 class ElectricityFactoryComponentsForm(forms.ModelForm):
     class Meta:
         model = ElectricityFactoryComponents
-        fields = ('component_type', 'name', 'power_in_kw', 'count')
+        fields = ('component_type', 'name', 'power_in_kw', 'count', 'docfile')
         labels = {
             'component_type': 'Тип компонент',
             'name': 'Име на компонента',
             'power_in_kw': 'Мощност kW',
             'count': 'Бройки',
+            'docfile': 'Документ',
         }
         widgets = {
             'name': forms.TextInput(attrs={
@@ -514,6 +515,7 @@ class ElectricityFactoryComponentsForm(forms.ModelForm):
                 'class': 'form-control',
                 'style': 'width:9ch',
             }),
+            #'docfile': forms.FileField(allow_empty_file=True),
         }
         
     def __init__(self, *args, **kwargs):
@@ -527,8 +529,9 @@ class ElectricityFactoryComponentsForm(forms.ModelForm):
             Row(
                 Column('component_type', css_class='form-group col-md-2 mb-0'),
                 Column('name',           css_class='form-group col-md-6 mb-0'),
-                Column('power_in_kw', css_class='form-group col-md-2 mb-0'),
-                Column('count', css_class='form-group col-md-2 mb-0'),
+                Column('power_in_kw',    css_class='form-group col-md-2 mb-0'),
+                Column('count',          css_class='form-group col-md-2 mb-0'),
+                Column('docfile',        css_class='form-group col-md-2 mb-0'),
                 css_class='form-row'
             )
         )        
