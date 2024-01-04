@@ -6,6 +6,7 @@ from vei_platform.models.legal import find_legal_entity
 from vei_platform.models.factory import ElectricityFactory
 
 from decimal import Decimal
+from os import path
 
 register = template.Library()
 
@@ -54,3 +55,7 @@ def balance_from_transactions(account):
     r = BankTransaction.objects.filter(account=account).aggregate(
         total=models.Sum(models.F('amount') - models.F('fee')))
     return Decimal(r['total'] if r['total'] else 0)
+
+@register.filter(is_safe=True)
+def basename(filepath):
+    return path.basename(filepath)

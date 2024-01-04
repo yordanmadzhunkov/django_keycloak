@@ -18,6 +18,10 @@ from django import template
 from django.forms import formset_factory
 from django.forms.models import model_to_dict
 
+from django.urls import reverse_lazy
+from django.db import transaction
+from django.forms.models import inlineformset_factory
+
 
 def view_offered_factories():
     campaigns = Campaign.objects.order_by('factory')
@@ -53,12 +57,6 @@ def view_my_factories(request):
     return render(request, "my_factories.html", context)
 
 
-
-
-
-
-
-
 def view_all_factories_paganated(request):
     factories_list = ElectricityFactory.objects.all().order_by('pk')
     paginator = Paginator(factories_list, 5)  # Show 25 contacts per page.
@@ -68,6 +66,7 @@ def view_all_factories_paganated(request):
     context['page_obj'] = page_obj
     context['factory_list_title'] = 'Електроцентали от възобновяеми източници на енергия'
     return render(request, "factories_list.html", context)
+
 
 def view_campaign_active(request, pk):
     context = common_context(request)
@@ -306,12 +305,17 @@ def view_factory_production(request, pk=None):
     return render(request, "factory_production.html", context)
 
 
-from django.urls import reverse_lazy
-from django.db import transaction
-from django.forms.models import inlineformset_factory
-
-
-
+def extract_error_messages_from(request, formset):
+    for f in formset:
+        if not f.is_valid():
+            if 'docfile' in f.errors.keys():
+                s = str(f.errors['docfile']) 
+                if s.find('Filetype not supported') > 0:
+                    messages.error(request, "Грешен тип на прикачения файл")
+                elif s.find('Please keep filesize under') > 0:
+                    messages.error(request, "Прикачения файл е прекаленно голям")
+                else:
+                    messages.error(request, "Файлът го няма - изчезнал е")
 
 
 class FactoryUpdate(UpdateView):
@@ -351,48 +355,22 @@ class FactoryUpdate(UpdateView):
 
     def form_valid(self, form):
         context = self.get_context_data()
-        for component_form in context['formset']:
+        formset = context['formset']
+        for component_form in formset:
             if component_form.is_valid():
-                component_form.save()
-#                d = component_form.cleaned_data
-#                if 'id' in d.keys() and d['id'] is None:
-#                    # CREATE
-#                    new_comp = ElectricityFactoryComponents(
-#                        name = d['name'],
-#                        component_type =  d['component_type'],
-#                        power_in_kw = d['power_in_kw'],
-#                        factory = self.object,
-#                        count = d['count'],
-#                        )
-#                    new_comp.save()
+                d = component_form.cleaned_data
+                # DELETE HARD
+                do_delete = 'DELETE' in d.keys() and d['DELETE']
+                if 'id' in d.keys():
+                    id = d['id']
+                    if id is not None and do_delete:
+                        id.delete()
+                    else:
+                        component_form.save()
 
-#                if 'id' in d.keys() and d['id'] is not None:
-#                    comp = d['id'] 
-#                    # DELETE HARD
-#                    if 'DELETE' in d.keys() and d['DELETE']:
-#                        comp.delete()
-#                    else:
-#                        needs_update = False
-#                        if comp.name != d['name']:
-#                            comp.name = d['name']
-#                            needs_update = True
-
-#                        if comp.component_type != d['component_type']:
-#                            comp.component_type = d['component_type']
-#                            needs_update = True
-
-#                        if comp.power_in_kw != d['power_in_kw']:
-#                            comp.power_in_kw = d['power_in_kw']
-#                            needs_update = True
-
-#                        if comp.count != d['count']:
-#                            comp.count = d['count']
-#                            needs_update = True
-
-#                        if needs_update:
-#                            comp.save()
-
+        extract_error_messages_from(self.request, formset)
         return super(FactoryUpdate, self).form_valid(form)
+
 
 
     def get_success_url(self):
@@ -405,8 +383,10 @@ class FactoryCreate(CreateView):
     form_class = FactoryModelForm
     success_url = None
 
-    @login_required(login_url='/oidc/authenticate/')
     def get_context_data(self, **kwargs):
+        if not self.request.user.is_authenticated:
+            return redirect('login')
+
         context = super(FactoryCreate, self).get_context_data(**kwargs)
         context.update(common_context(self.request))
         context['factory'] = self.object
@@ -429,8 +409,11 @@ class FactoryCreate(CreateView):
 
 
     def form_valid(self, form):
-        form.instance.manager = self.request.user
-        created_factory = form.save(commit=False)
+        created_factory = form.save(commit=True)
+        created_factory.manager = self.request.user
+        created_factory.save()
+        messages.success(self.request, "Електроцентралата е добавена")
+
         FactoryComponentsFormSet = inlineformset_factory(           
                 ElectricityFactory, 
                 ElectricityFactoryComponents, 
@@ -442,11 +425,8 @@ class FactoryCreate(CreateView):
                                            files=self.request.FILES, 
                                            instance=created_factory)
         if formset.is_valid():
-            created_factory.save()
             formset.save()
-        else:
-            messages.error(self.request, "Грешка при компонентите, моля опитайте пак")
-        messages.success(self.request, "Електроцентралата е добавена")
+        extract_error_messages_from(self.request, formset)
         return super(FactoryCreate, self).form_valid(form)
 
     def form_invalid(self, form):
@@ -456,38 +436,3 @@ class FactoryCreate(CreateView):
     def get_success_url(self):
         return reverse_lazy('view_factory', kwargs={'pk': self.object.pk})
 
-def view_add_factory(request):
-    context = common_context(request)
-    if request.method == 'POST':
-        form = FactoryModelForm(request.POST, request.FILES)
-        if form.is_valid():
-            #{'name': 'Голямата Кофа за Фотони 2', 
-            # 'factory_type': 'FEV', 
-            # 'location': 'България', 
-            # 'opened': datetime.date(2023, 11, 15), 
-            # 'capacity_in_mw': Decimal('2'), 
-            # 'image': None, 
-            # 'tax_id': '5932945923', 
-            # 'owner_name': 'Гошо ЕООД'}
-
-            factory = ElectricityFactory(
-                name=form.cleaned_data['name'],
-                factory_type=form.cleaned_data['factory_type'],
-                manager=request.user,
-                location=form.cleaned_data['location'],
-                opened=form.cleaned_data['opened'],
-                capacity_in_mw=form.cleaned_data['capacity_in_mw'],
-                primary_owner=None,
-                tax_id=form.cleaned_data['tax_id'],
-                owner_name=form.cleaned_data['owner_name'],
-                image=form.cleaned_data['image']
-            )
-            factory.save()
-            messages.success(request, "Електроцентралата е добавена")
-            return redirect(factory.get_absolute_url())
-        else:
-            messages.error(request, "Невалидни данни, моля опитайте отново")
-    else:
-        form = FactoryModelForm()
-    context['form'] = form
-    return render(request, "factory_create.html", context)

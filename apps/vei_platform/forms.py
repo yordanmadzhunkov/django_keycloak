@@ -1,6 +1,6 @@
 from django import forms
 from datetime import date, datetime
-from .models.factory import FactoryProductionPlan, ElectricityFactory, ElectricityFactoryComponents
+from .models.factory import FactoryProductionPlan, ElectricityFactory, ElectricityFactoryComponents, docfile_content_types
 from .models.finance_modeling import ElectricityPricePlan, BankLoan, BankAccount, BankTransaction, InvestementInCampaign
 from .models.profile import UserProfile
 from .models.legal import LegalEntity, find_legal_entity
@@ -515,7 +515,10 @@ class ElectricityFactoryComponentsForm(forms.ModelForm):
                 'class': 'form-control',
                 'style': 'width:9ch',
             }),
-            #'docfile': forms.FileField(allow_empty_file=True),
+            'docfile': forms.ClearableFileInput(attrs={'accept': docfile_content_types(),
+                                                    
+                                                       #'application/pdf'
+                                                       })
         }
         
     def __init__(self, *args, **kwargs):
@@ -534,7 +537,16 @@ class ElectricityFactoryComponentsForm(forms.ModelForm):
                 Column('docfile',        css_class='form-group col-md-2 mb-0'),
                 css_class='form-row'
             )
-        )        
+        )
+
+    #def form_invalid(self, request, form):
+    #    # Note: I added request as an argument because I was getting an error that
+    #    # says the method is expecting 2 arguments but got 3.
+    #    return render(self.request, self.template_name, 
+    #        self.get_context_data(
+    #            form=form
+    #        )
+    #    )        
 
 class FactoryModelForm(forms.ModelForm):
   

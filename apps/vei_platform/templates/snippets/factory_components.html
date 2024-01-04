@@ -1,25 +1,32 @@
-{% if components|length > 0  %}
+{% if components|length > 0 %}
+{% load vei_platform_utils %}
 <div class="row justify-content-center mb-3">
     <div class="col-md-12 col-xl-10">
-      <h2 class="text-center">Данни за проекта</h2>
-      <table class="table align-middle mb-0 bg-white">
-        <thead class="bg-light">
-          <th>Тип</th>
-          <th>Име</th>
-          <th>Мощност kW</th>
-          <th>Брой</th>
-        </thead>
-        <tbody> 
-            {% for comp in components %}
-            <tr class="bg-light">
-                <td>{{comp.component_type}}</td>
-                <td>{{comp.name}}</td>
-                <td>{{comp.power_in_kw}}</td>
-                <td>{{comp.count}}</td>
-              </tr>
-            {% endfor %}
-        </tbody>
-      </table>
+        <h2 class="text-center">Данни за проекта</h2>
+        <table class="table align-middle mb-0 bg-white">
+            <thead class="bg-light">
+                <th>Тип</th>
+                <th>Име</th>
+                <th>Мощност kW</th>
+                <th>Брой</th>
+                <th>Документи</th>
+            </thead>
+            <tbody>
+                {% for comp in components %}
+                <tr class="bg-light">
+                    <td>{{comp.component_type}}</td>
+                    <td>{{comp.name}}</td>
+                    <td>{{comp.power_in_kw}}</td>
+                    <td>{{comp.count}}</td>
+                    <td>{% if comp.docfile %}
+                        <a href="/media/{{comp.docfile}}"> {{comp.docfile.name|basename}} </a>
+                        {% endif %}
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
-  </div>
+</div>
 {% endif %}

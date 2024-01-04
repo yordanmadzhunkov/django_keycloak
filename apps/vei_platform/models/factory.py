@@ -8,13 +8,14 @@ from django.dispatch import receiver
 from django_q.tasks import async_task
 
 from django.core.validators import MaxValueValidator, MinValueValidator
+from .restricted_file_field import RestrictedFileField
 
 def user_image_upload_directory_path(instance, filename):
     # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
     return "images/user_{0}/{1}".format(str(instance.manager), filename)
 
-def user_file_upload_directory_path(instance, filename):
-    return "documents/user_{0}/factory_{1}/{2}".format(str(instance.factory.manager), instance.factory.pk, filename)
+def factory_component_file_upload_directory_path(instance, filename):
+    return "documents/factory_{0}/{1}".format(instance.factory.pk, filename)
 
 class ElectricityFactory(models.Model):
     name = models.CharField(max_length=128)
@@ -95,6 +96,10 @@ class ElectricityFactory(models.Model):
             return None
         
 
+    
+def docfile_content_types():
+    return ['video/x-msvideo', 'application/pdf', 'video/mp4', 'audio/mpeg', ]
+
 class ElectricityFactoryComponents(models.Model):
         # Factory type
     PHOTO_PANEL = 'PAN'
@@ -118,12 +123,57 @@ class ElectricityFactoryComponents(models.Model):
     factory = models.ForeignKey(ElectricityFactory, null=True, blank=True, default=None, on_delete=models.DO_NOTHING)
     power_in_kw = models.DecimalField(null=True, blank=True, default=None, decimal_places=3, max_digits=9)
     count = models.IntegerField(default=1)
-    docfile = models.FileField(
-        upload_to=user_file_upload_directory_path, default=None, null=True, blank=True)
+    docfile = RestrictedFileField(
+        upload_to=factory_component_file_upload_directory_path,
+        content_types=docfile_content_types(),#['application/pdf',],
+        max_upload_size=5242880, # 5 MB
+        default=None, 
+        null=True, 
+        blank=True)
     
+
+
     def __str__(self) -> str:
         return '%s %s kW x %d' % (self.name, self.power_in_kw, self.count)
         
+
+import os
+from django.db import models
+
+def _delete_file(path):
+   """ Deletes file from filesystem. """
+   if os.path.isfile(path):
+        print("cleaning " + path)
+        try:
+            os.remove(path)
+        except FileNotFoundError:
+            pass
+
+
+@receiver(models.signals.post_delete, sender=ElectricityFactoryComponents)
+def delete_file(sender, instance, *args, **kwargs):
+    """ Deletes image files on `post_delete` """
+    if instance.docfile:
+        _delete_file(instance.docfile.path)
+
+@receiver(models.signals.pre_save, sender=ElectricityFactoryComponents)
+def auto_delete_file_on_change(sender, instance, update_fields, **kwargs):
+    """
+    Deletes old file from filesystem
+    when corresponding `ElectricityFactoryComponents` object is updated
+    with new file.
+    """
+    #print(update_fields)
+    if not instance.pk:
+        return False
+
+    try:
+        old_file = ElectricityFactoryComponents.objects.get(pk=instance.pk).docfile
+        if old_file:
+            _delete_file(old_file.path)   
+    except ElectricityFactoryComponents.DoesNotExist:
+        return False
+
 
 def parse_energy(x):
     map = {

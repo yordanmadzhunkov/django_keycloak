@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='electricityfactorycomponents',
             name='docfile',
-            field=models.FileField(blank=True, default=None, null=True, upload_to=vei_platform.models.factory.user_file_upload_directory_path),
+            field=models.FileField(blank=True, default=None, null=True, upload_to=vei_platform.models.factory.factory_component_file_upload_directory_path),
         ),
     ]
