@@ -515,10 +515,9 @@ class ElectricityFactoryComponentsForm(forms.ModelForm):
                 'class': 'form-control',
                 'style': 'width:9ch',
             }),
-            'docfile': forms.ClearableFileInput(attrs={'accept': docfile_content_types(),
-                                                    
-                                                       #'application/pdf'
-                                                       })
+            'docfile': forms.ClearableFileInput(
+                attrs={'accept': docfile_content_types(),                                           
+            })
         }
         
     def __init__(self, *args, **kwargs):
@@ -539,14 +538,7 @@ class ElectricityFactoryComponentsForm(forms.ModelForm):
             )
         )
 
-    #def form_invalid(self, request, form):
-    #    # Note: I added request as an argument because I was getting an error that
-    #    # says the method is expecting 2 arguments but got 3.
-    #    return render(self.request, self.template_name, 
-    #        self.get_context_data(
-    #            form=form
-    #        )
-    #    )        
+
 
 class FactoryModelForm(forms.ModelForm):
   

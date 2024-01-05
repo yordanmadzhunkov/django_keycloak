@@ -98,7 +98,7 @@ class ElectricityFactory(models.Model):
 
     
 def docfile_content_types():
-    return ['video/x-msvideo', 'application/pdf', 'video/mp4', 'audio/mpeg', ]
+    return 'application/pdf'
 
 class ElectricityFactoryComponents(models.Model):
         # Factory type
