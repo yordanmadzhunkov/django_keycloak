@@ -25,8 +25,8 @@ class RestrictedFileField(FileField):
             null=True)
     """    
     def __init__(self, *args, **kwargs):
-        self.content_types = kwargs.pop("content_types")
-        self.max_upload_size = kwargs.pop("max_upload_size")
+        self.content_types = kwargs.pop("content_types", [])
+        self.max_upload_size = kwargs.pop("max_upload_size", 5242880)
 
         super(RestrictedFileField, self).__init__(*args, **kwargs)
 
