@@ -27,3 +27,4 @@ pillow
 psutil
 bs4
 
+python-gettext 

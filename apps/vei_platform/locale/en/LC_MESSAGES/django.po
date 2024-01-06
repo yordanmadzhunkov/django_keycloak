@@ -1,0 +1,56 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-05 13:09+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+#: vei_platform/models/restricted_file_field.py:39
+msgid "File is missing."
+msgstr ""
+
+#: vei_platform/models/restricted_file_field.py:41
+msgid "Cant open file."
+msgstr ""
+
+#: vei_platform/models/restricted_file_field.py:48
+#, python-format
+msgid "Please keep filesize under %s. Current filesize %s"
+msgstr ""
+
+#: vei_platform/models/restricted_file_field.py:50
+msgid "Filetype not supported."
+msgstr ""
+
+#: vei_platform/settings/base.py:126
+msgid "English"
+msgstr ""
+
+#: vei_platform/settings/base.py:127
+msgid "Bulgarian"
+msgstr ""
+
+#: vei_platform/views/factory.py:45 vei_platform/views/factory.py:67
+msgid "Електроцентали от възобновяеми източници на енергия"
+msgstr ""
+
+#: vei_platform/views/factory.py:135
+#, python-format
+msgid "Успешно стартирахте кампания за набиране на инвеститори до %s"
+msgstr ""
+
+#: vei_platform/views/factory.py:138
+msgid "Невалидни данни, моля опитайте отново"
+msgstr ""

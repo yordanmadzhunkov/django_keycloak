@@ -43,6 +43,7 @@ HEALTH_CHECK = {
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware', #right place
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -63,6 +64,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.i18n',
             ],
         },
     },
@@ -112,13 +114,19 @@ SITE_ID = 1
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
+USE_I18N = True
+USE_L10N = True
+USE_TZ = True
 
 LANGUAGE_CODE = config("LANGUAGE_CODE", default="en-us")
 TIME_ZONE = config("TIME_ZONE", default="UTC")
 
-USE_I18N = True
-USE_L10N = True
-USE_TZ = True
+ugettext = lambda s: s        
+LANGUAGES = (
+            ( 'en-us', ugettext( 'English' )),
+            ( 'bg', ugettext( 'Bulgarian' )),
+)        
+
 
 STATICFILES_DIRS = (
     (BASE_DIR / 'static_to_collect'),
@@ -132,8 +140,8 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media/'
 
 
+LOCALE_PATHS = ((BASE_DIR / 'locale' ), ) # translation files will be created into 'locale' folder from root project folder
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
-
 
 MESSAGE_TAGS = {
     messages.DEBUG: 'alert-info',

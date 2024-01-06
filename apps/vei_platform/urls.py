@@ -17,10 +17,13 @@ from .views.invest import view_campaign
 from .views.team import view_team
 
 urlpatterns = [
-    path('', view_home, name="home"),
+    
     path('admin/', admin.site.urls),
+    path('i18n/', include('django.conf.urls.i18n')),
     path('oidc/', include('mozilla_django_oidc.urls')),
     path('ht/', include('health_check.urls')),
+    
+    path('', view_home, name="home"),
     path('dashboard', view_dashboard, name='dashboard'),
     path('profile', view_my_profile, name='my_profile'),
     path('profile/<int:pk>', view_user_profile, name='user_profile'),
