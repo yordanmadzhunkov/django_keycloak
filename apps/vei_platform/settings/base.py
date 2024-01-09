@@ -118,13 +118,13 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-LANGUAGE_CODE = config("LANGUAGE_CODE", default="en-us")
+LANGUAGE_CODE = config("LANGUAGE_CODE", default="en")
 TIME_ZONE = config("TIME_ZONE", default="UTC")
 
 ugettext = lambda s: s        
 LANGUAGES = (
-            ( 'en-us', ugettext( 'English' )),
-            ( 'bg', ugettext( 'Bulgarian' )),
+    ( 'en', ugettext( 'English' )),
+    ( 'bg', ugettext( 'Български' )),
 )        
 
 

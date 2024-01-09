@@ -21,6 +21,7 @@
         {% comment %}
         {% include "snippets/topbar_search_toggle.html" %}
         {% endcomment %}
+        {% include "snippets/setlang.html" %}
         {% comment %}
         {% include "snippets/topbar_alerts.html" %}
         {% include "snippets/topbar_messages.html" %}
@@ -28,16 +29,6 @@
         {% endcomment %}
         <div class="topbar-divider d-none d-sm-block"></div>
         {% include "snippets/topbar_user.html" %}
-        <form action="/i18n/setlang/" method="post">{% csrf_token %}
-            <input name="next" type="hidden" value="/" />
-            <select name="language">
-                <option value="en">English</option>
-                <option value="nl">Dutch\Nederlands</option>
-                <option value="ru">Russian\Русский</option>
-                <option value="zh-cn">Simplified Chinese-简体中文</option>
-            </select>
-            <input type="submit" value="Go" />
-        </form>  
     </ul>
 </nav>
 <!-- End of Topbar -->

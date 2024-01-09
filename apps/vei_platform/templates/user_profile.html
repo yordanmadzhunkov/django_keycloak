@@ -10,23 +10,23 @@
         <img class="img-profile rounded-circle" src={{user_profile.get_avatar_url}}></img>
         <table class="table w-auto text-lg">
             <tr>
-                <td>User</td>
+                <td> {% trans "User" %} </td>
                 <td> {{ user_profile.get_display_name }} </td>
             </tr>
             <tr>
-                <td>is staff</td>
+                <td>{% trans "Is staff" %}</td>
                 <td> {{ user_profile.is_staff }} </td>
             </tr>
             <tr>
-                <td>is_active</td>
+                <td> {% trans "Is active" %} </td>
                 <td> {{ user_profile.is_active }}</td>
             </tr>
             <tr>
-                <td>Member since</td>
+                <td>{% trans "Member since" %}</td>
                 <td> {{ user_profile.date_joined }}</td>
             </tr>
             <tr>
-                <td>Last Login</td>
+                <td>{% trans "Last Login" %}</td>
                 <td> {{ user_profile.last_login }}</td>
             </tr>
         </table>

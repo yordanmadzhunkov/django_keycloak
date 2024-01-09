@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-05 13:08+0000\n"
+"POT-Creation-Date: 2024-01-09 15:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,40 +17,156 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
 #: vei_platform/models/restricted_file_field.py:39
 msgid "File is missing."
-msgstr ""
+msgstr "Файлът липсва"
 
 #: vei_platform/models/restricted_file_field.py:41
 msgid "Cant open file."
-msgstr ""
+msgstr "Файлът не се отваря"
 
 #: vei_platform/models/restricted_file_field.py:48
 #, python-format
 msgid "Please keep filesize under %s. Current filesize %s"
-msgstr ""
+msgstr "Размера на файлът трябва да е под %s. Текущият размер е %s"
 
 #: vei_platform/models/restricted_file_field.py:50
 msgid "Filetype not supported."
-msgstr ""
+msgstr "Не поддържаме този тип файлове"
 
 #: vei_platform/settings/base.py:126
 msgid "English"
-msgstr ""
+msgstr "Английски"
 
 #: vei_platform/settings/base.py:127
-msgid "Bulgarian"
+msgid "Български"
+msgstr "Български"
+
+#: vei_platform/templates/snippets/logout_modal.html:9
+msgid "Ready to Leave?"
+msgstr "Искате да излезете"
+
+#: vei_platform/templates/snippets/logout_modal.html:14
+msgid "Select 'Logout' below if you are ready to end your current session."
+msgstr "Натиснете 'Изход', ако искате да излезете от текущата сесия"
+
+#: vei_platform/templates/snippets/logout_modal.html:17
+msgid "Cancel"
+msgstr "Отказ"
+
+#: vei_platform/templates/snippets/logout_modal.html:23
+#: vei_platform/templates/snippets/sidebar.html:89
+#: vei_platform/templates/snippets/topbar_user.html:41
+msgid "Logout"
+msgstr "Изход"
+
+#: vei_platform/templates/snippets/sidebar.html:21
+msgid "Dashboard"
+msgstr "Табло"
+
+#: vei_platform/templates/snippets/sidebar.html:28
+msgid "Offers for investors"
+msgstr "Предложения за инвестиране"
+
+#: vei_platform/templates/snippets/sidebar.html:35
+msgid "Offer your Electrical factory"
+msgstr "Предложи твоята електроцентрала"
+
+#: vei_platform/templates/snippets/sidebar.html:42
+msgid "About us"
+msgstr "За нас"
+
+#: vei_platform/templates/snippets/sidebar.html:50
+msgid "Factory list"
+msgstr "Списък с електроцентрали"
+
+#: vei_platform/templates/snippets/sidebar.html:60
+msgid "Admin"
+msgstr "Админ"
+
+#: vei_platform/templates/snippets/sidebar.html:66
+msgid "Platform legal"
 msgstr ""
 
-#: vei_platform/views/factory.py:45 vei_platform/views/factory.py:67
-msgid "Електроцентали от възобновяеми източници на енергия"
+#: vei_platform/templates/snippets/sidebar.html:67
+msgid "Scriping tools"
 msgstr ""
+
+#: vei_platform/templates/snippets/sidebar.html:82
+#: vei_platform/templates/snippets/topbar_user.html:28
+msgid "Profile"
+msgstr "Профил"
+
+#: vei_platform/templates/snippets/sidebar.html:87
+#, fuzzy
+#| msgid "Profile"
+msgid "My profile"
+msgstr "Моят профил"
+
+#: vei_platform/templates/snippets/sidebar.html:88
+msgid "KYC"
+msgstr ""
+
+#: vei_platform/templates/snippets/sidebar.html:97
+#, fuzzy
+#| msgid "Log in/Register"
+msgid "Login or Register"
+msgstr "Вход/Регистрация"
+
+#: vei_platform/templates/snippets/topbar_user.html:10
+msgid "Anonymous user"
+msgstr "Анонимен потрбител"
+
+#: vei_platform/templates/snippets/topbar_user.html:32
+msgid "Settings"
+msgstr "Настойки"
+
+#: vei_platform/templates/snippets/topbar_user.html:36
+msgid "Activity Log"
+msgstr "Активностти"
+
+#: vei_platform/templates/snippets/topbar_user.html:46
+msgid "Log in/Register"
+msgstr "Вход/Регистрация"
+
+#: vei_platform/templates/user_profile.html:13
+msgid "User"
+msgstr "Потребител"
+
+#: vei_platform/templates/user_profile.html:17
+msgid "Is staff"
+msgstr "От екипа"
+
+#: vei_platform/templates/user_profile.html:21
+msgid "Is active"
+msgstr "Активен"
+
+#: vei_platform/templates/user_profile.html:25
+msgid "Member since"
+msgstr "Регистриран на"
+
+#: vei_platform/templates/user_profile.html:29
+msgid "Last Login"
+msgstr "Последно онлайн"
+
+#: vei_platform/views/factory.py:45 vei_platform/views/factory.py:67
+msgid "Electrical factories from renewable sources"
+msgstr "Електрически фабрики от възобновяеми източници"
 
 #: vei_platform/views/factory.py:135
 #, python-format
-msgid "Успешно стартирахте кампания за набиране на инвеститори до %s"
+msgid "You have successfully started a campaign to collect investors until %s"
 msgstr ""
+"Успешно стартирахте кампания за набиране на инвеститори. Кампанията изтича "
+"на %s"
 
-#: vei_platform/views/factory.py:138
-msgid "Невалидни данни, моля опитайте отново"
-msgstr ""
+#: vei_platform/views/factory.py:140 vei_platform/views/factory.py:436
+msgid "Invalid data, please try again"
+msgstr "Невалидни данни, моля опитайте отново"
+
+#: vei_platform/views/factory.py:418
+#, fuzzy
+#| msgid "Offer your Electrical factory"
+msgid "Electrical factory added"
+msgstr "Предложи твоята електроцентрала"

@@ -42,7 +42,7 @@ def view_offered_factories_paganated(request):
     page_obj = paginator.get_page(page_number)
     context = common_context(request)
     context['page_obj'] = page_obj
-    context['factory_list_title'] = _('Електроцентали от възобновяеми източници на енергия')
+    context['factory_list_title'] = _('Electrical factories from renewable sources')
     return render(request, "factories_list.html", context)
 
 @login_required(login_url='/oidc/authenticate/')
@@ -64,7 +64,7 @@ def view_all_factories_paganated(request):
     page_obj = paginator.get_page(page_number)
     context = common_context(request)
     context['page_obj'] = page_obj
-    context['factory_list_title'] = _('Електроцентали от възобновяеми източници на енергия')
+    context['factory_list_title'] = _('Electrical factories from renewable sources')
     return render(request, "factories_list.html", context)
 
 
@@ -132,10 +132,13 @@ def view_campaign_create(request, pk=None):
                     factory=factory
             )
             campaign.save()
-            messages.success(request, _('Успешно стартирахте кампания за набиране на инвеститори до %s') % (start_date))
+            messages.success(request, _('You have successfully started a campaign to collect investors until %s')  
+                             #_('Успешно стартирахте кампания за набиране на инвеститори до %s') 
+                             % (start_date))
             return redirect(campaign.get_absolute_url())
         else:
-            messages.error(request, _('Невалидни данни, моля опитайте отново'))
+            messages.error(request, _('Invalid data, please try again'))
+                           #_('Невалидни данни, моля опитайте отново'))
 
     context['new_campaign_form'] = form
     context['hide_link_buttons'] = True
@@ -412,7 +415,7 @@ class FactoryCreate(CreateView):
         created_factory = form.save(commit=True)
         created_factory.manager = self.request.user
         created_factory.save()
-        messages.success(self.request, "Електроцентралата е добавена")
+        messages.success(self.request, _('Electrical factory added'))
 
         FactoryComponentsFormSet = inlineformset_factory(           
                 ElectricityFactory, 
@@ -430,7 +433,7 @@ class FactoryCreate(CreateView):
         return super(FactoryCreate, self).form_valid(form)
 
     def form_invalid(self, form):
-        messages.error(self.request, "Невалидни данни, моля опитайте отново")
+        messages.error(self.request, _('Invalid data, please try again'))
         return super(FactoryCreate).form_invalid(form)
 
     def get_success_url(self):

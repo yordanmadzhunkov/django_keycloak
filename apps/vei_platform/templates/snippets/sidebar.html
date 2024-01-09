@@ -1,3 +1,5 @@
+{% load i18n %}
+
 <!-- Sidebar -->
 <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
@@ -16,28 +18,28 @@
     <li class="nav-item active">
         <a class="nav-link" href="{% url 'dashboard' %}">
             <i class="fas fa-fw fa-tachometer-alt"></i>
-            <span>Моето табло</span></a>
+            <span>{% trans "Dashboard" %}</span></a>
 
     </li>
 
     <li class="nav-item active">
         <a class="nav-link" href="{% url 'campaigns'  %}">
             <i class="fas fa-fw fa-search-dollar"></i>
-            <span>Оферти за инвестори</span>
+            <span>{% trans "Offers for investors" %}</span>
         </a>
     </li>
 
     <li class="nav-item active">
         <a class="nav-link" href="{% url 'my_factories'  %}">
             <i class="fas fa-fw fa-warehouse"></i>
-            <span>Предложи твоята Електроцентрала</span>
+            <span>{% trans "Offer your Electrical factory" %}</span>
         </a>
     </li>
 
     <li class="nav-item active">
         <a class="nav-link" href="{% url 'team'  %}">
             <i class="fas fa-fw fa-users"></i>
-            <span>Нашият екип</span>
+            <span>{% trans "About us" %}</span>
         </a>
     </li>
 
@@ -45,7 +47,7 @@
     <li class="nav-item active">
         <a class="nav-link" href="{% url 'factories_list_all'  %}">
             <i class="fas fa-fw fa-warehouse"></i>
-            <span>Списък с фабрики</span>
+            <span>{% trans "Factory list" %}</span>
         </a>
     </li>
 
@@ -55,14 +57,14 @@
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#admin_collapseUtilities"
             aria-expanded="true" aria-controls="admin_collapseUtilities">
             <i class="fas fa-fw fa-user"></i>
-            <span>Admin</span>
+            <span>{% trans "Admin" %}</span>
         </a>
         <div id="admin_collapseUtilities" class="collapse" aria-labelledby="headingUtilities"
             data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
                 <!-- <h6 class="collapse-header">Custom Utilities:</h6> -->
-                <a class="collapse-item" href="{% url 'platform_legal'    %}">Platform legal </a>
-                <a class="collapse-item" href="{% url 'scriping_tools'     %}">Scriping tools</a>
+                <a class="collapse-item" href="{% url 'platform_legal'    %}">{% trans "Platform legal" %} </a>
+                <a class="collapse-item" href="{% url 'scriping_tools'     %}">{% trans "Scriping tools" %}</a>
             </div>
         </div>
     </li>
@@ -77,14 +79,14 @@
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities"
             aria-expanded="true" aria-controls="collapseUtilities">
             <i class="fas fa-fw fa-user"></i>
-            <span>Профил</span>
+            <span>{% trans "Profile" %}</span>
         </a>
         <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
                 <!-- <h6 class="collapse-header">Custom Utilities:</h6> -->
-                <a class="collapse-item" href="{% url 'my_profile'    %}">Моя профил </a>
-                <a class="collapse-item" href="{% url 'my_entity'     %}">Моето физическо лице</a>
-                <a class="collapse-item" href="{% url 'oidc_logout'   %}">Изход </a>
+                <a class="collapse-item" href="{% url 'my_profile'    %}">{% trans "My profile" %}</a>
+                <a class="collapse-item" href="{% url 'my_entity'     %}">{% trans "KYC" %}</a>
+                <a class="collapse-item" href="{% url 'oidc_logout'   %}">{% trans "Logout" %} </a>
             </div>
         </div>
     </li>
@@ -92,7 +94,7 @@
     <li class="nav-item active">
         <a class="nav-link" href="{% url 'my_profile'  %}">
             <i class="fas fa-fw fa-money-check"> </i>
-            <span>Вход или Регистрация</span>
+            <span>{% trans "Login or Register" %}</span>
         </a>
     </li>
     {% endif %}

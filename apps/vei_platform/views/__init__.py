@@ -25,8 +25,7 @@ from vei_platform.models.factory import ElectricityFactory
 from vei_platform.models.finance_modeling import BankAccount
 from decimal import Decimal
 from vei_platform.templatetags.vei_platform_utils import balance_from_transactions
-from vei_platform.settings.base import VEI_PLATFORM_IMAGE
-
+from vei_platform.settings.base import VEI_PLATFORM_IMAGE, LANGUAGES
 def get_balance(profile):
     legal_entities_pk = []
     entity = find_legal_entity(user=profile.user)
@@ -64,6 +63,13 @@ def common_context(request):
                     context['profile'] = profile
                     if profile.show_balance:
                         context['profile_balance'] = get_balance(profile)
+    context['django_language'] = request.COOKIES.get('django_language', 'bg')
+
+    django_languages = []
+    for lang in LANGUAGES:
+        selected = (lang[0] == context['django_language'])
+        django_languages.append((lang[0], lang[1], "selected" if selected else ""))
+    context['django_languages'] = django_languages
     return context
 
 

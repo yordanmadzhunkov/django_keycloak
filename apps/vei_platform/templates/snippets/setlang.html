@@ -1,0 +1,12 @@
+<div class="d-inline-flex p-2">
+    <form action="/i18n/setlang/" method="post">
+        {% csrf_token %}
+        <input name="next" type="hidden" value="/" />
+        <select name="language" class="form-control" onchange='this.form.submit()'>
+            {% for lang in django_languages %}
+            <option value="{{ lang.0 }}" {{lang.2}}>
+                {{ lang.1 }}</option>
+            {% endfor %}
+        </select>
+    </form>
+</div>
