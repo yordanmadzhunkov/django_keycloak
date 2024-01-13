@@ -24,7 +24,7 @@
         {% csrf_token %}
         {{ formset.management_form }}
         <tr>
-          <td> Manager </td>
+          <td> {% trans "Manager" %} </td>
           {% if manager_profile %}
           <td> <a href={{manager_profile.get_href}}> {{ manager_profile.get_display_name }} </a> </td>
           <td>

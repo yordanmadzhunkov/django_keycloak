@@ -10,6 +10,7 @@ from vei_platform.forms import NumberPerMonthForm, BankLoanForm
 
 
 from decimal import Decimal, DecimalException
+from django.utils.translation import gettext as _
 
 
 @login_required(login_url='/oidc/authenticate/')

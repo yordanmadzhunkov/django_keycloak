@@ -13,6 +13,8 @@ from django.shortcuts import render, redirect
 from django.db import transaction
 from django.contrib import messages
 from decimal import Decimal
+from django.utils.translation import gettext as _
+
 
 def legal_entities_pk_for_user(user):
     profile = get_user_profile(user)
@@ -46,7 +48,7 @@ def view_bank_accounts(request):
             )
             new_account.save()
         else:
-            messages.error(request, 'Invalid from ' + str(form.errors))
+            messages.error(request, _('Invalid from %s') % str(form.errors))
     accounts = BankAccount.objects.filter(owner__in=entities)
     context['accounts'] = accounts            
     context['form'] = form
@@ -59,11 +61,11 @@ def view_verify_bank_account(request, pk=None):
         if account.status == BankAccount.AccountStatus.UNVERIFIED:
             account.status = BankAccount.AccountStatus.ACTIVE
             account.save()
-            messages.success(request, "Activating " + str(account))
+            messages.success(request, _("Activating %s") % str(account))
         elif account.status == BankAccount.AccountStatus.ACTIVE:
-            messages.info(request, "Already active account " + str(account))
+            messages.info(request, _("Already active account %s") % str(account))
         else:
-            messages.error(request, "Can't activate " + str(account))
+            messages.error(request, _("Can't activate %s") % str(account))
     return redirect('bank_accounts')
     
 @login_required(login_url='/oidc/authenticate/')
@@ -123,7 +125,7 @@ def view_withdraw_bank_account(request, pk=None):
             requested_amount = Decimal(form.cleaned_data['amount'])
             occured_at = form.cleaned_data['occured_at']
             if requested_amount <= availabe:
-                messages.info(request, "You can withdraw %s" % str(requested_amount))
+                messages.info(request, _("You can withdraw %s") % str(requested_amount))
                 accounts = platform_bank_accounts(c)
                 for platform_account in accounts:
                     with transaction.atomic():                    
@@ -132,7 +134,7 @@ def view_withdraw_bank_account(request, pk=None):
                             destination_account = investor_bank_account
                             source_account = platform_account
                             amount = requested_amount
-                            description = 'Client withdraw %s' % profile.get_display_name()
+                            description = _('Client withdraw %s') % profile.get_display_name()
                             withdraw = BankTransaction(
                                 account = source_account,
                                 amount = -Decimal(form.cleaned_data['amount']),
@@ -149,13 +151,13 @@ def view_withdraw_bank_account(request, pk=None):
                                 description = description)
                             withdraw.save()
                             accepted_withdraw.save()
-                            messages.info(request, "Withdraw %s %s %s->%s" % (amount, c, platform_account.iban, investor_bank_account.iban))
+                            messages.info(request, _("Withdraw %s %s %s->%s") % (amount, c, platform_account.iban, investor_bank_account.iban))
                             form.clean()
                             break
             else:
-                messages.error(request, "Not enough money in you account")
+                messages.error(request, _("Not enough money in you account"))
         else:
-            messages.error(request, "Invalid form")
+            messages.error(request, _("Invalid form"))
     context['transactions'] = BankTransaction.objects.filter(account=investor_bank_account)
     context['form'] = form
     context['profile_balance'] = get_balance(profile)

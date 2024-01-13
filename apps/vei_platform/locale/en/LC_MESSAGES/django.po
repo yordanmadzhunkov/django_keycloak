@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-05 13:09+0000\n"
+"POT-Creation-Date: 2024-01-13 07:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,244 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: vei_platform/forms.py:76 vei_platform/forms.py:366
+msgid "Capitalization"
+msgstr ""
+
+#: vei_platform/forms.py:107
+msgid "Working hours"
+msgstr ""
+
+#: vei_platform/forms.py:112
+msgid "Electricity price"
+msgstr ""
+
+#: vei_platform/forms.py:117
+msgid "Bank loan"
+msgstr ""
+
+#: vei_platform/forms.py:125 vei_platform/forms.py:133
+msgid "Plan name"
+msgstr ""
+
+#: vei_platform/forms.py:126
+msgid "Start year"
+msgstr ""
+
+#: vei_platform/forms.py:127
+msgid "End year"
+msgstr ""
+
+#: vei_platform/forms.py:150 vei_platform/forms.py:158
+msgid "Issued date"
+msgstr ""
+
+#: vei_platform/forms.py:151 vei_platform/templates/dashboard_campaigns.html:12
+#: vei_platform/templates/dashboard_investments.html:13
+#: vei_platform/templates/factory_invest.html:17
+msgid "Amount"
+msgstr ""
+
+#: vei_platform/forms.py:152
+msgid "Duration [months]"
+msgstr ""
+
+#: vei_platform/forms.py:175
+msgid "Birth date"
+msgstr ""
+
+#: vei_platform/forms.py:176
+msgid "EGN"
+msgstr ""
+
+#: vei_platform/forms.py:177
+msgid "Full name"
+msgstr ""
+
+#: vei_platform/forms.py:178
+msgid "Full name using latin"
+msgstr ""
+
+#: vei_platform/forms.py:183
+msgid "Birthday"
+msgstr ""
+
+#: vei_platform/forms.py:190 vei_platform/forms.py:217
+#: vei_platform/forms.py:239 vei_platform/forms.py:245
+#: vei_platform/forms.py:271 vei_platform/forms.py:300
+#: vei_platform/forms.py:344 vei_platform/forms.py:352
+#: vei_platform/forms.py:411 vei_platform/forms.py:422
+msgid "Enter numbers Only"
+msgstr ""
+
+#: vei_platform/forms.py:260
+msgid "IBAN"
+msgstr ""
+
+#: vei_platform/forms.py:314
+msgid "Show balance"
+msgstr ""
+
+#: vei_platform/forms.py:330
+msgid "First name"
+msgstr ""
+
+#: vei_platform/forms.py:331
+msgid "Last name"
+msgstr ""
+
+#: vei_platform/forms.py:362
+msgid "Text to search"
+msgstr ""
+
+#: vei_platform/forms.py:367
+msgid "Total value of factory"
+msgstr ""
+
+#: vei_platform/forms.py:376
+msgid "Share from factory [%]"
+msgstr ""
+
+#: vei_platform/forms.py:377
+msgid ""
+"This share will be sold to investors in this platform. The amount you will "
+"recieve is this share times capitalization minus platform commision."
+msgstr ""
+
+#: vei_platform/forms.py:387
+msgid "Campaing end date"
+msgstr ""
+
+#: vei_platform/forms.py:388
+msgid ""
+"Until this date investors can declare interest in this project. If enough "
+"people declare interst in this project you will be able to complete the "
+"campaing"
+msgstr ""
+
+#: vei_platform/forms.py:391
+msgid "Date"
+msgstr ""
+
+#: vei_platform/forms.py:402
+msgid "Ducation"
+msgstr ""
+
+#: vei_platform/forms.py:403
+msgid ""
+"Number of months that investors will recieve percent form the profit "
+"proportional to their share. After this period ownership will be transfered "
+"to original factory owner. A duration of 15 years is good in most cases."
+msgstr ""
+
+#: vei_platform/forms.py:413
+msgid "Commision [%]"
+msgstr ""
+
+#: vei_platform/forms.py:414
+#, python-format
+msgid ""
+"%% commision for the platform. This commision is withholded once when the "
+"initial amout its collected and transfered to the factory originar and each "
+"time a payment to investors is carried out in the future."
+msgstr ""
+
+#: vei_platform/forms.py:428
+msgid "Interest amount"
+msgstr ""
+
+#: vei_platform/forms.py:429
+msgid "Amount which you want to participate in this project"
+msgstr ""
+
+#: vei_platform/forms.py:448
+msgid "Claim interest"
+msgstr ""
+
+#: vei_platform/forms.py:457
+msgid "Cancel campaign"
+msgstr ""
+
+#: vei_platform/forms.py:459
+msgid "Finish campaign"
+msgstr ""
+
+#: vei_platform/forms.py:474
+#: vei_platform/templates/snippets/logout_modal.html:17
+msgid "Cancel"
+msgstr ""
+
+#: vei_platform/forms.py:476 vei_platform/forms.py:564
+msgid "Save"
+msgstr ""
+
+#: vei_platform/forms.py:486
+#: vei_platform/templates/dashboard_investments.html:7
+msgid "Your interest"
+msgstr ""
+
+#: vei_platform/forms.py:500
+msgid "Component type"
+msgstr ""
+
+#: vei_platform/forms.py:501
+msgid "Component name"
+msgstr ""
+
+#: vei_platform/forms.py:502
+msgid "Power [kW]"
+msgstr ""
+
+#: vei_platform/forms.py:503
+msgid "Count"
+msgstr ""
+
+#: vei_platform/forms.py:504
+msgid "Document file [pdf]"
+msgstr ""
+
+#: vei_platform/forms.py:560
+msgid "Type energy source"
+msgstr ""
+
+#: vei_platform/forms.py:590
+msgid "Details about the factory"
+msgstr ""
+
+#: vei_platform/forms.py:600 vei_platform/templates/dashboard_campaigns.html:10
+#: vei_platform/templates/dashboard_investments.html:11
+msgid "Factory name"
+msgstr ""
+
+#: vei_platform/forms.py:601
+msgid "Location"
+msgstr ""
+
+#: vei_platform/forms.py:602
+msgid "Opened"
+msgstr ""
+
+#: vei_platform/forms.py:603
+msgid "Capacity [MW]"
+msgstr ""
+
+#: vei_platform/forms.py:604
+msgid "TAX ID"
+msgstr ""
+
+#: vei_platform/forms.py:605
+msgid "Legal entity owning the factory"
+msgstr ""
+
+#: vei_platform/forms.py:606
+msgid "Energy source type"
+msgstr ""
+
+#: vei_platform/forms.py:607
+msgid "Image"
+msgstr ""
+
 #: vei_platform/models/restricted_file_field.py:39
 msgid "File is missing."
 msgstr ""
@@ -39,18 +277,370 @@ msgid "English"
 msgstr ""
 
 #: vei_platform/settings/base.py:127
-msgid "Bulgarian"
+msgid "Български"
+msgstr ""
+
+#: vei_platform/templates/campaign.html:15
+msgid "Campaign"
+msgstr ""
+
+#: vei_platform/templates/campaign.html:20
+#: vei_platform/templates/campaigns.html:10
+#: vei_platform/templates/dashboard_campaigns.html:9
+#: vei_platform/templates/dashboard_investments.html:10
+#: vei_platform/templates/factory_listings.html:10
+msgid "Status"
+msgstr ""
+
+#: vei_platform/templates/campaign.html:25
+#: vei_platform/templates/campaigns.html:11
+msgid "Campaign end date"
+msgstr ""
+
+#: vei_platform/templates/campaign.html:30
+#: vei_platform/templates/investment.html:22
+msgid "Duration"
+msgstr ""
+
+#: vei_platform/templates/campaign.html:35
+msgid "Total amount offered"
+msgstr ""
+
+#: vei_platform/templates/campaign.html:40
+msgid "Total share offered"
+msgstr ""
+
+#: vei_platform/templates/campaign.html:45
+msgid "Plaform commision"
+msgstr ""
+
+#: vei_platform/templates/campaign.html:50
+msgid "Price per kW production capacity"
+msgstr ""
+
+#: vei_platform/templates/campaign.html:52
+#: vei_platform/templates/investment.html:29
+#: vei_platform/templates/investment.html:44
+msgid "lv"
+msgstr ""
+
+#: vei_platform/templates/campaigns.html:7
+msgid "Campaings for collection investors"
+msgstr ""
+
+#: vei_platform/templates/campaigns.html:12
+#: vei_platform/templates/dashboard_campaigns.html:13
+#: vei_platform/templates/dashboard_investments.html:14
+#: vei_platform/templates/factory_invest.html:18
+#: vei_platform/templates/factory_listings.html:12
+#, python-format
+msgid "Share[%%]"
+msgstr ""
+
+#: vei_platform/templates/campaigns.html:13
+msgid "Campaing progress"
+msgstr ""
+
+#: vei_platform/templates/campaigns.html:14
+#: vei_platform/templates/dashboard_campaigns.html:14
+msgid "Number of investors"
+msgstr ""
+
+#: vei_platform/templates/campaigns.html:15
+#: vei_platform/templates/dashboard_campaigns.html:16
+#: vei_platform/templates/dashboard_investments.html:16
+#: vei_platform/templates/factory_invest.html:20
+#: vei_platform/templates/factory_listings.html:15
+#: vei_platform/templates/investment.html:42
+msgid "Price per kW"
+msgstr ""
+
+#: vei_platform/templates/dashboard_campaigns.html:6
+msgid "Your campaigns"
+msgstr ""
+
+#: vei_platform/templates/dashboard_campaigns.html:11
+#: vei_platform/templates/dashboard_investments.html:12
+msgid "Expiry date"
+msgstr ""
+
+#: vei_platform/templates/dashboard_campaigns.html:15
+#: vei_platform/templates/dashboard_investments.html:15
+msgid "Progress"
+msgstr ""
+
+#: vei_platform/templates/factory_header.html:4
+msgid "Power installed (kW): "
+msgstr ""
+
+#: vei_platform/templates/factory_header.html:5
+msgid "Operational since: "
+msgstr ""
+
+#: vei_platform/templates/factory_invest.html:16
+msgid "Start"
+msgstr ""
+
+#: vei_platform/templates/factory_invest.html:19
+msgid "Available"
+msgstr ""
+
+#: vei_platform/templates/factory_invest.html:40
+msgid "Manager"
+msgstr ""
+
+#: vei_platform/templates/factory_invest.html:56
+msgid "Sell to investors"
+msgstr ""
+
+#: vei_platform/templates/factory_listings.html:7
+msgid "Campaigns for collection of investors"
+msgstr ""
+
+#: vei_platform/templates/factory_listings.html:11
+#: vei_platform/templates/investment.html:17
+msgid "Start date"
+msgstr ""
+
+#: vei_platform/templates/factory_listings.html:13
+msgid "Collected so far"
+msgstr ""
+
+#: vei_platform/templates/factory_listings.html:14
+msgid "Number of investments"
+msgstr ""
+
+#: vei_platform/templates/factory_production.html:39
+msgid "Become manager"
+msgstr ""
+
+#: vei_platform/templates/investment.html:24
+msgid "months"
+msgstr ""
+
+#: vei_platform/templates/investment.html:27
+msgid "Total amount listed"
+msgstr ""
+
+#: vei_platform/templates/investment.html:32
+msgid "Total shares offered"
+msgstr ""
+
+#: vei_platform/templates/investment.html:37
+msgid "Platform commision"
+msgstr ""
+
+#: vei_platform/templates/snippets/logout_modal.html:9
+msgid "Ready to Leave?"
+msgstr ""
+
+#: vei_platform/templates/snippets/logout_modal.html:14
+msgid "Select 'Logout' below if you are ready to end your current session."
+msgstr ""
+
+#: vei_platform/templates/snippets/logout_modal.html:23
+#: vei_platform/templates/snippets/sidebar.html:89
+#: vei_platform/templates/snippets/topbar_user.html:41
+msgid "Logout"
+msgstr ""
+
+#: vei_platform/templates/snippets/sidebar.html:21
+msgid "Dashboard"
+msgstr ""
+
+#: vei_platform/templates/snippets/sidebar.html:28
+msgid "Offers for investors"
+msgstr ""
+
+#: vei_platform/templates/snippets/sidebar.html:35
+msgid "Offer your Electrical factory"
+msgstr ""
+
+#: vei_platform/templates/snippets/sidebar.html:42
+msgid "About us"
+msgstr ""
+
+#: vei_platform/templates/snippets/sidebar.html:50
+msgid "Factory list"
+msgstr ""
+
+#: vei_platform/templates/snippets/sidebar.html:60
+msgid "Admin"
+msgstr ""
+
+#: vei_platform/templates/snippets/sidebar.html:66
+msgid "Platform legal"
+msgstr ""
+
+#: vei_platform/templates/snippets/sidebar.html:67
+msgid "Scriping tools"
+msgstr ""
+
+#: vei_platform/templates/snippets/sidebar.html:82
+#: vei_platform/templates/snippets/topbar_user.html:28
+msgid "Profile"
+msgstr ""
+
+#: vei_platform/templates/snippets/sidebar.html:87
+msgid "My profile"
+msgstr ""
+
+#: vei_platform/templates/snippets/sidebar.html:88
+msgid "KYC"
+msgstr ""
+
+#: vei_platform/templates/snippets/sidebar.html:97
+msgid "Login or Register"
+msgstr ""
+
+#: vei_platform/templates/snippets/topbar_user.html:10
+msgid "Anonymous user"
+msgstr ""
+
+#: vei_platform/templates/snippets/topbar_user.html:32
+msgid "Settings"
+msgstr ""
+
+#: vei_platform/templates/snippets/topbar_user.html:36
+msgid "Activity Log"
+msgstr ""
+
+#: vei_platform/templates/snippets/topbar_user.html:46
+msgid "Log in/Register"
+msgstr ""
+
+#: vei_platform/templates/user_profile.html:13
+msgid "User"
+msgstr ""
+
+#: vei_platform/templates/user_profile.html:17
+msgid "Is staff"
+msgstr ""
+
+#: vei_platform/templates/user_profile.html:21
+msgid "Is active"
+msgstr ""
+
+#: vei_platform/templates/user_profile.html:25
+msgid "Member since"
+msgstr ""
+
+#: vei_platform/templates/user_profile.html:29
+msgid "Last Login"
+msgstr ""
+
+#: vei_platform/views/bank_account.py:51
+#, python-format
+msgid "Invalid from %s"
+msgstr ""
+
+#: vei_platform/views/bank_account.py:64
+#, python-format
+msgid "Activating %s"
+msgstr ""
+
+#: vei_platform/views/bank_account.py:66
+#, python-format
+msgid "Already active account %s"
+msgstr ""
+
+#: vei_platform/views/bank_account.py:68
+#, python-format
+msgid "Can't activate %s"
+msgstr ""
+
+#: vei_platform/views/bank_account.py:128
+#, python-format
+msgid "You can withdraw %s"
+msgstr ""
+
+#: vei_platform/views/bank_account.py:137
+#, python-format
+msgid "Client withdraw %s"
+msgstr ""
+
+#: vei_platform/views/bank_account.py:154
+#, python-format
+msgid "Withdraw %s %s %s->%s"
+msgstr ""
+
+#: vei_platform/views/bank_account.py:158
+msgid "Not enough money in you account"
+msgstr ""
+
+#: vei_platform/views/bank_account.py:160 vei_platform/views/legal_entity.py:64
+msgid "Invalid form"
 msgstr ""
 
 #: vei_platform/views/factory.py:45 vei_platform/views/factory.py:67
-msgid "Електроцентали от възобновяеми източници на енергия"
+msgid "Electrical factories from renewable sources"
 msgstr ""
 
 #: vei_platform/views/factory.py:135
 #, python-format
-msgid "Успешно стартирахте кампания за набиране на инвеститори до %s"
+msgid "You have successfully started a campaign to collect investors until %s"
 msgstr ""
 
-#: vei_platform/views/factory.py:138
-msgid "Невалидни данни, моля опитайте отново"
+#: vei_platform/views/factory.py:140 vei_platform/views/factory.py:436
+#: vei_platform/views/invest.py:66
+msgid "Invalid data, please try again"
+msgstr ""
+
+#: vei_platform/views/factory.py:418
+msgid "Electrical factory added"
+msgstr ""
+
+#: vei_platform/views/invest.py:24
+msgid "Campaign is canceled"
+msgstr ""
+
+#: vei_platform/views/invest.py:31
+msgid "Campaign is completed"
+msgstr ""
+
+#: vei_platform/views/invest.py:33
+msgid "Not enough acumulated interest to be able to finish the campaing"
+msgstr ""
+
+#: vei_platform/views/invest.py:64
+#, python-format
+msgid "You declared interest in amount %d to %s"
+msgstr ""
+
+#: vei_platform/views/invest.py:73
+msgid "Your interest have been canceled"
+msgstr ""
+
+#: vei_platform/views/invest.py:82
+#, python-format
+msgid "You declared interest in amount changed to %d"
+msgstr ""
+
+#: vei_platform/views/invest.py:84
+msgid "Error occured when changing the amount"
+msgstr ""
+
+#: vei_platform/views/legal_entity.py:62
+#, python-format
+msgid "Legal entity %s created"
+msgstr ""
+
+#: vei_platform/views/legal_entity.py:79
+#, python-format
+msgid "No matches for %s"
+msgstr ""
+
+#: vei_platform/views/legal_entity.py:88
+#, python-format
+msgid "Added %s"
+msgstr ""
+
+#: vei_platform/views/legal_entity.py:90
+#, python-format
+msgid "Cant add %s, Its already owned by plaform"
+msgstr ""
+
+#: vei_platform/views/profile.py:49
+#, python-format
+msgid "Full name set to: %s %s"
 msgstr ""

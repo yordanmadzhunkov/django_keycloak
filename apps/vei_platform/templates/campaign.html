@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
+{% load i18n %}
 
 {% block head_title%}
 {{head_title}}
@@ -11,44 +12,44 @@
     <div class="row justify-content-center mb-3">
       <div class="col-md-12 col-xl-10">
         <div class="text-center">
-          <h2>Кампания</h2>
+          <h2>{% trans "Campaign" %}</h2>
         </div>
         <table class="table table-striped custom-table">
           <tbody>
             <tr>
-              <td> Статус </td>
+              <td> {% trans "Status" %} </td>
               <td> {{campaign.status_str}}</td>
               <td> </td>
             </tr>
             <tr>
-              <td> Срок за набиране на инвеститори</td>
+              <td> {% trans "Campaign end date" %}</td>
               <td> {{campaign.start_date}}</td>
               <td> </td>
             </tr>
             <tr>
-              <td> Продължителност </td>
+              <td> {% trans "Duration" %} </td>
               <td> {{campaign.duration}} </td>
               <td> месеца </td>
             </tr>
             <tr>
-              <td> Общо предложени на платформата </td>
+              <td> {% trans "Total amount offered" %}</td>
               <td> {{campaign.amount}} </td>
               <td> лв </td>
             </tr>
             <tr>
-              <td> Общ дял от централата </td>
+              <td> {% trans "Total share offered" %} </td>
               <td> {{campaign.persent_from_profit}} </td>
               <td> % </td>
             </tr>
             <tr>
-              <td> Комисионна в за платформата </td>
+              <td> {% trans "Plaform commision" %}</td>
               <td> {{campaign.commision}} </td>
               <td> % </td>
             </tr>
             <tr>
-              <td> Цена на kW от капацитета </td>
+              <td> {% trans "Price per kW production capacity" %}</td>
               <td> {{campaign.price_per_kw}} </td>
-              <td> лв </td>
+              <td> {% trans "lv" %} </td>
             </tr>
           <tbody>
         </table>

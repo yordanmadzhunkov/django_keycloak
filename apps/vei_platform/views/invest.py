@@ -8,9 +8,8 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
 
-from decimal import Decimal#, DecimalException
-#from datetime import date
-#from django import template
+from decimal import Decimal
+from django.utils.translation import gettext as _
 
 
 def view_campaign_as_manager(request, pk, context, campaign, factory):
@@ -22,16 +21,16 @@ def view_campaign_as_manager(request, pk, context, campaign, factory):
                 form = CampaingEditForm(request.POST)
                 campaign.status = Campaign.Status.CANCELED;
                 campaign.save()
-                messages.success(request, "Кампанияте беше прекратена")
+                messages.success(request, _("Campaign is canceled"))
 
             if 'complete' in request.POST:
                 form = CampaingEditForm(request.POST)
                 if allow_finish:
                     campaign.status = Campaign.Status.COMPLETED;
                     campaign.save()
-                    messages.success(request, "Приключване")
+                    messages.success(request, _("Campaign is completed"))
                 else:
-                    messages.error(request, "Все още няма достатъчно предварителен интерес от инвеститорите")
+                    messages.error(request, _("Not enough acumulated interest to be able to finish the campaing"))
 
         context['invest_form'] = form
     context['show_invest_form'] = campaign.accept_investments()
@@ -62,16 +61,16 @@ def view_campaign_as_investor(request, pk, context, campaign, factory):
                     investment.save()
                     form = EditInvestmentForm(instance=investment)
 
-                    messages.success(request, "Заявихте инвестиционнен интерес в размер на %d в %s" % (amount, factory.name))
+                    messages.success(request, _("You declared interest in amount %d to %s") % (amount, factory.name))
                 else:
-                    messages.error(request, "Невалидни данни, моля опитайте отново")        
+                    messages.error(request, _("Invalid data, please try again"))        
     else:
         form = EditInvestmentForm(instance=my_investments[0])
         if request.method == 'POST':
             if 'cancel' in request.POST:
                 my_investments[0].status = InvestementInCampaign.Status.CANCELED
                 my_investments[0].save()
-                messages.success(request, "Инвестиционния ви интерес беше отменен")
+                messages.success(request, _("Your interest have been canceled"))
                 form = CreateInvestmentForm()
 
                 
@@ -80,9 +79,9 @@ def view_campaign_as_investor(request, pk, context, campaign, factory):
                 if form.is_valid():
                     my_investments[0].amount = form.cleaned_data['amount']
                     my_investments[0].save()
-                    messages.success(request, "Инвестиционния ви интерес беше променен на %d" % my_investments[0].amount)
+                    messages.success(request, _("You declared interest in amount changed to %d") % my_investments[0].amount)
                 else:
-                    messages.error(request, "Възникна грешка при промяна на сумата")
+                    messages.error(request, _("Error occured when changing the amount"))
 
     context['show_invest_form'] = campaign.accept_investments()
     context['factory'] = factory

@@ -11,6 +11,7 @@ from vei_platform.models.platform import PlatformLegalEntity
 from vei_platform.forms import LegalEntityForm, SearchForm
 from django.contrib import messages
 from django.forms.models import model_to_dict
+from django.utils.translation import gettext as _
 
 def view_entity_detail(request, pk=None):
     context = common_context(request)
@@ -58,9 +59,9 @@ def view_my_entity_detail(request):
                     form.instance.save()
 
             my_entity = find_legal_entity(tax_id=form.cleaned_data['tax_id'])
-            messages.success(request, "Legal entity %s created" % str(my_entity))
+            messages.success(request, _('Legal entity %s created') % str(my_entity))
         else:
-            messages.error(request, 'Invalid form' + str(form.errors))
+            messages.error(request, _('Invalid form') + str(form.errors))
     context['form'] = form
     return render(request, "my_legal_entity.html", context)
 
@@ -75,7 +76,7 @@ def view_entity_platform(request):
                 entities = LegalEntity.objects.filter(tax_id=search_text)
                 context['entities'] = entities
                 if len(entities) == 0:
-                    messages.info(request, "No matches for " + search_text)
+                    messages.info(request, _('No matches for %s') % search_text)
 
             for key in request.POST.keys():
                 if key.startswith('add_'):
@@ -84,9 +85,9 @@ def view_entity_platform(request):
                     if len(PlatformLegalEntity.objects.filter(entity=entity_to_add)) == 0:
                         new_entity = PlatformLegalEntity(entity=entity_to_add)
                         new_entity.save()
-                        messages.info(request, "Adding " + str(entity_to_add))
+                        messages.info(request, _('Added %s') % str(entity_to_add))
                     else:
-                        messages.error(request, "Can't add " + str(entity_to_add) + "It's already owned by plaform")
+                        messages.error(request, _('Can''t add %s, It''s already owned by plaform') % str(entity_to_add))
     platform_entites_list = []
     for e in PlatformLegalEntity.objects.all():
         platform_entites_list.append( {'native_name': e.entity.native_name,

@@ -3,6 +3,7 @@ from . import common_context
 from django.contrib.auth.decorators import login_required
 from vei_platform.models.profile import get_user_profile
 from django.shortcuts import render
+from django.utils.translation import gettext as _
 
 
 def view_home(request):

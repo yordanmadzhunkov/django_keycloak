@@ -15,6 +15,7 @@ from .custom_layout_object import Formset
 import re
 from django.conf import settings
 from django.utils.translation import get_language
+from django.utils.translation import gettext as _
 from django import forms
 from django.utils import formats, timezone
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -72,7 +73,7 @@ class BootstrapDatePicker(forms.DateInput):
 
 
 class FactoryFinancialPlaningForm(forms.Form):
-    capitalization = forms.DecimalField(label='Капитализация',
+    capitalization = forms.DecimalField(label=_('Capitalization'),
                                         initial=53000,
                                         widget=forms.widgets.NumberInput(
                                             attrs={
@@ -103,17 +104,17 @@ class FactoryFinancialPlaningForm(forms.Form):
         super(FactoryFinancialPlaningForm, self).__init__(*args, **kwargs)
         production_plan_choise = [
             (t.pk, t.name) for t in FactoryProductionPlan.objects.filter(factory=factory)]
-        self.fields['production_plan'] = forms.ChoiceField(label='работни часове',
+        self.fields['production_plan'] = forms.ChoiceField(label=_('Working hours'),
                                                            choices=production_plan_choise)
 
         electricity_prices = [(t.pk, t.name)
                               for t in ElectricityPricePlan.objects.all()]
-        self.fields['electricity_prices'] = forms.ChoiceField(label='Цена на тока',
+        self.fields['electricity_prices'] = forms.ChoiceField(label=_('Electricity price'),
                                                               choices=electricity_prices)
 
         bank_loans = [(t.pk, str(t)) for t in BankLoan.objects.all()]
         self.fields['bank_loan'] = forms.ChoiceField(
-            label='Банково финансиране', choices=bank_loans)
+            label=_('Bank loan'), choices=bank_loans)
 
 
 class PricePlanForm(forms.ModelForm):
@@ -121,15 +122,15 @@ class PricePlanForm(forms.ModelForm):
         model = ElectricityPricePlan
         fields = '__all__'
         labels = {
-            'name': 'Име на план',
-            'start_year': 'Начало',
-            'end_year': 'Край',
+            'name': _('Plan name'),
+            'start_year': _('Start year'),
+            'end_year': _('End year'),
         }
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'form-control',
                 'autocomplete': 'off',
-                'title': 'Plan name'}),
+                'title': _('Plan name')}),
             'start_year': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'style': 'width:9ch',
@@ -146,15 +147,15 @@ class BankLoanForm(forms.ModelForm):
         model = BankLoan
         fields = '__all__'
         labels = {
-            'start_date': 'Дата на отпускане',
-            'amount': 'Размер',
-            'duration': 'Период [месеци]',
+            'start_date': _('Issued date'),
+            'amount': _('Amount'),
+            'duration': _('Duration [months]'),
         }
         exclude = ['factory']
         widgets = {
             'start_date': forms.DateInput(attrs={
                 'class': 'form-control',
-                'title': 'Дата на отпускане'}),
+                'title': _('Issued date')}),
             'duration': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'style': 'width:19ch',
@@ -171,23 +172,22 @@ class LegalEntityForm(forms.ModelForm):
         fields = '__all__'
         exclude = ['legal_form', 'person']
         labels = {
-            'founded': 'Рожденна дата',
-            'tax_id': 'ЕГН',
-            'native_name': 'Всички имена',
-            'latin_name': 'Всички имена на латиница'
-
+            'founded': _('Birth date'),
+            'tax_id': _('EGN'),
+            'native_name': _('Full name'),
+            'latin_name': _('Full name using latin'),
         }
         widgets = {
             'founded': BootstrapDatePicker(attrs={
                 'class': 'form-control',
-                'title': 'Birthday'},
+                'title': _('Birthday')},
                 ),    
             'tax_id': forms.TextInput(attrs={
                 'class': 'form-control',
                 'autocomplete': 'off',
                 'pattern': '[0-9\.]+',
                 'style': 'width:30ch',
-                'title': 'Enter numbers Only'}),
+                'title': _('Enter numbers Only')}),
             'native_name': forms.TextInput(attrs={
                 'class': 'form-control',
                 'autocomplete': 'off',
@@ -214,7 +214,7 @@ class BankAccountForm(forms.ModelForm):
                 'autocomplete': 'off',
                 'pattern': '[0-9\.]+',
                 'style': 'width:30ch',
-                'title': 'Enter numbers Only'}),
+                'title': _('Enter numbers Only')}),
         }
 
     def __init__(self, legal_entities_pk_list, *args, **kwargs):
@@ -236,13 +236,13 @@ class BankAccountDepositForm(forms.ModelForm):
                 'autocomplete': 'off',
                 'pattern': '[0-9\.]+',
                 'style': 'width:30ch',
-                'title': 'Enter numbers Only'}),
+                'title': _('Enter numbers Only')}),
             'fee': forms.TextInput(attrs={
                 'class': 'form-control',
                 'autocomplete': 'off',
                 'pattern': '[0-9\.]+',
                 'style': 'width:30ch',
-                'title': 'Enter numbers Only'}),
+                'title': _('Enter numbers Only')}),
             'occured_at':  BootstrapDatePicker(attrs={
                 'class': 'form-control',
                 'title': 'Date of transaction',
@@ -257,7 +257,7 @@ class BankAccountDepositForm(forms.ModelForm):
     def __init__(self, bank_account, *args, **kwargs):
         super (BankAccountDepositForm, self).__init__(*args,**kwargs) # populates the post
         bank_accounts = [(t.pk, str(t)) for t in platform_bank_accounts(bank_account.currency)]
-        dest_iban = forms.ChoiceField(label='IBAN', choices=bank_accounts)
+        dest_iban = forms.ChoiceField(label=_('IBAN'), choices=bank_accounts)
         self.fields['dest_iban'] = dest_iban 
 
 class PlatformWithdrawForm(forms.Form):
@@ -268,7 +268,7 @@ class PlatformWithdrawForm(forms.Form):
                                  'autocomplete': 'off',
                                  'pattern': '[0-9\.]+',
                                  'style': 'width:9ch',
-                                 'title': 'Enter numbers Only'})
+                                 'title': _('Enter numbers Only')})
                              )
     occured_at = forms.DateTimeField(initial=datetime.today(),
                                required=True,
@@ -297,7 +297,7 @@ class NumberPerMonthForm(forms.Form):
                                  'autocomplete': 'off',
                                  'pattern': '[0-9\.]+',
                                  'style': 'width:9ch',
-                                 'title': 'Enter numbers Only'}))
+                                 'title': _('Enter numbers Only')}))
     month = forms.DateField(widget=forms.HiddenInput(), required=True)
 
 
@@ -311,7 +311,7 @@ class UserProfileForm(forms.Form):
     last_name = forms.CharField(required=True,
                                 widget=forms.TextInput(attrs={'class': "textinput form-control  form-control-user"}))
     show_balance = forms.BooleanField(required=False, 
-                                      label='Show balance', 
+                                      label=_('Show balance'), 
                                       widget=forms.CheckboxInput(attrs={
                                         'class': 'form-control form-control-user',})
                                       )
@@ -327,8 +327,8 @@ class UserProfileForm(forms.Form):
                 css_class='form-row'
             ),
         )
-        self.fields['first_name'].label = 'Собствено име'
-        self.fields['last_name'].label = 'Фамилия'
+        self.fields['first_name'].label = _('First name')
+        self.fields['last_name'].label = _('Last name')
 
 
 
@@ -341,7 +341,7 @@ class FactoryScriperForm(forms.Form):
                                       'autocomplete': 'off',
                                       'pattern': '[0-9\.]+',
                                       'style': 'width:9ch',
-                                      'title': 'Enter numbers Only'}))
+                                      'title': _('Enter numbers Only')}))
     tax_id = forms.CharField(initial=None,
                                   required=False,
                                   widget=forms.TextInput(attrs={
@@ -349,7 +349,7 @@ class FactoryScriperForm(forms.Form):
                                       'autocomplete': 'off',
                                       'pattern': '[0-9\.]+',
                                       'style': 'width:9ch',
-                                      'title': 'Enter numbers Only'}))
+                                      'title': _('Enter numbers Only')}))
 
 
 class SearchForm(forms.Form):
@@ -359,22 +359,22 @@ class SearchForm(forms.Form):
                                       'class': 'form-control',
                                       'autocomplete': 'off',
                                       'style': 'width:30ch',
-                                      'title': 'Text to search'}))
+                                      'title': _('Text to search')}))
 
 
 class FactoryListingForm(forms.Form):
-    amount = forms.DecimalField(label='Капитализация',
-                                help_text='Общата сума на електроцентралата в лева',
-                                        initial=1000,
-                                        widget=forms.widgets.NumberInput(
-                                            attrs={
-                                                'class': 'form-control',
-                                                'inputmode': 'decimal',
-                                            }
-                                        ))
+    amount = forms.DecimalField(label=_('Capitalization'),
+                                help_text=_('Total value of factory'),
+                                initial=1000,
+                                widget=forms.widgets.NumberInput(
+                                    attrs={
+                                        'class': 'form-control',
+                                        'inputmode': 'decimal',
+                                    }
+                                ))
 
-    persent_from_profit = forms.DecimalField(label='Дял от централата[%]',
-                                        help_text='Който искате да продадете. Сумата, която ще получите е капитализацията по дяла минус комисионната на платформата',
+    persent_from_profit = forms.DecimalField(label=_('Share from factory [%]'),
+                                        help_text=_('This share will be sold to investors in this platform. The amount you will recieve is this share times capitalization minus platform commision.'),
                                         initial=10.0,
                                         widget=forms.widgets.NumberInput(
                                             attrs={
@@ -384,11 +384,11 @@ class FactoryListingForm(forms.Form):
                                         ))
 
 
-    start_date = forms.DateField(label='Влизане в сила',
-                                 help_text='Дата на която ще се разделите с вашият дял, ако съберем нужното количество инвестирори',
-                                 initial=date(2023, 6, 1),
+    start_date = forms.DateField(label=_('Campaing end date'),
+                                 help_text=_('Until this date investors can declare interest in this project. If enough people declare interst in this project you will be able to complete the campaing'),
+                                 initial=date(2024, 12, 31),
                                  widget=BootstrapDatePicker(attrs={
-                                    'title': 'Дата',
+                                    'title': _('Date'),
                                     'class': 'form-control',
                                     'style': 'width:18ch',
                                     'data-date-autoclose': 'true',
@@ -399,40 +399,42 @@ class FactoryListingForm(forms.Form):
                                     )
 
     duration = forms.CharField(initial='180',
-                               label='Продължителност',
-                               help_text='Броя месеци в който инвеститорите ще получават съответстващият им дял от печалбите. След изтичане на периода, цялата собственост се връща на оригинатора. 15 години или 180 месеца е добър срок',
-
+                               label=_('Ducation'),
+                               help_text=_('Number of months that investors will recieve percent form the profit proportional to their share. After this period ownership will be transfered to original factory owner. A duration of 15 years is good in most cases.'),
+                               #'Броя месеци в който инвеститорите ще получават съответстващият им дял от печалбите. След изтичане на периода, цялата собственост се връща на оригинатора. 15 години или 180 месеца е добър срок',
                              required=False,
                              widget=forms.widgets.TextInput(attrs={
                                  'class': 'form-control',
                                  'autocomplete': 'off',
                                  'pattern': '[0-9\.]+',
                                  'style': 'width:9ch',
-                                 'title': 'Enter numbers Only'}))
+                                 'title': _('Enter numbers Only')}))
 
-    commision = forms.DecimalField(label='Комисионна [%]',
-                                   help_text='% комисионна за платформата. Удържа се веднъж при първоначалното инвестиране, както и при бъдещите разплащания от елекроцентралата към ивеститорите. ',
+    commision = forms.DecimalField(label=_('Commision [%]'),
+                                   help_text=_('%% commision for the platform. This commision is withholded once when the initial amout it''s collected and transfered to the factory originar and each time a payment to investors is carried out in the future.'),
+                                                #'% комисионна за платформата. Удържа се веднъж при първоначалното инвестиране, както и при бъдещите разплащания от елекроцентралата към ивеститорите. ',
                                         initial=1.5,
                                         widget=forms.widgets.TextInput(attrs={
                                             'class': 'form-control',
                                             'autocomplete': 'off',
                                             'pattern': '[0-9\.]+',
                                             'style': 'width:9ch',
-                                            'title': 'Enter numbers Only',
+                                            'title': _('Enter numbers Only'),
                                             'readonly': True,}
                                         )
                                  )
     
 class CreateInvestmentForm(forms.Form):
-    amount = forms.DecimalField(label='Инвестиция',
-                                help_text='Общата сума, която искате да ивестирате в централата',
-                                        initial=1000,
-                                        widget=forms.widgets.NumberInput(
-                                            attrs={
-                                                'class': 'form-control',
-                                                'inputmode': 'decimal',
-                                            }
-                                        ))
+    amount = forms.DecimalField(label=_('Interest amount'),
+                                help_text=_('Amount which you want to participate in this project'),
+                                #'Общата сума, която искате да ивестирате в централата',
+                                initial=1000,
+                                widget=forms.widgets.NumberInput(
+                                    attrs={
+                                        'class': 'form-control',
+                                        'inputmode': 'decimal',
+                                    }
+                                ))
     def __init__(self, *args, **kwargs):
         super(CreateInvestmentForm, self).__init__(*args, **kwargs)
         # If you pass FormHelper constructor a form instance
@@ -443,7 +445,7 @@ class CreateInvestmentForm(forms.Form):
                 Column('amount', css_class='form-group'),
                 css_class='form-row'
             ),
-            Submit('invest', 'Заяви интерес')
+            Submit('invest', _('Claim interest'))
         )
 
 class CampaingEditForm(forms.Form):
@@ -452,9 +454,9 @@ class CampaingEditForm(forms.Form):
         # If you pass FormHelper constructor a form instance
         # It builds a default layout with all its fields
         self.helper = FormHelper(self)
-        cancel = Submit('cancel', 'Отмяна на кампанията')
+        cancel = Submit('cancel', _('Cancel campaign'))
         cancel.field_classes = 'btn btn-danger'
-        complete = Submit('complete', 'Приключи кампанията')
+        complete = Submit('complete', _('Finish campaign'))
         complete.field_classes = 'btn btn-success'
         self.helper.layout = Layout(Row(complete), Row(cancel),) if allow_finish else Layout(Row(cancel),)
         
@@ -469,9 +471,9 @@ class EditInvestmentForm(forms.ModelForm):
         # If you pass FormHelper constructor a form instance
         # It builds a default layout with all its fields
         self.helper = FormHelper(self)
-        cancel = Submit('cancel', 'Отмяна')
+        cancel = Submit('cancel', _('Cancel'))
         cancel.field_classes = 'btn btn-danger'
-        save = Submit('save', 'Запази')
+        save = Submit('save', _('Save'))
         save.field_classes = 'btn btn-warning'
         self.helper.layout = Layout(
             Row(
@@ -481,7 +483,7 @@ class EditInvestmentForm(forms.ModelForm):
             save,
             cancel,
         )
-        self.fields['amount'].label = 'Вашата инвестиция'
+        self.fields['amount'].label = _('Your interest')
 
 
 class CustomImageField(Field):
@@ -495,11 +497,11 @@ class ElectricityFactoryComponentsForm(forms.ModelForm):
         model = ElectricityFactoryComponents
         fields = ('component_type', 'name', 'power_in_kw', 'count', 'docfile')
         labels = {
-            'component_type': 'Тип компонент',
-            'name': 'Име на компонента',
-            'power_in_kw': 'Мощност kW',
-            'count': 'Бройки',
-            'docfile': 'Документ',
+            'component_type': _('Component type'), 
+            'name': _('Component name'),
+            'power_in_kw': _('Power [kW]'),
+            'count': _('Count'),
+            'docfile': _('Document file [pdf]'),
         }
         widgets = {
             'name': forms.TextInput(attrs={
@@ -555,11 +557,11 @@ class FactoryModelForm(forms.ModelForm):
 
         factory_type = forms.TypedChoiceField( 
                    choices = FACTORY_TYPE_CHOISES, 
-                   label = 'Вид електроцентрала',
+                   label = _('Type energy source'),#'Вид електроцентрала',
                    coerce = str
                   ) 
         self.fields['factory_type'] = factory_type
-        save = Submit('save', 'Запази', css_class='btn btn-primary')
+        save = Submit('save', _('Save'), css_class='btn btn-primary')
         save.field_classes = 'btn btn-success'
         # If you pass FormHelper constructor a form instance
         # It builds a default layout with all its fields
@@ -585,7 +587,7 @@ class FactoryModelForm(forms.ModelForm):
                 Column(CustomImageField('image'), css_class='form-group col-md-12'),
                 css_class='form-row'
             ),
-            HTML('<h2>Техинически детайли за компонентите</h2>'),
+            HTML('<h2>' + _('Details about the factory') + '</h2>'),
             Formset('formset'),
             save,
         )
@@ -595,14 +597,14 @@ class FactoryModelForm(forms.ModelForm):
         fields = '__all__'
         exclude = ['manager', 'primary_owner']
         labels = {
-            'name': 'Име на електроцентралата',
-            'location': 'Местоположение',
-            'opened': 'в експлотация от',
-            'capacity_in_mw': 'капацитет [в MW]',
-            'tax_id': 'ЕИК',
-            'owner_name': 'Юридическо лице собственик на централата',
-            'factory_type': 'Вид електроцентрала',
-            'image': "Снимка"
+            'name': _('Factory name'), #Име на електроцентралата',
+            'location': _('Location'),#'Местоположение',
+            'opened': _('Opened'),#'в експлотация от',
+            'capacity_in_mw': _('Capacity [MW]'),#'капацитет [в MW]',
+            'tax_id': _('TAX ID'), #'ЕИК',
+            'owner_name': _('Legal entity owning the factory'), #'Юридическо лице собственик на централата',
+            'factory_type': _('Energy source type'),
+            'image': _('Image'),
         }
 #        help_texts = {
 #            'client_id': (

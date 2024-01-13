@@ -8,6 +8,7 @@ from vei_platform.models.legal import LegalEntity, find_legal_entity, add_legal_
 from django.contrib import messages
 from django_q.tasks import async_task
 
+from django.utils.translation import gettext as _
 
 @login_required(login_url='/oidc/authenticate/')
 def view_scriping_tools(request):

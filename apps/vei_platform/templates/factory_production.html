@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% load i18n %}
+
 {% block head_title%}
 {{ platform_name}}
 {% endblock%}
@@ -34,7 +36,7 @@
       {% if not factory.manager %}
       <div class="d-flex flex-column mt-4">
         <button class="btn btn-secondary btn-sm" type="button"
-          onclick="window.location.href='/factory/{{factory.pk}}';">Become manager</button>
+          onclick="window.location.href='/factory/{{factory.pk}}';">{% trans "Become manager" %}</button>
       </div>
       {% endif%}
     </form>

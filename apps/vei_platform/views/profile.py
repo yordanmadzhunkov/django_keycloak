@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 
 from vei_platform.models.profile import UserProfile, get_user_profile
 from vei_platform.forms import UserProfileForm
+from django.utils.translation import gettext as _
 
 
 def view_user_profile(request, pk=None):
@@ -45,8 +46,7 @@ def view_my_profile(request):
             user.first_name = first_name
             user.last_name = last_name
             user.save()
-            messages.success(request, 'Запазени са вашите имена: %s %s' %
-                             (first_name, last_name))
+            messages.success(request, _('Full name set to: %s %s') % (first_name, last_name))
             context['user'] = user
 
         show_balance = user_profile_form.cleaned_data.get('show_balance')

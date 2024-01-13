@@ -6,6 +6,8 @@ from vei_platform.models.legal import find_legal_entity
 from vei_platform.models.finance_modeling import InvestementInCampaign, Campaign
 from vei_platform.models.profile import get_user_profile
 from vei_platform.models.factory import ElectricityFactory
+from django.utils.translation import gettext as _
+
 
 def view_dashboard(request):
     context = common_context(request)

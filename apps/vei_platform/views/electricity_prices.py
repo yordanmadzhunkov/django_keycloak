@@ -11,6 +11,8 @@ from vei_platform.models.finance_modeling import ElectricityPricePlan, Electrici
 from vei_platform.forms import PricePlanForm, NumberPerMonthForm
 
 from decimal import Decimal, DecimalException
+from django.utils.translation import gettext as _
+
 
 @login_required(login_url='/oidc/authenticate/')
 def view_electricity_prices(request, pk=None):
