@@ -18,6 +18,8 @@ cat oidc.env >> .env
 
 
 echo "Starting build .. "
+cd apps/ && python manage.py compilemessages 
+cd ..
 docker compose build vei_platform
 
 
