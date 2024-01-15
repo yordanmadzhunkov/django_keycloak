@@ -401,7 +401,6 @@ class FactoryListingForm(forms.Form):
     duration = forms.CharField(initial='180',
                                label=_('Ducation'),
                                help_text=_('Number of months that investors will recieve percent form the profit proportional to their share. After this period ownership will be transfered to original factory owner. A duration of 15 years is good in most cases.'),
-                               #'Броя месеци в който инвеститорите ще получават съответстващият им дял от печалбите. След изтичане на периода, цялата собственост се връща на оригинатора. 15 години или 180 месеца е добър срок',
                              required=False,
                              widget=forms.widgets.TextInput(attrs={
                                  'class': 'form-control',
@@ -412,7 +411,7 @@ class FactoryListingForm(forms.Form):
 
     commision = forms.DecimalField(label=_('Commision [%]'),
                                    help_text=_('%% commision for the platform. This commision is withholded once when the initial amout it''s collected and transfered to the factory originar and each time a payment to investors is carried out in the future.'),
-                                                #'% комисионна за платформата. Удържа се веднъж при първоначалното инвестиране, както и при бъдещите разплащания от елекроцентралата към ивеститорите. ',
+                                                
                                         initial=1.5,
                                         widget=forms.widgets.TextInput(attrs={
                                             'class': 'form-control',
@@ -427,7 +426,6 @@ class FactoryListingForm(forms.Form):
 class CreateInvestmentForm(forms.Form):
     amount = forms.DecimalField(label=_('Interest amount'),
                                 help_text=_('Amount which you want to participate in this project'),
-                                #'Общата сума, която искате да ивестирате в централата',
                                 initial=1000,
                                 widget=forms.widgets.NumberInput(
                                     attrs={
@@ -498,7 +496,7 @@ class ElectricityFactoryComponentsForm(forms.ModelForm):
         fields = ('component_type', 'name', 'power_in_kw', 'count', 'docfile')
         labels = {
             'component_type': _('Component type'), 
-            'name': _('Component name'),
+            'name': _('Name'),
             'power_in_kw': _('Power [kW]'),
             'count': _('Count'),
             'docfile': _('Document file [pdf]'),
@@ -508,7 +506,7 @@ class ElectricityFactoryComponentsForm(forms.ModelForm):
                 'class': 'form-control',
                 'style': 'width:40ch',
                 'autocomplete': 'off',
-                'title': 'Plan name'}),
+                }),
             'power_in_kw': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'style': 'width:9ch',

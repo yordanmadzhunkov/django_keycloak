@@ -1,20 +1,22 @@
 {% load vei_platform_utils %}
+{% load i18n %}
 
 {% if factory|has_completed_campaign %}
 <div class="d-flex flex-row align-items-center mb-1">
     <p class="mt-4 mb-1 text-center" style="font-size: 1.00rem;">
         <a href="{{factory|last_completed_campaign_href}}">
             <button class="btn btn-info btn-block" type="button">
-            Успешно приключила кампания за {{factory|last_completed_campaign_amount}} лв
+                {% trans "Successfully completed campaign for "%}
+                {{factory|last_completed_campaign_amount}}
+                {% trans "lv" %}
             </button>
         </a>
     </p>
 </div>
-{% else %} 
+{% else %}
 <div class="d-flex flex-row align-items-center mb-1">
     <p class="mt-4 mb-1 text-center" style="font-size: 1.00rem;">
-        Няма активна кампания за инвестиране
+        {% trans "No active campagin" %}
     </p>
 </div>
 {% endif %}
-

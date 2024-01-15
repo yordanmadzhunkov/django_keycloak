@@ -98,7 +98,7 @@ class ElectricityFactory(models.Model):
 
     
 def docfile_content_types():
-    return 'application/pdf'
+    return ['application/pdf', ]
 
 class ElectricityFactoryComponents(models.Model):
         # Factory type
@@ -143,7 +143,7 @@ from django.db import models
 def _delete_file(path):
    """ Deletes file from filesystem. """
    if os.path.isfile(path):
-        print("cleaning " + path)
+        #print("cleaning " + path)
         try:
             os.remove(path)
         except FileNotFoundError:

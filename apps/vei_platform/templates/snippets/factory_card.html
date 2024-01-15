@@ -1,5 +1,6 @@
 {% load vei_platform_utils %}
 {% load crispy_forms_tags %}
+{% load i18n %}
 
 
 <div class="row justify-content-center mb-3">
@@ -20,7 +21,7 @@
           <div class="col-md-6 col-lg-6 col-xl-6">
             <h5><a href={{factory.get_absolute_url}}> {{ factory.name }}<a></h5>
             <div class="d-flex flex-row">
-              <span> Manager:
+              <span> {% trans "Manager" %}:
                 <a href={{factory.get_manager_profile.get_href}}>
                   {{factory.get_manager_profile.get_display_name}}
                 </a>
@@ -29,15 +30,16 @@
             </div>
             <div class="mt-1 mb-0 text-muted small">
               {% if factory.primary_owner %}
-              <span> Owner <a href="/entity/{{ factory.primary_owner.pk}}"> {{ factory.owner_name}} </a> <br /></span>
+              <span> {% trans "Owner" %} <a href="/entity/{{ factory.primary_owner.pk}}"> {{ factory.owner_name}} </a>
+                <br /></span>
               {% else %}
-              <span> Owner {{ factory.owner_name}} <br /></span>
-              <span> Tax ID {{ factory.tax_id }} <br /></span>
+              <span> {% trans "Owner" %} {{ factory.owner_name}} <br /></span>
+              <span> {% trans "Tax ID" %} {{ factory.tax_id }} <br /></span>
               {% endif%}
-              <span>Location {{ factory.location}} <br /></span>
-              <span> Source {{ factory.get_factory_type_display}} <br /></span>
-              <span> Capacity {{ factory.capacity_in_mw }} MW <br /></span>
-              <span> Opened {{ factory.opened }} <br /></span>
+              <span> {% trans "Location" %} {{ factory.location}} <br /></span>
+              <span> {% trans "Source" %} {{ factory.get_factory_type_display}} <br /></span>
+              <span> {% trans "Capacity" %} {{ factory.capacity_in_mw }} MW <br /></span>
+              <span> {% trans "Opened" %} {{ factory.opened }} <br /></span>
             </div>
           </div>
           {%if not hide_link_buttons %}

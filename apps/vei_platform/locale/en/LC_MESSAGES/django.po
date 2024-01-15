@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-13 07:59+0000\n"
+"POT-Creation-Date: 2024-01-14 08:48+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -84,7 +84,7 @@ msgstr ""
 #: vei_platform/forms.py:239 vei_platform/forms.py:245
 #: vei_platform/forms.py:271 vei_platform/forms.py:300
 #: vei_platform/forms.py:344 vei_platform/forms.py:352
-#: vei_platform/forms.py:411 vei_platform/forms.py:422
+#: vei_platform/forms.py:410 vei_platform/forms.py:421
 msgid "Enter numbers Only"
 msgstr ""
 
@@ -148,11 +148,11 @@ msgid ""
 "to original factory owner. A duration of 15 years is good in most cases."
 msgstr ""
 
-#: vei_platform/forms.py:413
+#: vei_platform/forms.py:412
 msgid "Commision [%]"
 msgstr ""
 
-#: vei_platform/forms.py:414
+#: vei_platform/forms.py:413
 #, python-format
 msgid ""
 "%% commision for the platform. This commision is withholded once when the "
@@ -160,98 +160,102 @@ msgid ""
 "time a payment to investors is carried out in the future."
 msgstr ""
 
-#: vei_platform/forms.py:428
+#: vei_platform/forms.py:427
 msgid "Interest amount"
 msgstr ""
 
-#: vei_platform/forms.py:429
+#: vei_platform/forms.py:428
 msgid "Amount which you want to participate in this project"
 msgstr ""
 
-#: vei_platform/forms.py:448
+#: vei_platform/forms.py:446
+#: vei_platform/templates/snippets/factory_card_offer_to_invest.html:7
 msgid "Claim interest"
 msgstr ""
 
-#: vei_platform/forms.py:457
+#: vei_platform/forms.py:455
 msgid "Cancel campaign"
 msgstr ""
 
-#: vei_platform/forms.py:459
+#: vei_platform/forms.py:457
 msgid "Finish campaign"
 msgstr ""
 
-#: vei_platform/forms.py:474
+#: vei_platform/forms.py:472
 #: vei_platform/templates/snippets/logout_modal.html:17
 msgid "Cancel"
 msgstr ""
 
-#: vei_platform/forms.py:476 vei_platform/forms.py:564
+#: vei_platform/forms.py:474 vei_platform/forms.py:562
 msgid "Save"
 msgstr ""
 
-#: vei_platform/forms.py:486
+#: vei_platform/forms.py:484
 #: vei_platform/templates/dashboard_investments.html:7
 msgid "Your interest"
 msgstr ""
 
-#: vei_platform/forms.py:500
+#: vei_platform/forms.py:498
 msgid "Component type"
 msgstr ""
 
-#: vei_platform/forms.py:501
+#: vei_platform/forms.py:499
 msgid "Component name"
 msgstr ""
 
-#: vei_platform/forms.py:502
+#: vei_platform/forms.py:500
 msgid "Power [kW]"
 msgstr ""
 
-#: vei_platform/forms.py:503
+#: vei_platform/forms.py:501
+#: vei_platform/templates/snippets/factory_components.html:13
 msgid "Count"
 msgstr ""
 
-#: vei_platform/forms.py:504
+#: vei_platform/forms.py:502
 msgid "Document file [pdf]"
 msgstr ""
 
-#: vei_platform/forms.py:560
+#: vei_platform/forms.py:558
 msgid "Type energy source"
 msgstr ""
 
-#: vei_platform/forms.py:590
+#: vei_platform/forms.py:588
 msgid "Details about the factory"
 msgstr ""
 
-#: vei_platform/forms.py:600 vei_platform/templates/dashboard_campaigns.html:10
+#: vei_platform/forms.py:598 vei_platform/templates/dashboard_campaigns.html:10
 #: vei_platform/templates/dashboard_investments.html:11
 msgid "Factory name"
 msgstr ""
 
-#: vei_platform/forms.py:601
+#: vei_platform/forms.py:599
+#: vei_platform/templates/snippets/factory_card.html:39
 msgid "Location"
 msgstr ""
 
-#: vei_platform/forms.py:602
+#: vei_platform/forms.py:600
+#: vei_platform/templates/snippets/factory_card.html:42
 msgid "Opened"
 msgstr ""
 
-#: vei_platform/forms.py:603
+#: vei_platform/forms.py:601
 msgid "Capacity [MW]"
 msgstr ""
 
-#: vei_platform/forms.py:604
+#: vei_platform/forms.py:602
 msgid "TAX ID"
 msgstr ""
 
-#: vei_platform/forms.py:605
+#: vei_platform/forms.py:603
 msgid "Legal entity owning the factory"
 msgstr ""
 
-#: vei_platform/forms.py:606
+#: vei_platform/forms.py:604
 msgid "Energy source type"
 msgstr ""
 
-#: vei_platform/forms.py:607
+#: vei_platform/forms.py:605
 msgid "Image"
 msgstr ""
 
@@ -321,6 +325,8 @@ msgstr ""
 #: vei_platform/templates/campaign.html:52
 #: vei_platform/templates/investment.html:29
 #: vei_platform/templates/investment.html:44
+#: vei_platform/templates/snippets/factory_card_no_campaign.html:11
+#: vei_platform/templates/snippets/factory_card_offer_start_campaign.html:11
 msgid "lv"
 msgstr ""
 
@@ -386,6 +392,7 @@ msgid "Available"
 msgstr ""
 
 #: vei_platform/templates/factory_invest.html:40
+#: vei_platform/templates/snippets/factory_card.html:24
 msgid "Manager"
 msgstr ""
 
@@ -428,6 +435,72 @@ msgstr ""
 
 #: vei_platform/templates/investment.html:37
 msgid "Platform commision"
+msgstr ""
+
+#: vei_platform/templates/snippets/factory_card.html:33
+#: vei_platform/templates/snippets/factory_card.html:36
+msgid "Owner"
+msgstr ""
+
+#: vei_platform/templates/snippets/factory_card.html:37
+msgid "Tax ID"
+msgstr ""
+
+#: vei_platform/templates/snippets/factory_card.html:40
+msgid "Source"
+msgstr ""
+
+#: vei_platform/templates/snippets/factory_card.html:41
+msgid "Capacity"
+msgstr ""
+
+#: vei_platform/templates/snippets/factory_card_link_to_active_campaign.html:5
+msgid "Active campaign"
+msgstr ""
+
+#: vei_platform/templates/snippets/factory_card_no_campaign.html:9
+#: vei_platform/templates/snippets/factory_card_offer_start_campaign.html:9
+msgid "Successfully completed campaign for "
+msgstr ""
+
+#: vei_platform/templates/snippets/factory_card_no_campaign.html:19
+msgid "No active campagin"
+msgstr ""
+
+#: vei_platform/templates/snippets/factory_card_offer_login.html:5
+msgid "You need to login in order to claim interest in project"
+msgstr ""
+
+#: vei_platform/templates/snippets/factory_card_offer_login.html:6
+msgid "Login"
+msgstr ""
+
+#: vei_platform/templates/snippets/factory_card_offer_start_campaign.html:19
+msgid "Start campaign"
+msgstr ""
+
+#: vei_platform/templates/snippets/factory_card_offer_start_campaign.html:24
+msgid "Edit factory"
+msgstr ""
+
+#: vei_platform/templates/snippets/factory_card_progress.html:5
+msgid "Progress so far"
+msgstr ""
+
+#: vei_platform/templates/snippets/factory_components.html:7
+msgid "Details for this project"
+msgstr ""
+
+#: vei_platform/templates/snippets/factory_components.html:10
+msgid "Type"
+msgstr ""
+
+#: vei_platform/templates/snippets/factory_components.html:11
+msgid "Name"
+msgstr ""
+
+#: vei_platform/templates/snippets/factory_components.html:12
+msgid "Power [kw]"
 msgstr ""
 
 #: vei_platform/templates/snippets/logout_modal.html:9

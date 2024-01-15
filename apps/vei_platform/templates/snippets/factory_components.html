@@ -1,15 +1,17 @@
 {% if components|length > 0 %}
 {% load vei_platform_utils %}
+{% load i18n %}
+
 <div class="row justify-content-center mb-3">
     <div class="col-md-12 col-xl-10">
-        <h2 class="text-center">Данни за проекта</h2>
+        <h2 class="text-center">{% trans "Details for this project" %}</h2>
         <table class="table align-middle mb-0 bg-white">
             <thead class="bg-light">
-                <th>Тип</th>
-                <th>Име</th>
-                <th>Мощност kW</th>
-                <th>Брой</th>
-                <th>Документи</th>
+                <th>{% trans "Type" %}</th>
+                <th>{% trans "Name" %}</th>
+                <th>{% trans "Power [kw]" %}</th>
+                <th>{% trans "Count" %}</th>
+                <th>{% trans "Document" %}</th>
             </thead>
             <tbody>
                 {% for comp in components %}
@@ -22,7 +24,6 @@
                         <a href="/media/{{comp.docfile}}"> {{comp.docfile.name|basename}} </a>
                         {% endif %}
                     </td>
-
                 </tr>
                 {% endfor %}
             </tbody>
