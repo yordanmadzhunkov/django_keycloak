@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: FractionEnergy Platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-14 08:48+0000\n"
+"POT-Creation-Date: 2024-01-15 06:35+0000\n"
 "PO-Revision-Date: 2024-01-14 16:41+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -212,8 +212,9 @@ msgid "Component type"
 msgstr "Тип на компонента"
 
 #: vei_platform/forms.py:499
-msgid "Component name"
-msgstr "Име на компоненента"
+#: vei_platform/templates/snippets/factory_components.html:11
+msgid "Name"
+msgstr "Име"
 
 #: vei_platform/forms.py:500
 msgid "Power [kW]"
@@ -508,13 +509,13 @@ msgstr "Детайли за проекта"
 msgid "Type"
 msgstr "Тип"
 
-#: vei_platform/templates/snippets/factory_components.html:11
-msgid "Name"
-msgstr "Име"
-
 #: vei_platform/templates/snippets/factory_components.html:12
 msgid "Power [kw]"
 msgstr "Мощност [кВт]"
+
+#: vei_platform/templates/snippets/factory_components.html:14
+msgid "Document"
+msgstr ""
 
 #: vei_platform/templates/snippets/logout_modal.html:9
 msgid "Ready to Leave?"
@@ -732,3 +733,6 @@ msgstr "Не може да добавим %s, вече го има в платф
 #, python-format
 msgid "Full name set to: %s %s"
 msgstr "Вашето пълно име е: %s %s"
+
+#~ msgid "Component name"
+#~ msgstr "Име на компоненента"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-14 08:48+0000\n"
+"POT-Creation-Date: 2024-01-15 06:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -200,7 +200,8 @@ msgid "Component type"
 msgstr ""
 
 #: vei_platform/forms.py:499
-msgid "Component name"
+#: vei_platform/templates/snippets/factory_components.html:11
+msgid "Name"
 msgstr ""
 
 #: vei_platform/forms.py:500
@@ -495,12 +496,12 @@ msgstr ""
 msgid "Type"
 msgstr ""
 
-#: vei_platform/templates/snippets/factory_components.html:11
-msgid "Name"
-msgstr ""
-
 #: vei_platform/templates/snippets/factory_components.html:12
 msgid "Power [kw]"
+msgstr ""
+
+#: vei_platform/templates/snippets/factory_components.html:14
+msgid "Document"
 msgstr ""
 
 #: vei_platform/templates/snippets/logout_modal.html:9
