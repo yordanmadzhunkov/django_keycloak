@@ -326,6 +326,8 @@ class FactoryUpdate(UpdateView):
     template_name = 'factory_components.html'
     form_class = FactoryModelForm
     success_url = None
+    formset_fields = ['component_type', 'name', 'power_in_kw', 'count', 'docfile', 'description']
+
     
     def get_context_data(self, **kwargs):
         context = super(FactoryUpdate, self).get_context_data(**kwargs)
@@ -338,22 +340,28 @@ class FactoryUpdate(UpdateView):
                 ElectricityFactory, 
                 ElectricityFactoryComponents, 
                 form=ElectricityFactoryComponentsForm,
-                fields=['component_type', 'name', 'power_in_kw', 'count', 'docfile'], 
+                fields=self.formset_fields, 
                 can_delete=True
                 )
             context['formset'] = FactoryComponentsFormSet(data=self.request.POST, 
                                                           files=self.request.FILES,
                                                           instance=self.object)
+            
         else:
             context['form'] = FactoryModelForm(instance=self.object)
             FactoryComponentsFormSet = inlineformset_factory(           
                 ElectricityFactory, 
                 ElectricityFactoryComponents, 
                 form=ElectricityFactoryComponentsForm,
-                fields=['component_type', 'name', 'power_in_kw', 'count', 'docfile'], 
+                fields=self.formset_fields, 
                 extra=2, can_delete=True
                 )
             context['formset'] = FactoryComponentsFormSet(instance=self.object)
+        for f in context['formset']:
+            formset_helper = f.helper
+            context['formset_helper'] = formset_helper
+            #print(formset_helper)
+            break
         return context
 
     def form_valid(self, form):
@@ -385,6 +393,7 @@ class FactoryCreate(CreateView):
     template_name = 'factory_create.html'
     form_class = FactoryModelForm
     success_url = None
+    formset_fields = ['component_type', 'name', 'power_in_kw', 'count', 'docfile', 'description']
 
     def get_context_data(self, **kwargs):
         if not self.request.user.is_authenticated:
@@ -404,7 +413,7 @@ class FactoryCreate(CreateView):
                 ElectricityFactory, 
                 ElectricityFactoryComponents, 
                 form=ElectricityFactoryComponentsForm,
-                fields=['component_type', 'name', 'power_in_kw', 'count', 'docfile'], 
+                fields=self.formset_fields, 
                 extra=2, can_delete=True
                 )
             context['formset'] = FactoryComponentsFormSet(instance=self.object)
@@ -421,7 +430,7 @@ class FactoryCreate(CreateView):
                 ElectricityFactory, 
                 ElectricityFactoryComponents, 
                 form=ElectricityFactoryComponentsForm,
-                fields=['component_type', 'name', 'power_in_kw', 'count', 'docfile'], 
+                fields=self.fields, 
                 can_delete=True
                 )
         formset = FactoryComponentsFormSet(data=self.request.POST, 
