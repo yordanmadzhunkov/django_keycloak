@@ -18,6 +18,7 @@ RUN apk update
 
 RUN apk add --no-cache python3 gcc libc-dev linux-headers postgresql-dev \
     && apk add libffi-dev \
+    && apk add gettext \
     && python3 -m ensurepip \
     && pip3 install --upgrade pip gunicorn    
 
@@ -34,7 +35,6 @@ RUN pip3 install -r $APP_PATH/requirements/production.txt
 # Copy the application over into the container.
 COPY ./apps/ $APP_PATH
 
-
 # entrypoint, must be executable file chmod +x entrypoint.sh
 COPY entrypoint.sh          /entrypoint/
 COPY entrypoint_qcluster.sh /entrypoint/
@@ -43,6 +43,7 @@ COPY entrypoint_tests.sh    /entrypoint/
 
 WORKDIR $APP_PATH/
 EXPOSE 8000
+RUN python manage.py compilemessages
 
 # what happens when I start the container
 ENTRYPOINT ["sh", "/entrypoint/entrypoint.sh"]
