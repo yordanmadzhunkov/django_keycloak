@@ -37,7 +37,7 @@ def view_my_profile(request):
                 profile.avatar = avatar
             profile.save()
             messages.success(
-                request, '%s е запазан като ваш аватар' % avatar)
+                request, _('%s saved as avatar') % avatar)
 
         first_name = user_profile_form.cleaned_data.get('first_name')
         last_name = user_profile_form.cleaned_data.get('last_name')
@@ -56,7 +56,7 @@ def view_my_profile(request):
             profile.save()
     else:
         if request.method == "POST":
-            messages.error(request, 'Profile error')
+            messages.error(request, _('Profile error'))
     context['avatar_form'] = user_profile_form
     context['profile'] = get_user_profile(request.user)
     return render(request, "my_profile.html", context)

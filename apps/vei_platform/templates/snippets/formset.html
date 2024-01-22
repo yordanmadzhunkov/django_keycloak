@@ -1,21 +1,41 @@
 {% load crispy_forms_tags %}
 
-<table class="table">
+
+{% comment %}
+
+{{ formset.management_form }}
+
+{% if helper %}
+{% crispy formset helper %}
+{% else %}
+{{ formset|crispy }}
+{% endif %}
+
+{% endcomment %}
+
+
+
+<table class="table table-striped table-bordered ">
     {{ formset.management_form }}
     {% for form in formset.forms %}
     {% if forloop.first %}
     <thead>
         <tr>
+            {% comment %}
             {% for field in form.visible_fields %}
             <th>{{ field.label|capfirst }}</th>
             {% endfor %}
+            {% endcomment %}
         </tr>
     </thead>
     <tbody>
         {% endif %}
+
+
         <tr class="{% cycle row1 row2 %} formset_row">
-            {% for field in form.visible_fields %}
             <td>
+                {% for field in form.visible_fields %}
+
                 {# Include the hidden fields in the form #}
                 {% if forloop.first %}
                 {% for hidden in form.hidden_fields %}
@@ -23,8 +43,13 @@
                 {% endfor %}
                 {% endif %}
                 {{ field | as_crispy_field }}
+                {% if field.name == 'docfile' or field.name == 'description' %}
             </td>
-            {% endfor %}
+            <td>
+                {% endif %}
+
+                {% endfor %}
+            </td>
         </tr>
         {% if forloop.last %}
     </tbody>

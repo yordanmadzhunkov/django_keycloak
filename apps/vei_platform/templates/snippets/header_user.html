@@ -1,6 +1,7 @@
 {% load account %}
-{% if request.user.is_authenticated %}
+{% load i18n %}
 
+{% if request.user.is_authenticated %}
 <div class="dropdown dib">
     <div class="header-icon" data-toggle="dropdown">
         <span class="user-avatar">{% user_display user %}
@@ -15,39 +16,16 @@
                     <li>
                         <a href="/accounts/profile">
                             <i class="ti-user"></i>
-                            <span>Profile</span>
+                            <span>{% trans "Profile" %}</span>
                         </a>
                     </li>
-                    {% comment %}
-                    <li>
-                        <a href="#">
-                            <i class="ti-email"></i>
-                            <span>Inbox</span>
-                        </a>
-                    </li>
-                    {% endcomment %}
-                    <li>
-                        <a href="#">
-                            <i class="ti-settings"></i>
-                            <span>Setting</span>
-                        </a>
-                    </li>
-                    {% comment %}
-                    <li>
-                        <a href="#">
-                            <i class="ti-lock"></i>
-                            <span>Lock Screen</span>
-                        </a>
-                    </li>
-                    {% endcomment %}
-
                     <li>
                         <form method="post" action="{% url 'oidc_logout' %}">
                             {% csrf_token %}
                             {% if redirect_field_value %}
-                            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+                            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
                             {% endif %}
-                            <button type="submit"><i class="ti-power-off"></i>Logout</button>
+                            <button type="submit"><i class="ti-power-off"></i>{% trans "Logout" %}</button>
                         </form>
                     </li>
                 </ul>

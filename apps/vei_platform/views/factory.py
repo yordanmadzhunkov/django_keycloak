@@ -326,7 +326,7 @@ class FactoryUpdate(UpdateView):
     template_name = 'factory_components.html'
     form_class = FactoryModelForm
     success_url = None
-    formset_fields = ['component_type', 'name', 'power_in_kw', 'count', 'docfile', 'description']
+    formset_fields = ['component_type', 'power_in_kw', 'count', 'docfile', 'name', 'description']
 
     
     def get_context_data(self, **kwargs):

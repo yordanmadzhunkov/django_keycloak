@@ -493,31 +493,42 @@ class CustomImageField(Field):
 class ElectricityFactoryComponentsForm(forms.ModelForm):
     class Meta:
         model = ElectricityFactoryComponents
-        fields = ('component_type', 'name', 'power_in_kw', 'count', 'docfile')
+        fields = ('component_type',  'power_in_kw', 'count', 'name', 'description', 'docfile',)
         labels = {
             'component_type': _('Component type'), 
             'name': _('Name'),
             'power_in_kw': _('Power [kW]'),
             'count': _('Count'),
             'docfile': _('Document file [pdf]'),
+            'description': _('Description')
         }
+        docfile = forms.ClearableFileInput(
+                attrs={'accept': docfile_content_types(),
+                       'class': 'form-control',                                           
+            })
+
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'form-control',
-                'style': 'width:40ch',
                 'autocomplete': 'off',
-                }),
+                }
+            ),
             'power_in_kw': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'style': 'width:9ch',
-            }),
+                }
+            ),
             'count': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'style': 'width:9ch',
-            }),
-            'docfile': forms.ClearableFileInput(
-                attrs={'accept': docfile_content_types(),                                           
-            })
+                }
+            ),
+            'docfile': docfile,
+            'description': forms.Textarea(
+                attrs={
+                    'class': 'form-control',
+                    'rows': 10,
+                    'cols': 120,
+                }
+            ),
         }
         
     def __init__(self, *args, **kwargs):
@@ -525,18 +536,9 @@ class ElectricityFactoryComponentsForm(forms.ModelForm):
         # If you pass FormHelper constructor a form instance
         # It builds a default layout with all its fields
         self.helper = FormHelper(self)
-        self.helper.form_show_labels = False
-        self.helper.form_class = 'form-horizontal'
-        self.helper.layout = Layout(
-            Row(
-                Column('component_type', css_class='form-group col-md-2 mb-0'),
-                Column('name',           css_class='form-group col-md-6 mb-0'),
-                Column('power_in_kw',    css_class='form-group col-md-2 mb-0'),
-                Column('count',          css_class='form-group col-md-2 mb-0'),
-                Column('docfile',        css_class='form-group col-md-2 mb-0'),
-                css_class='form-row'
-            )
-        )
+        self.helper.form_show_labels = True
+        for key, value in self.Meta.labels.items():
+            self.fields[key].label = _(value)
 
 
 
@@ -555,14 +557,18 @@ class FactoryModelForm(forms.ModelForm):
 
         factory_type = forms.TypedChoiceField( 
                    choices = FACTORY_TYPE_CHOISES, 
-                   label = _('Type energy source'),#'Вид електроцентрала',
+                   label = _('Type energy source'),
                    coerce = str
                   ) 
         self.fields['factory_type'] = factory_type
+
+        for key, value in self.Meta.labels.items():
+            self.fields[key].label = _(value)
         save = Submit('save', _('Save'), css_class='btn btn-primary')
         save.field_classes = 'btn btn-success'
         # If you pass FormHelper constructor a form instance
         # It builds a default layout with all its fields
+
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
             Row(
@@ -586,7 +592,7 @@ class FactoryModelForm(forms.ModelForm):
                 css_class='form-row'
             ),
             HTML('<h2>' + _('Details about the factory') + '</h2>'),
-            Formset('formset'),
+            Formset('formset', 'formset_helper'),
             save,
         )
 
@@ -595,20 +601,16 @@ class FactoryModelForm(forms.ModelForm):
         fields = '__all__'
         exclude = ['manager', 'primary_owner']
         labels = {
-            'name': _('Factory name'), #Име на електроцентралата',
-            'location': _('Location'),#'Местоположение',
-            'opened': _('Opened'),#'в експлотация от',
-            'capacity_in_mw': _('Capacity [MW]'),#'капацитет [в MW]',
-            'tax_id': _('TAX ID'), #'ЕИК',
-            'owner_name': _('Legal entity owning the factory'), #'Юридическо лице собственик на централата',
+            'name': _('Factory name'),
+            'location': _('Location'),
+            'opened': _('Opened'),
+            'capacity_in_mw': _('Capacity [MW]'),
+            'tax_id': _('TAX ID'), 
+            'owner_name': _('Legal entity owning the factory'), 
             'factory_type': _('Energy source type'),
             'image': _('Image'),
         }
-#        help_texts = {
-#            'client_id': (
-#                'Um identificador exclusivo de formato livre da chave. 50 caracteres no máximo'
-#            ),
-#        }
+
         widgets = {
             'opened': BootstrapDatePicker(attrs={
                 'class': 'form-control',

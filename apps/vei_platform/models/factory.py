@@ -9,6 +9,10 @@ from django_q.tasks import async_task
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from .restricted_file_field import RestrictedFileField
+from django.utils.translation import gettext_lazy as _
+
+
+
 
 def user_image_upload_directory_path(instance, filename):
     # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
@@ -28,11 +32,11 @@ class ElectricityFactory(models.Model):
     REN_GAS = 'RGS'
 
     FACTORY_TYPE_CHOISES = (
-        (PHOTOVOLTAIC, 'Photovoltaic'),
-        (WIND_TURBINE, 'Wind turbine'),
-        (HYDROPOWER, 'Hydropower'),
-        (BIOMASS, 'Biomass'),
-        (REN_GAS, 'Renewable gas'),
+        (PHOTOVOLTAIC, _('Photovoltaic')),
+        (WIND_TURBINE, _('Wind turbine')),
+        (HYDROPOWER, _('Hydropower')),
+        (BIOMASS, _('Biomass')),
+        (REN_GAS, _('Renewable gas')),
     )
 
     factory_type = models.CharField(
@@ -46,7 +50,7 @@ class ElectricityFactory(models.Model):
         settings.AUTH_USER_MODEL, null=True, blank=True, default=None, on_delete=models.DO_NOTHING)
 
     # info
-    location = models.CharField(max_length=100, default="България")
+    location = models.CharField(max_length=100, default=_('Bulgaria'))
     opened = models.DateField(null=True)
     capacity_in_mw = models.DecimalField(
         default=0, decimal_places=3, max_digits=9)
@@ -108,10 +112,10 @@ class ElectricityFactoryComponents(models.Model):
     OTHER = 'OTH'
 
     COMPONENT_TYPE_CHOISES = (
-        (PHOTO_PANEL, 'Photovoltaic Panel'),
-        (INVERTOR, 'Invertor'),
-        (CONNECTOR, 'Connector'),
-        (OTHER, 'Other'),
+        (PHOTO_PANEL, _('Photovoltaic Panel')),
+        (INVERTOR, _('Invertor')),
+        (CONNECTOR, _('Connector')),
+        (OTHER, _('Other')),
     )
 
     name = models.CharField(max_length=128)
@@ -130,6 +134,7 @@ class ElectricityFactoryComponents(models.Model):
         default=None, 
         null=True, 
         blank=True)
+    description = models.TextField(null=True, blank=True, default=None)
     
 
 
@@ -168,8 +173,10 @@ def auto_delete_file_on_change(sender, instance, update_fields, **kwargs):
         return False
 
     try:
-        old_file = ElectricityFactoryComponents.objects.get(pk=instance.pk).docfile
-        if old_file:
+        old_instance = ElectricityFactoryComponents.objects.get(pk=instance.pk)
+        old_file = old_instance.docfile
+        should_delete = instance.docfile != old_instance.docfile
+        if should_delete and old_file:
             _delete_file(old_file.path)   
     except ElectricityFactoryComponents.DoesNotExist:
         return False

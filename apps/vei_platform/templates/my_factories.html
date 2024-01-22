@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
+{% load i18n %}
 
 
 {% block head_title%}
@@ -14,12 +15,12 @@
           <div class="col-md-12 col-lg-3 col-xl-3 mb-4 mb-lg-0">
           </div>
           <div class="col-md-6 col-lg-6 col-xl-6">
-            <h2><a href="#">Мойте електроцентали</a></h2>
+            <h2><a href="#">{% trans "My Factories"%}</a></h2>
           </div>
           <div class="col-md-6 col-lg-3 col-xl-3 border-sm-start-none border-start">
             <div class="text-success">
               <a href="{% url 'factory_create' %}">
-                <button class="btn btn-success" type="button">Добави нова</button>
+                <button class="btn btn-success" type="button">{% trans "Add new" %}</button>
               </a>
               <span><br></span>
             </div>

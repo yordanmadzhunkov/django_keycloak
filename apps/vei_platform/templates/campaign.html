@@ -19,37 +19,30 @@
             <tr>
               <td> {% trans "Status" %} </td>
               <td> {{campaign.status_str}}</td>
-              <td> </td>
             </tr>
             <tr>
               <td> {% trans "Campaign end date" %}</td>
               <td> {{campaign.start_date}}</td>
-              <td> </td>
             </tr>
             <tr>
               <td> {% trans "Duration" %} </td>
-              <td> {{campaign.duration}} </td>
-              <td> месеца </td>
+              <td> {{campaign.duration}} {% trans "months" %} </td>
             </tr>
             <tr>
               <td> {% trans "Total amount offered" %}</td>
-              <td> {{campaign.amount}} </td>
-              <td> лв </td>
+              <td> {{campaign.amount}} {% trans "lv" %} </td>
             </tr>
             <tr>
               <td> {% trans "Total share offered" %} </td>
-              <td> {{campaign.persent_from_profit}} </td>
-              <td> % </td>
+              <td> {{campaign.persent_from_profit}} % </td>
             </tr>
             <tr>
               <td> {% trans "Plaform commision" %}</td>
-              <td> {{campaign.commision}} </td>
-              <td> % </td>
+              <td> {{campaign.commision}} % </td>
             </tr>
             <tr>
               <td> {% trans "Price per kW production capacity" %}</td>
-              <td> {{campaign.price_per_kw}} </td>
-              <td> {% trans "lv" %} </td>
+              <td> {{campaign.price_per_kw}} {% trans "lv" %} </td>
             </tr>
           <tbody>
         </table>
@@ -60,15 +53,13 @@
 
   <div class="container py-5">
     <div class="row justify-content-center mb-3">
-      <h2 class="text-center">Инвеститори</h2>
-
       <div class="col-md-12 col-xl-10">
+        <h2 class="text-center">{% trans "Investors" %}</h2>
         <table class="table table-striped custom-table table-secondary table-bordered">
           <thead>
-            <th> Статус</th>
-            <th> Сума </th>
-            <th> Аватар</th>
-            <th> Инвестирор</th>
+            <th> {% trans "Status" %}</th>
+            <th> {% trans "Amount" %} </th>
+            <th> {% trans "Investor" %}</th>
           </thead>
           <tbody>
             {% for investment in investors %}
@@ -78,9 +69,9 @@
               <td>
                 <img class="img-profile rounded-circle topbar nav-item nav-link"
                   src="{{ investment.user_profile_avatar}}">
+                <a href={{ investment.user_profile_link }}> {{ investment.user_profile }}
+                </a>
               </td>
-              <td> <a href={{ investment.user_profile_link }}> {{ investment.user_profile }} </a> </td>
-
             </tr>
             {% endfor %}
           </tbody>

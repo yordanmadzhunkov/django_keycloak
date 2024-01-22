@@ -1,17 +1,23 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
 {% block head_title %}
-Home
+{% trans "About us" %}
 {% endblock%}
 {% block content %}
+
 <!-- ======= Team Section ======= -->
 <section id="team" class="team">
     <div class="container">
         <div class="section-title text-center">
-            <h1 class="text-dark">Нашият екип</h1>
-            <p>Макар и малък, нашият екип застава открито с лицата си, за спечелим и заслужим доверието на напите
-                инвеститори и клиенти.</p>
+            <h1 class="text-dark">
+                {% trans "About us" %}
+            </h1>
+            <p>
+                {% trans "Our team stands openly with its faces to earn " %}
+                {% trans "the trust of our investors and clients." %}
+            </p>
         </div>
         <hr>
         <div class="row">
@@ -23,7 +29,7 @@ Home
                         <h4>{{member.name}}</h4>
                     </a>
                     <span>{{member.role}}</span>
-                    <p>{{member.description}}</p>
+                    <p>{{member.description |linebreaks}}</p>
                     <div class="social">
                         {% if member.twitter %}
                         <a href="{{member.twitter}}"><i class="fab fa-twitter"></i></a>

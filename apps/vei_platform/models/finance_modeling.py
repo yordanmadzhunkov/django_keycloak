@@ -7,9 +7,11 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from .factory import ElectricityFactory, FactoryProductionPlan
 from .legal import LegalEntity
 from .profile import UserProfile
+
+from django.utils.translation import gettext_lazy as _
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-
 from django_q.tasks import async_task
 
 from uuid import uuid4, UUID
@@ -65,17 +67,17 @@ class ElectricityPrice(models.Model):
 
 
 class Currency(models.TextChoices):
-    BGN = 'BGN', ('Bulgarian lev')
-    EUR = 'EUR', ('Euro')
-    USD = 'USD', ('Unated States Dolar')
+    BGN = 'BGN', _('Bulgarian lev')
+    EUR = 'EUR', _('Euro')
+    USD = 'USD', _('Unated States Dolar')
 
 
 
 class BankAccount(models.Model):
     class AccountStatus(models.TextChoices):
-        UNVERIFIED = 'UN', ('Unverified')
-        INACTIVE = 'IN', ('Inactive')
-        ACTIVE = 'AC', ('Active')
+        UNVERIFIED = 'UN', _('Unverified')
+        INACTIVE = 'IN', _('Inactive')
+        ACTIVE = 'AC', _('Active')
 
     owner = models.ForeignKey(LegalEntity, null=True, blank=True, on_delete=models.DO_NOTHING)
     iban = models.TextField(max_length=100, null=False, blank=False)
@@ -114,11 +116,11 @@ class BankAccount(models.Model):
     
     def status_str(self):
         if self.status == BankAccount.AccountStatus.ACTIVE:
-            return 'Active'
+            return _('Active')
         if self.status == BankAccount.AccountStatus.UNVERIFIED:
-            return 'Unverified'
+            return _('Unverified')
         if self.status == BankAccount.AccountStatus.INACTIVE:
-            return 'Inactive'
+            return _('Inactive')
         return 'Unknown'
 
     
@@ -128,14 +130,14 @@ class BankTransaction(models.Model):
     amount = models.DecimalField(decimal_places=2,
                                  max_digits=20,
                                  default=0.00,
-                                 verbose_name=('Amount'),
-                                 help_text=('Account of the transaction.'),
+                                 verbose_name=_('Amount'),
+                                 help_text=_('Account of the transaction.'),
                                  )
     fee = models.DecimalField(decimal_places=2,
                                  max_digits=20,
                                  default=0.00,
-                                 verbose_name=('Fee'),
-                                 help_text=('Fee assosiated with the transaction.'),
+                                 verbose_name=_('Fee'),
+                                 help_text=_('Fee assosiated with the transaction.'),
                                  )
     other_account_iban = models.TextField(max_length=100, null=True, blank=True, default='')
     occured_at = models.DateTimeField(blank=False, null=False)
@@ -144,8 +146,8 @@ class BankTransaction(models.Model):
     description = models.CharField(max_length=256,
                                    null=False,
                                    blank=True,
-                                   verbose_name=('Tx Description'),
-                                   help_text=('A description to be included with this individual transaction'))
+                                   verbose_name=_('Tx Description'),
+                                   help_text=_('A description to be included with this individual transaction'))
     
 
     def __str__(self) -> str:
@@ -246,11 +248,11 @@ class BankLoanInterest(models.Model):
 
 class Campaign(models.Model):
     class Status(models.TextChoices):
-        INITIALIZED = 'UN', ('Under review')
-        ACTIVE = 'Ac', ('Active')
-        CANCELED = 'CA', ('Canceled')
-        COMPLETED = 'CO', ('Completed')
-        TIMEOUT = 'To', ('Timeout')
+        INITIALIZED = 'UN', _('Under review')
+        ACTIVE = 'Ac', _('Active')
+        CANCELED = 'CA', _('Canceled')
+        COMPLETED = 'CO', _('Completed')
+        TIMEOUT = 'To', _('Timeout')
 
     start_date = models.DateField()
     amount = models.DecimalField(max_digits=16, decimal_places=2)
@@ -318,14 +320,15 @@ class Campaign(models.Model):
                           day=self.start_date.day,
                           hour=8, minute=0, second=0):
             if self.status == Campaign.Status.INITIALIZED:
-                return 'Стартирана'
+                return _('Started')
+                
             if self.status == Campaign.Status.ACTIVE:
-                return 'Активена'
+                return _('Active')
             if self.status == Campaign.Status.CANCELED:
-                return 'Отменена'
+                return _('Canceled')
             if self.status == Campaign.Status.COMPLETED:
-                return 'Приключила'
-        return 'Изтекла'
+                return _('Completed')
+        return _('Expired')
 
     def accept_investments(self, when=datetime.now()):
         if when < datetime(year=self.start_date.year,
@@ -348,7 +351,7 @@ class Campaign(models.Model):
             res.append({
                 'status': investor.status_str(),
                 'amount': investor.amount,
-                'user_profile': ("Инвеститор %d" % count) if not show else investor.investor_profile.get_display_name(),
+                'user_profile': (_("Investor %d") % count) if not show else investor.investor_profile.get_display_name(),
                 'user_profile_link': '' if not show else investor.investor_profile.get_href(),
                 'user_profile_avatar': '/static/img/undraw_profile.svg' if not show else investor.investor_profile.get_avatar_url(),
             })
@@ -361,9 +364,9 @@ class Campaign(models.Model):
 
 class InvestementInCampaign(models.Model):
     class Status(models.TextChoices):
-        INTERESTED = 'IN', ('Interested')
-        CANCELED = 'CA', ('Canceled')
-        COMPLETED = 'CO', ('Completed')
+        INTERESTED = 'IN', _('Interested')
+        CANCELED = 'CA', _('Canceled')
+        COMPLETED = 'CO', _('Completed')
         
     #name = models.CharField(max_length=128)
     investor_profile = models.ForeignKey(UserProfile, null=False, blank=False, on_delete=models.DO_NOTHING)
@@ -385,17 +388,17 @@ class InvestementInCampaign(models.Model):
     def status_with_css_class(self):
         if self.campaign.accept_investments():
             if self.status == InvestementInCampaign.Status.INTERESTED:
-                return ('Заявен интерес', 'text-dark')
+                return (_('Claimed interest'), 'text-dark')
             if self.status == InvestementInCampaign.Status.CANCELED:
-                return ('Отменен', 'text-error')
+                return (_('Canceled'), 'text-error')
             if self.status == InvestementInCampaign.Status.COMPLETED:
-                return ('Завършен', 'text-success')
+                return (_('Completed'), 'text-success')
         else:
             if self.campaign.status == Campaign.Status.COMPLETED:
-                return ('Очакваме депозит', 'text-success')
+                return (_('Expecting deposit'), 'text-success')
             else:
-                return ('Кампанията е изтекла', 'text-muted')
-        return ('Unknown', 'text-error')
+                return (_('Campaign expired'), 'text-muted')
+        return (_('Unknown'), 'text-error')
     
     def status_str(self):
         status, css_class = self.status_with_css_class()

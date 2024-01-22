@@ -1,22 +1,21 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
 msgid ""
 msgstr ""
 "Project-Id-Version: FractionEnergy Platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-15 06:35+0000\n"
-"PO-Revision-Date: 2024-01-14 16:41+0200\n"
+"POT-Creation-Date: 2024-01-22 12:11+0000\n"
+"PO-Revision-Date: 2024-01-22 14:13+0200\n"
 "Last-Translator: \n"
-"Language-Team: \n"
-"Language: en_US\n"
+"Language-Team: Bulgarian\n"
+"Language: be\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100 != 11) ? 0 : ((n%10 >= 2 "
+"&& n%10 <= 4 && (n%100 < 12 || n%100 > 14)) ? 1 : (n%10 == 0 || (n%10 >= 5 "
+"&& n%10 <=9) || (n%100 >= 11 && n%100 <= 14)) ? 2 : 3);\n"
+"X-Loco-Source-Locale: en_BG\n"
 "X-Generator: Poedit 3.0.1\n"
+"X-Loco-Parser: loco_parse_po\n"
 
 #: vei_platform/forms.py:76 vei_platform/forms.py:366
 msgid "Capitalization"
@@ -50,7 +49,9 @@ msgstr "Последна година"
 msgid "Issued date"
 msgstr "Крайна дата"
 
-#: vei_platform/forms.py:151 vei_platform/templates/dashboard_campaigns.html:12
+#: vei_platform/forms.py:151 vei_platform/models/finance_modeling.py:133
+#: vei_platform/templates/campaign.html:61
+#: vei_platform/templates/dashboard_campaigns.html:12
 #: vei_platform/templates/dashboard_investments.html:13
 #: vei_platform/templates/factory_invest.html:17
 msgid "Amount"
@@ -198,7 +199,7 @@ msgstr "Приключете кампанията"
 msgid "Cancel"
 msgstr "Отказ"
 
-#: vei_platform/forms.py:474 vei_platform/forms.py:562
+#: vei_platform/forms.py:474 vei_platform/forms.py:567
 msgid "Save"
 msgstr "Запази"
 
@@ -229,48 +230,197 @@ msgstr "Брой"
 msgid "Document file [pdf]"
 msgstr "Документ [pdf]"
 
-#: vei_platform/forms.py:558
+#: vei_platform/forms.py:503
+msgid "Description"
+msgstr "Описание"
+
+#: vei_platform/forms.py:560
 msgid "Type energy source"
 msgstr "Вид енергоизотчник"
 
-#: vei_platform/forms.py:588
+#: vei_platform/forms.py:594
 msgid "Details about the factory"
 msgstr "Детайли за електроцентралата"
 
-#: vei_platform/forms.py:598 vei_platform/templates/dashboard_campaigns.html:10
+#: vei_platform/forms.py:604 vei_platform/templates/dashboard_campaigns.html:10
 #: vei_platform/templates/dashboard_investments.html:11
 msgid "Factory name"
 msgstr "Електроцентрала"
 
-#: vei_platform/forms.py:599
+#: vei_platform/forms.py:605
 #: vei_platform/templates/snippets/factory_card.html:39
 msgid "Location"
 msgstr "Локация"
 
-#: vei_platform/forms.py:600
+#: vei_platform/forms.py:606
 #: vei_platform/templates/snippets/factory_card.html:42
 msgid "Opened"
 msgstr "В експлоатация"
 
-#: vei_platform/forms.py:601
+#: vei_platform/forms.py:607
 msgid "Capacity [MW]"
 msgstr "Капацитет [MW]"
 
-#: vei_platform/forms.py:602
+#: vei_platform/forms.py:608
 msgid "TAX ID"
 msgstr "ДАНЪЧЕН НОМЕР"
 
-#: vei_platform/forms.py:603
+#: vei_platform/forms.py:609
 msgid "Legal entity owning the factory"
 msgstr "Юридическо лице  собственик на електроцентралата"
 
-#: vei_platform/forms.py:604
+#: vei_platform/forms.py:610
 msgid "Energy source type"
 msgstr "Вид енергоизточник"
 
-#: vei_platform/forms.py:605
+#: vei_platform/forms.py:611
+#: vei_platform/templates/layout/image_thumbnail.html:20
 msgid "Image"
 msgstr "Изборажение"
+
+#: vei_platform/models/factory.py:35
+msgid "Photovoltaic"
+msgstr "Фотоволтаик"
+
+#: vei_platform/models/factory.py:36
+msgid "Wind turbine"
+msgstr "Вятърна турбина"
+
+#: vei_platform/models/factory.py:37
+msgid "Hydropower"
+msgstr "Водна"
+
+#: vei_platform/models/factory.py:38
+msgid "Biomass"
+msgstr "Биомаса"
+
+#: vei_platform/models/factory.py:39
+msgid "Renewable gas"
+msgstr "Възобновяем газ"
+
+#: vei_platform/models/factory.py:53
+msgid "Bulgaria"
+msgstr "България"
+
+#: vei_platform/models/factory.py:115
+msgid "Photovoltaic Panel"
+msgstr "Фотоволтаичен панел"
+
+#: vei_platform/models/factory.py:116
+msgid "Invertor"
+msgstr "Инвертор"
+
+#: vei_platform/models/factory.py:117
+msgid "Connector"
+msgstr "Конектор"
+
+#: vei_platform/models/factory.py:118
+msgid "Other"
+msgstr "Друго"
+
+#: vei_platform/models/finance_modeling.py:70
+msgid "Bulgarian lev"
+msgstr "Българиски лев"
+
+#: vei_platform/models/finance_modeling.py:71
+msgid "Euro"
+msgstr "Евро"
+
+#: vei_platform/models/finance_modeling.py:72
+msgid "Unated States Dolar"
+msgstr "Американски Долар"
+
+#: vei_platform/models/finance_modeling.py:78
+#: vei_platform/models/finance_modeling.py:121
+msgid "Unverified"
+msgstr "Непроверен"
+
+#: vei_platform/models/finance_modeling.py:79
+#: vei_platform/models/finance_modeling.py:123
+msgid "Inactive"
+msgstr "Неактивен"
+
+#: vei_platform/models/finance_modeling.py:80
+#: vei_platform/models/finance_modeling.py:119
+#: vei_platform/models/finance_modeling.py:252
+#: vei_platform/models/finance_modeling.py:326
+msgid "Active"
+msgstr "Активен"
+
+#: vei_platform/models/finance_modeling.py:134
+msgid "Account of the transaction."
+msgstr "Сметка свързана с транзакцията."
+
+#: vei_platform/models/finance_modeling.py:139
+msgid "Fee"
+msgstr "Такса"
+
+#: vei_platform/models/finance_modeling.py:140
+msgid "Fee assosiated with the transaction."
+msgstr "Такса асоцирана с транзакцията."
+
+#: vei_platform/models/finance_modeling.py:149
+msgid "Tx Description"
+msgstr "Описание на транзакцията"
+
+#: vei_platform/models/finance_modeling.py:150
+msgid "A description to be included with this individual transaction"
+msgstr "Описание, което да бъде включено към индивидуалната транзакция"
+
+#: vei_platform/models/finance_modeling.py:251
+msgid "Under review"
+msgstr "В процес на ревюиране"
+
+#: vei_platform/models/finance_modeling.py:253
+#: vei_platform/models/finance_modeling.py:328
+#: vei_platform/models/finance_modeling.py:368
+#: vei_platform/models/finance_modeling.py:393
+msgid "Canceled"
+msgstr "Отменена"
+
+#: vei_platform/models/finance_modeling.py:254
+#: vei_platform/models/finance_modeling.py:330
+#: vei_platform/models/finance_modeling.py:369
+#: vei_platform/models/finance_modeling.py:395
+msgid "Completed"
+msgstr "Завършено"
+
+#: vei_platform/models/finance_modeling.py:255
+msgid "Timeout"
+msgstr "Изтекло време"
+
+#: vei_platform/models/finance_modeling.py:323
+msgid "Started"
+msgstr "Започнало"
+
+#: vei_platform/models/finance_modeling.py:331
+msgid "Expired"
+msgstr "Изтекло"
+
+#: vei_platform/models/finance_modeling.py:354
+#, python-format
+msgid "Investor %d"
+msgstr "Инвеститор  %d"
+
+#: vei_platform/models/finance_modeling.py:367
+msgid "Interested"
+msgstr "Размер на интереса ви"
+
+#: vei_platform/models/finance_modeling.py:391
+msgid "Claimed interest"
+msgstr "Вашият интерес"
+
+#: vei_platform/models/finance_modeling.py:398
+msgid "Expecting deposit"
+msgstr "Очакваме депозит"
+
+#: vei_platform/models/finance_modeling.py:400
+msgid "Campaign expired"
+msgstr "Край на кампанията"
+
+#: vei_platform/models/finance_modeling.py:401
+msgid "Unknown"
+msgstr "Неизвестен"
 
 #: vei_platform/models/restricted_file_field.py:39
 msgid "File is missing."
@@ -297,11 +447,24 @@ msgstr "Английски"
 msgid "Български"
 msgstr "Български"
 
+#: vei_platform/templates/404.html:9
+msgid "Page Not Found"
+msgstr "Страницата не е намерена"
+
+#: vei_platform/templates/404.html:10
+msgid "It looks like you found a glitch in the matrix..."
+msgstr "Изглежда, че сте намерили бъг в матрицата..."
+
+#: vei_platform/templates/404.html:11
+msgid "Back to Dashboard"
+msgstr "Обратно към таблото"
+
 #: vei_platform/templates/campaign.html:15
 msgid "Campaign"
 msgstr "Кампания"
 
 #: vei_platform/templates/campaign.html:20
+#: vei_platform/templates/campaign.html:60
 #: vei_platform/templates/campaigns.html:10
 #: vei_platform/templates/dashboard_campaigns.html:9
 #: vei_platform/templates/dashboard_investments.html:10
@@ -309,39 +472,53 @@ msgstr "Кампания"
 msgid "Status"
 msgstr "Статус"
 
-#: vei_platform/templates/campaign.html:25
+#: vei_platform/templates/campaign.html:24
 #: vei_platform/templates/campaigns.html:11
 msgid "Campaign end date"
 msgstr "Край на кампанията"
 
-#: vei_platform/templates/campaign.html:30
+#: vei_platform/templates/campaign.html:28
 #: vei_platform/templates/investment.html:22
 msgid "Duration"
 msgstr "Продължителност"
 
-#: vei_platform/templates/campaign.html:35
+#: vei_platform/templates/campaign.html:29
+#: vei_platform/templates/investment.html:24
+msgid "months"
+msgstr "месеци"
+
+#: vei_platform/templates/campaign.html:32
 msgid "Total amount offered"
 msgstr "Обща предложена сума"
 
-#: vei_platform/templates/campaign.html:40
-msgid "Total share offered"
-msgstr "Общо предложени дялове"
-
+#: vei_platform/templates/campaign.html:33
 #: vei_platform/templates/campaign.html:45
-msgid "Plaform commision"
-msgstr "Комисионна на платформата"
-
-#: vei_platform/templates/campaign.html:50
-msgid "Price per kW production capacity"
-msgstr "Цена на кВт за производствен капацитет"
-
-#: vei_platform/templates/campaign.html:52
 #: vei_platform/templates/investment.html:29
 #: vei_platform/templates/investment.html:44
 #: vei_platform/templates/snippets/factory_card_no_campaign.html:11
 #: vei_platform/templates/snippets/factory_card_offer_start_campaign.html:11
 msgid "lv"
 msgstr "лв"
+
+#: vei_platform/templates/campaign.html:36
+msgid "Total share offered"
+msgstr "Общо предложени дялове"
+
+#: vei_platform/templates/campaign.html:40
+msgid "Plaform commision"
+msgstr "Комисионна на платформата"
+
+#: vei_platform/templates/campaign.html:44
+msgid "Price per kW production capacity"
+msgstr "Цена на кВт за производствен капацитет"
+
+#: vei_platform/templates/campaign.html:57
+msgid "Investors"
+msgstr "Инвеститори"
+
+#: vei_platform/templates/campaign.html:62
+msgid "Investor"
+msgstr "Инвеститор"
 
 #: vei_platform/templates/campaigns.html:7
 msgid "Campaings for collection investors"
@@ -434,9 +611,9 @@ msgstr "Брой инвестиции"
 msgid "Become manager"
 msgstr "Стани управител"
 
-#: vei_platform/templates/investment.html:24
-msgid "months"
-msgstr "месеци"
+#: vei_platform/templates/home.html:6
+msgid "Home"
+msgstr "Начална страница"
 
 #: vei_platform/templates/investment.html:27
 msgid "Total amount listed"
@@ -449,6 +626,18 @@ msgstr "Общ предложен дял"
 #: vei_platform/templates/investment.html:37
 msgid "Platform commision"
 msgstr "Комисионна за платформата"
+
+#: vei_platform/templates/layout/image_thumbnail.html:10
+msgid "Clear"
+msgstr "Изчисти"
+
+#: vei_platform/templates/my_factories.html:18
+msgid "My Factories"
+msgstr "Мойте електроцентрали"
+
+#: vei_platform/templates/my_factories.html:23
+msgid "Add new"
+msgstr "Добави нова"
 
 #: vei_platform/templates/snippets/factory_card.html:33
 #: vei_platform/templates/snippets/factory_card.html:36
@@ -474,7 +663,7 @@ msgstr "Анулиране на кампанията"
 #: vei_platform/templates/snippets/factory_card_no_campaign.html:9
 #: vei_platform/templates/snippets/factory_card_offer_start_campaign.html:9
 msgid "Successfully completed campaign for "
-msgstr "Успешно приключване на кампанията на"
+msgstr "Успешно приключване на кампанията на "
 
 #: vei_platform/templates/snippets/factory_card_no_campaign.html:19
 msgid "No active campagin"
@@ -515,7 +704,20 @@ msgstr "Мощност [кВт]"
 
 #: vei_platform/templates/snippets/factory_components.html:14
 msgid "Document"
-msgstr ""
+msgstr "Документ"
+
+#: vei_platform/templates/snippets/header_user.html:19
+#: vei_platform/templates/snippets/sidebar.html:82
+#: vei_platform/templates/snippets/topbar_user.html:28
+msgid "Profile"
+msgstr "Профил"
+
+#: vei_platform/templates/snippets/header_user.html:28
+#: vei_platform/templates/snippets/logout_modal.html:23
+#: vei_platform/templates/snippets/sidebar.html:89
+#: vei_platform/templates/snippets/topbar_user.html:41
+msgid "Logout"
+msgstr "Изход"
 
 #: vei_platform/templates/snippets/logout_modal.html:9
 msgid "Ready to Leave?"
@@ -524,12 +726,6 @@ msgstr "Искате да излезете?"
 #: vei_platform/templates/snippets/logout_modal.html:14
 msgid "Select 'Logout' below if you are ready to end your current session."
 msgstr "Натиснете 'Изход', ако искате да излезете от текущата сесия."
-
-#: vei_platform/templates/snippets/logout_modal.html:23
-#: vei_platform/templates/snippets/sidebar.html:89
-#: vei_platform/templates/snippets/topbar_user.html:41
-msgid "Logout"
-msgstr "Изход"
 
 #: vei_platform/templates/snippets/sidebar.html:21
 msgid "Dashboard"
@@ -544,6 +740,7 @@ msgid "Offer your Electrical factory"
 msgstr "Предложи твоята електроцентрала"
 
 #: vei_platform/templates/snippets/sidebar.html:42
+#: vei_platform/templates/team.html:6 vei_platform/templates/team.html:15
 msgid "About us"
 msgstr "За нас"
 
@@ -562,11 +759,6 @@ msgstr ""
 #: vei_platform/templates/snippets/sidebar.html:67
 msgid "Scriping tools"
 msgstr ""
-
-#: vei_platform/templates/snippets/sidebar.html:82
-#: vei_platform/templates/snippets/topbar_user.html:28
-msgid "Profile"
-msgstr "Профил"
 
 #: vei_platform/templates/snippets/sidebar.html:87
 msgid "My profile"
@@ -595,6 +787,14 @@ msgstr "Активностти"
 #: vei_platform/templates/snippets/topbar_user.html:46
 msgid "Log in/Register"
 msgstr "Вход/Регистрация"
+
+#: vei_platform/templates/team.html:18
+msgid "Our team stands openly with its faces to earn "
+msgstr "Екипът ни застава открито с лицата си, за да спечелим "
+
+#: vei_platform/templates/team.html:19
+msgid "the trust of our investors and clients."
+msgstr "доверието на нашите инвеститори и клиенти."
 
 #: vei_platform/templates/user_profile.html:13
 msgid "User"
@@ -670,12 +870,12 @@ msgstr ""
 "Успешно стартирахте кампания за набиране на инвеститори. Кампанията изтича "
 "на %s"
 
-#: vei_platform/views/factory.py:140 vei_platform/views/factory.py:436
+#: vei_platform/views/factory.py:140 vei_platform/views/factory.py:445
 #: vei_platform/views/invest.py:66
 msgid "Invalid data, please try again"
 msgstr "Невалидни данни, моля опитайте отново"
 
-#: vei_platform/views/factory.py:418
+#: vei_platform/views/factory.py:427
 msgid "Electrical factory added"
 msgstr "Eлектроцентрала е добавена"
 
@@ -729,10 +929,20 @@ msgstr "Добавено %s"
 msgid "Cant add %s, Its already owned by plaform"
 msgstr "Не може да добавим %s, вече го има в платформата"
 
+#: vei_platform/views/profile.py:40
+#, python-format
+msgid "%s saved as avatar"
+msgstr "%s запазен като аватар"
+
 #: vei_platform/views/profile.py:49
 #, python-format
 msgid "Full name set to: %s %s"
 msgstr "Вашето пълно име е: %s %s"
 
-#~ msgid "Component name"
-#~ msgstr "Име на компоненента"
+#: vei_platform/views/profile.py:59
+msgid "Profile error"
+msgstr "Грешка в профила"
+
+#, fuzzy, python-format
+#~ msgid "Инвеститор %d"
+#~ msgstr "Инвеститор %d"
