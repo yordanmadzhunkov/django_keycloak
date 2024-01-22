@@ -4,8 +4,10 @@
 <div class="fileupload fileupload-new" data-provides="fileupload">
   <div class="row">
     <div class="col-md-12">
-      <img id="output" class="img-thumbnail img-fluid w-100" {% if field.value %} src="{{ field.value.url }}" {% endif
-        %} />
+      <img id="output" class="img-thumbnail img-fluid w-100" 
+        {% if field.value %} 
+        src="{{ field.value.url }}" 
+        {% endif %} />
       {% if field.value %}
       <input type="checkbox" name="{{ field.name }}-clear" id="{{ field.name }}-clear_id">
       <label for="{{field.name}}-clear_id">{% trans "Clear" %}</label><br>
