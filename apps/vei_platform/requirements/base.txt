@@ -21,6 +21,7 @@ django-q
 django-extensions
 django-health-check>=3.17
 django-crispy-forms
+django-money
 crispy-bootstrap4
 
 pillow

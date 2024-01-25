@@ -3,7 +3,7 @@ from django.core.paginator import Paginator
 from . import common_context
 from vei_platform.models.factory import ElectricityFactory, FactoryProductionPlan, ElectricityWorkingHoursPerMonth, ElectricityFactoryComponents
 from vei_platform.models.finance_modeling import Campaign
-from vei_platform.models.finance_modeling import ElectricityPricePlan, BankLoan, Campaign
+from vei_platform.models.finance_modeling import ElectricityPricePlan, Campaign
 from vei_platform.models.profile import get_user_profile
 from vei_platform.forms import FactoryListingForm, FactoryFinancialPlaningForm, FactoryModelForm, ElectricityFactoryComponentsForm
 
@@ -133,12 +133,10 @@ def view_campaign_create(request, pk=None):
             )
             campaign.save()
             messages.success(request, _('You have successfully started a campaign to collect investors until %s')  
-                             #_('Успешно стартирахте кампания за набиране на инвеститори до %s') 
                              % (start_date))
             return redirect(campaign.get_absolute_url())
         else:
             messages.error(request, _('Invalid data, please try again'))
-                           #_('Невалидни данни, моля опитайте отново'))
 
     context['new_campaign_form'] = form
     context['hide_link_buttons'] = True
@@ -181,15 +179,7 @@ def view_factory_detail(request, pk=None):
             prices.save()
             return redirect(prices.get_absolute_url())
 
-        if '_add_bank_loan' in request.POST:
-            bank_loan = BankLoan(  # name="Банков заем",
-                start_date=factory.opened,
-                amount=factory.capacity_in_mw *
-                Decimal(1700000),
-                duration=12*15,
-                factory=factory)
-            bank_loan.save()
-            return redirect(bank_loan.get_absolute_url())
+
 
         if '_become_manager' in request.POST:
             if factory.manager is None:
@@ -215,11 +205,6 @@ def view_factory_detail(request, pk=None):
                 pk=int(form.cleaned_data['electricity_prices']))
             if '_edit_price' in request.POST:
                 return redirect(prices.get_absolute_url())
-
-            loan = BankLoan.objects.get(
-                pk=int(form.cleaned_data['bank_loan']))
-            if '_edit_bank_loan' in request.POST:
-                return redirect(loan.get_absolute_url())
 
             capacity = factory.capacity_in_mw
             capitalization = form.cleaned_data['capitalization']

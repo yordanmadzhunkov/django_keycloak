@@ -4,14 +4,15 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.generic.base import TemplateView
 
-from .views.factory import view_all_factories_paganated, view_factory_detail, view_factory_production, view_campaign_create, view_campaign_active, view_offered_factories_paganated, view_my_factories, FactoryCreate, FactoryUpdate
+from .views.factory import view_all_factories_paganated, view_factory_detail, view_factory_production 
+from .views.factory import view_campaign_create, view_campaign_active, view_offered_factories_paganated
+from .views.factory import view_my_factories
+from .views.factory import FactoryCreate, FactoryUpdate
 from .views.dashboard import view_dashboard
 from .views.home import view_home
 from .views.profile import view_my_profile, view_user_profile
 from .views.legal_entity import view_entity_detail, view_my_entity_detail, view_entity_platform
 from .views.electricity_prices import view_electricity_prices
-from .views.loan import view_bank_loan_detail
-from .views.bank_account import view_bank_accounts, view_verify_bank_account, view_deposit_bank_account, view_withdraw_bank_account
 from .views.scriping_tools import view_scriping_tools
 from .views.invest import view_campaign
 from .views.team import view_team
@@ -44,12 +45,6 @@ urlpatterns = [
     path('entity/my_entity', view_my_entity_detail, name='my_entity'),
     path('entity/platform', view_entity_platform, name='platform_legal'),
     path('tools/scriping', view_scriping_tools, name='scriping_tools'),
-    path('bank_loan/<int:pk>', view_bank_loan_detail, name='bank_loan'),
-    
-    path('bank_accounts', view_bank_accounts, name='bank_accounts'),
-    path('bank_accounts/verify/<int:pk>', view_verify_bank_account, name='verify_bank_account'),
-    path('bank_accounts/deposit/<int:pk>', view_deposit_bank_account, name='deposit_bank_account'),
-    path('bank_accounts/withdraw/<int:pk>', view_withdraw_bank_account, name='withdraw_bank_account'),
     path('team', view_team, name='team'),
 ]
 

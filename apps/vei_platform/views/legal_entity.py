@@ -7,7 +7,6 @@ from . import common_context
 from vei_platform.models.profile import get_user_profile
 from vei_platform.models.legal import LegalEntity,LegalEntitySources, canonize_name, find_legal_entity
 from vei_platform.models.factory import ElectricityFactory
-from vei_platform.models.platform import PlatformLegalEntity    
 from vei_platform.forms import LegalEntityForm, SearchForm
 from django.contrib import messages
 from django.forms.models import model_to_dict

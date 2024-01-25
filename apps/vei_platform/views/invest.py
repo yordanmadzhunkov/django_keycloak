@@ -79,7 +79,7 @@ def view_campaign_as_investor(request, pk, context, campaign, factory):
                 if form.is_valid():
                     my_investments[0].amount = form.cleaned_data['amount']
                     my_investments[0].save()
-                    messages.success(request, _("You declared interest in amount changed to %d") % my_investments[0].amount)
+                    messages.success(request, _("You declared interest in amount changed to %s") % my_investments[0].amount)
                 else:
                     messages.error(request, _("Error occured when changing the amount"))
 

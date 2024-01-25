@@ -171,3 +171,6 @@ VEI_PLATFORM_IMAGE = config("VEI_PLATFORM_IMAGE", default="unspecified image")
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
 
 CRISPY_TEMPLATE_PACK = "bootstrap4"
+
+CURRENCIES = ('EUR', 'BGN')
+CURRENCY_CHOICES = [('EUR', 'EUR €'), ('BGN', 'BGN лв')]

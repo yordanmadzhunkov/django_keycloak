@@ -24,7 +24,6 @@ def view_my_profile(request):
     user = User.objects.get(username=request.user)
     user_profile_form = UserProfileForm(request.POST or None, request.FILES or None, 
                                         initial={
-                                            'show_balance': (profile.show_balance if profile else False),
                                             'last_name': user.last_name,
                                             'first_name': user.first_name,
                                         })
@@ -48,12 +47,6 @@ def view_my_profile(request):
             user.save()
             messages.success(request, _('Full name set to: %s %s') % (first_name, last_name))
             context['user'] = user
-
-        show_balance = user_profile_form.cleaned_data.get('show_balance')
-        if show_balance != profile.show_balance:
-            messages.success(request, 'Show balance in profile set to %s' % show_balance)
-            profile.show_balance = show_balance
-            profile.save()
     else:
         if request.method == "POST":
             messages.error(request, _('Profile error'))

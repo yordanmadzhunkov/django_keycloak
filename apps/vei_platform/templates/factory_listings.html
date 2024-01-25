@@ -24,7 +24,7 @@
             <div class="progress-bar" role="progressbar" style="width: {{campaign.progress.percent}}%"
               aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
           </div>
-          {{campaign.progress.total}} от
+          {{campaign.progress.total}} {% trans "from" %}
           {{campaign.amount}}
         </td>
         <td><a href={{campaign.get_absolute_url}}> {{campaign.count_investitors}}</a></td>

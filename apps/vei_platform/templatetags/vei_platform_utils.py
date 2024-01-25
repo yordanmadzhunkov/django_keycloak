@@ -1,7 +1,7 @@
 from django import template
 from django.db import models
 
-from vei_platform.models.finance_modeling import Campaign, BankAccount, BankTransaction
+from vei_platform.models.finance_modeling import Campaign
 from vei_platform.models.legal import find_legal_entity
 from vei_platform.models.factory import ElectricityFactory
 

@@ -1,10 +1,9 @@
 from django import forms
 from datetime import date, datetime
 from .models.factory import FactoryProductionPlan, ElectricityFactory, ElectricityFactoryComponents, docfile_content_types
-from .models.finance_modeling import ElectricityPricePlan, BankLoan, BankAccount, BankTransaction, InvestementInCampaign
+from .models.finance_modeling import ElectricityPricePlan, InvestementInCampaign
 from .models.profile import UserProfile
 from .models.legal import LegalEntity, find_legal_entity
-from .models.platform import platform_bank_accounts
 
 
 from crispy_forms.helper import FormHelper
@@ -15,7 +14,7 @@ from .custom_layout_object import Formset
 import re
 from django.conf import settings
 from django.utils.translation import get_language
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 from django import forms
 from django.utils import formats, timezone
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -91,9 +90,6 @@ class FactoryFinancialPlaningForm(forms.Form):
         choices=()
     )
 
-    bank_loan = forms.ChoiceField(
-        choices=()
-    )
 
     start_year = forms.IntegerField(
         initial=2021, max_value=2050, min_value=1990, required=True)
@@ -111,10 +107,6 @@ class FactoryFinancialPlaningForm(forms.Form):
                               for t in ElectricityPricePlan.objects.all()]
         self.fields['electricity_prices'] = forms.ChoiceField(label=_('Electricity price'),
                                                               choices=electricity_prices)
-
-        bank_loans = [(t.pk, str(t)) for t in BankLoan.objects.all()]
-        self.fields['bank_loan'] = forms.ChoiceField(
-            label=_('Bank loan'), choices=bank_loans)
 
 
 class PricePlanForm(forms.ModelForm):
@@ -142,29 +134,6 @@ class PricePlanForm(forms.ModelForm):
         }
 
 
-class BankLoanForm(forms.ModelForm):
-    class Meta:
-        model = BankLoan
-        fields = '__all__'
-        labels = {
-            'start_date': _('Issued date'),
-            'amount': _('Amount'),
-            'duration': _('Duration [months]'),
-        }
-        exclude = ['factory']
-        widgets = {
-            'start_date': forms.DateInput(attrs={
-                'class': 'form-control',
-                'title': _('Issued date')}),
-            'duration': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'style': 'width:19ch',
-            }),
-            'amount': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'style': 'width:19ch',
-            }),
-        }
 
 class LegalEntityForm(forms.ModelForm):
     class Meta:
@@ -199,94 +168,6 @@ class LegalEntityForm(forms.ModelForm):
         }
 
 
-class BankAccountForm(forms.ModelForm):
-    class Meta:
-        model = BankAccount
-        fields = '__all__'
-        exclude = ['initial_balance', 'status']
-        widgets = {
-            'iban': forms.TextInput(attrs={
-                'class': 'form-control',
-                'style': 'width:40ch',
-            }),
-            'balance': forms.TextInput(attrs={
-                'class': 'form-control',
-                'autocomplete': 'off',
-                'pattern': '[0-9\.]+',
-                'style': 'width:30ch',
-                'title': _('Enter numbers Only')}),
-        }
-
-    def __init__(self, legal_entities_pk_list, *args, **kwargs):
-        super (BankAccountForm,self ).__init__(*args,**kwargs) # populates the post
-        self.fields['owner'].queryset = LegalEntity.objects.filter(pk__in=legal_entities_pk_list)
-
-class BankAccountDepositForm(forms.ModelForm):
-    class Meta:
-        model = BankTransaction
-        fields = '__all__'
-        exclude = ['account', 'other_account_iban', 'fee']
-        widgets = {
-            'iban': forms.TextInput(attrs={
-                'class': 'form-control',
-                'style': 'width:40ch',
-            }),
-            'amount': forms.TextInput(attrs={
-                'class': 'form-control',
-                'autocomplete': 'off',
-                'pattern': '[0-9\.]+',
-                'style': 'width:30ch',
-                'title': _('Enter numbers Only')}),
-            'fee': forms.TextInput(attrs={
-                'class': 'form-control',
-                'autocomplete': 'off',
-                'pattern': '[0-9\.]+',
-                'style': 'width:30ch',
-                'title': _('Enter numbers Only')}),
-            'occured_at':  BootstrapDatePicker(attrs={
-                'class': 'form-control',
-                'title': 'Date of transaction',
-                'style': 'width:12ch',
-                'data-date-autoclose': 'true',
-                'data-date-clear-btn': 'false',
-                'data-date-today-btn': 'linked',
-                'data-date-today-highlight': 'true'
-                }),
-        }
-
-    def __init__(self, bank_account, *args, **kwargs):
-        super (BankAccountDepositForm, self).__init__(*args,**kwargs) # populates the post
-        bank_accounts = [(t.pk, str(t)) for t in platform_bank_accounts(bank_account.currency)]
-        dest_iban = forms.ChoiceField(label=_('IBAN'), choices=bank_accounts)
-        self.fields['dest_iban'] = dest_iban 
-
-class PlatformWithdrawForm(forms.Form):
-    amount = forms.CharField(initial='0',
-                             required=False,
-                             widget=forms.TextInput(attrs={
-                                 'class': 'form-control',
-                                 'autocomplete': 'off',
-                                 'pattern': '[0-9\.]+',
-                                 'style': 'width:9ch',
-                                 'title': _('Enter numbers Only')})
-                             )
-    occured_at = forms.DateTimeField(initial=datetime.today(),
-                               required=True,
-                               widget=BootstrapDatePicker(attrs={
-                'class': 'form-control',
-                'title': 'Date of transaction',
-                'style': 'width:12ch',
-                'data-date-autoclose': 'true',
-                'data-date-clear-btn': 'false',
-                'data-date-today-btn': 'linked',
-                'data-date-today-highlight': 'true'
-                }))
-    
-    #def __init__(self, user, *args, **kwargs):
-        #super (PlatformWithdrawForm, self).__init__(*args, **kwargs) # populates the post
-        #bank_accounts = [(t.pk, str(t)) for t in platform_bank_accounts(bank_account.currency)]
-        #dest_iban = forms.ChoiceField(label='IBAN', choices=bank_accounts)
-        #self.fields['dest_iban'] = dest_iban 
 
 
 class NumberPerMonthForm(forms.Form):

@@ -658,7 +658,7 @@ msgstr "Капацитет [MW]"
 
 #: vei_platform/templates/snippets/factory_card_link_to_active_campaign.html:5
 msgid "Active campaign"
-msgstr "Анулиране на кампанията"
+msgstr "Активна кампания"
 
 #: vei_platform/templates/snippets/factory_card_no_campaign.html:9
 #: vei_platform/templates/snippets/factory_card_offer_start_campaign.html:9
@@ -667,7 +667,7 @@ msgstr "Успешно приключване на кампанията на "
 
 #: vei_platform/templates/snippets/factory_card_no_campaign.html:19
 msgid "No active campagin"
-msgstr "Анулиране на кампанията"
+msgstr "Няма активна кампанията"
 
 #: vei_platform/templates/snippets/factory_card_offer_login.html:5
 msgid "You need to login in order to claim interest in project"
