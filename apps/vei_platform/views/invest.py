@@ -1,6 +1,6 @@
 from . import common_context
 from vei_platform.models.factory import ElectricityFactory, FactoryProductionPlan, ElectricityWorkingHoursPerMonth
-from vei_platform.models.finance_modeling import Campaign, InvestementInCampaign
+from vei_platform.models.finance_modeling import Campaign as CampaignModel, InvestementInCampaign
 from vei_platform.models.profile import get_user_profile
 from vei_platform.forms import CreateInvestmentForm, EditInvestmentForm, CampaingEditForm
 
@@ -10,6 +10,7 @@ from django.contrib import messages
 
 from decimal import Decimal
 from django.utils.translation import gettext as _
+from django.views import View
 
 
 def view_campaign_as_manager(request, pk, context, campaign, factory):
@@ -94,17 +95,16 @@ def view_campaign_as_investor(request, pk, context, campaign, factory):
 def vire_campaign_as_anon(request, pk, context, campaign, factory):
     return render(request, "campaign.html", context)
 
-def view_campaign(request, pk):
-    context = common_context(request)
-    campaign = Campaign.objects.get(pk=pk)
-    factory = campaign.factory
-    form = None
-    if request.user:
-        if request.user.is_authenticated:
+class Campaign(View):
+    def get(self, request, pk, *args, **kwargs):
+        context = common_context(request)
+        campaign = CampaignModel.objects.get(pk=pk)
+        factory = campaign.factory
+        form = None
+        if request.user and request.user.is_authenticated:
             is_manager = factory.get_manager_profile() == get_user_profile(request.user)
             if is_manager:
                 return view_campaign_as_manager(request, pk, context, campaign, factory)
             else:
                 return view_campaign_as_investor(request, pk, context, campaign, factory)
-    return vire_campaign_as_anon(request, pk, context, campaign, factory)
-
+        return vire_campaign_as_anon(request, pk, context, campaign, factory)

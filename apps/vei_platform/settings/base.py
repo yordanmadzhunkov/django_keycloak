@@ -31,6 +31,8 @@ INSTALLED_APPS = [
     'health_check.contrib.psutil',
 
     'django_q',
+    'djmoney',
+    'djmoney.contrib.exchange',
 
     'vei_platform'
 ]
@@ -172,5 +174,10 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
 
 CRISPY_TEMPLATE_PACK = "bootstrap4"
 
-CURRENCIES = ('EUR', 'BGN')
-CURRENCY_CHOICES = [('EUR', 'EUR €'), ('BGN', 'BGN лв')]
+CURRENCIES = ('EUR', 'BGN', 'USD')
+CURRENCY_CHOICES = [('EUR', 'EUR €'), ('BGN', 'BGN лв'), ('USD', 'USD $')]
+
+#BASE_CURRENCY = 'EUR'
+#OPEN_EXCHANGE_RATES_URL = 'https://openexchangerates.org/api/latest.json?base=EUR'
+OPEN_EXCHANGE_RATES_APP_ID = config('OPEN_EXCHANGE_RATES_APP_ID', default='d4d02b6623504e4ca51c588443e960d5')
+EXCHANGE_BACKEND = 'djmoney.contrib.exchange.backends.OpenExchangeRatesBackend'

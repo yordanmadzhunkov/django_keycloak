@@ -10,6 +10,7 @@ mozilla-django-oidc==3.0.0
 python-decouple>=3.8
 psycopg2
 
+python-gettext 
 
 autopep8==1.4.4
 pep8==1.7.1
@@ -21,11 +22,10 @@ django-q
 django-extensions
 django-health-check>=3.17
 django-crispy-forms
-django-money
+django-money[exchange]
+
 crispy-bootstrap4
 
 pillow
 psutil
 bs4
-
-python-gettext 

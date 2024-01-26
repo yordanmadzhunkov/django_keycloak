@@ -8,11 +8,12 @@ from vei_platform.models.profile import get_user_profile
 from vei_platform.models.factory import ElectricityFactory
 from django.utils.translation import gettext as _
 
+from django.views import View
 
-def view_dashboard(request):
-    context = common_context(request)
-    if request.user:
-        if request.user.is_authenticated:
+class Dashboard(View):
+    def get(self, request, *args, **kwargs):
+        context = common_context(request)
+        if request.user and request.user.is_authenticated:
             context['my_legal_entity'] = find_legal_entity(user=request.user)
             profile = get_user_profile(request.user)
             my_investments = InvestementInCampaign.objects.filter(investor_profile=profile)
@@ -26,6 +27,5 @@ def view_dashboard(request):
                     campaigns.append(c)
             context['campaigns'] = campaigns
             return render(request, "dashboard.html", context)
-        
-    return redirect('home')
+        return redirect('home')
     

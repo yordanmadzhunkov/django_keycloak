@@ -5,7 +5,9 @@ from vei_platform.models.profile import get_user_profile
 from django.shortcuts import render
 from django.utils.translation import gettext as _
 
+from django.views import View
 
-def view_home(request):
-    context = common_context(request)
-    return render(request, "home.html", context)
+class Home(View):
+    def get(self, request, *args, **kwargs):
+        context = common_context(request)
+        return render(request, "home.html", context)

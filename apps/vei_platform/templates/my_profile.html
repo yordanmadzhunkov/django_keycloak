@@ -5,17 +5,17 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
+
 <div class="row">
     <div class="col-md-3"></div>
     <div class="col-md-6 text-center">
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-
             <div class="card mb-4">
                 <div class="card-body">
                     <div class="row">
                         <div class="col-sm-3">
-                            <p class="mb-0">Име</p>
+                            {{ avatar_form.first_name.label}}
                         </div>
                         <div class="col-sm-9">
                             <p class="text-muted mb-0">{{ avatar_form.first_name}}</p>
@@ -24,7 +24,7 @@
                     <hr>
                     <div class="row">
                         <div class="col-sm-3">
-                            <p class="mb-0">Фамилия</p>
+                            {{ avatar_form.last_name.label}}
                         </div>
                         <div class="col-sm-9">
                             <p class="text-muted mb-0">{{ avatar_form.last_name}}</p>
@@ -33,7 +33,7 @@
                     <hr>
                     <div class="row">
                         <div class="col-sm-3">
-                            <p class="mb-0">Профилна снимка</p>
+                            {{ avatar_form.avatar.label}}
                         </div>
                         <div class="col-sm-9">
                             <!-- To display image -->
@@ -54,7 +54,7 @@
                     <hr>
                     <div class="row">
                         <div class="col-sm-3">
-                            <p class="mb-0">E-mail</p>
+                            <p class="mb-0">{% trans "E-mail" %}</p>
                         </div>
                         <div class="col-sm-9">
                             <p class="text-muted mb-0">{{ user.email }}</p>
@@ -63,7 +63,7 @@
                     <hr>
                     <div class="row">
                         <div class="col-sm-3">
-                            <p class="mb-0">Дата на регистрация</p>
+                            <p class="mb-0">{% trans "Date joined" %}</p>
                         </div>
                         <div class="col-sm-9">
                             <p class="text-muted mb-0">{{ user.date_joined }}</p>
@@ -72,7 +72,7 @@
                     <hr>
                     <div class="row">
                         <div class="col-sm-3">
-                            <p class="mb-0">Последено влизане</p>
+                            <p class="mb-0">{% trans "Last login" %}</p>
                         </div>
                         <div class="col-sm-9">
                             <p class="text-muted mb-0">{{ user.last_login }}</p>
