@@ -186,25 +186,24 @@ class UserProfileForm(forms.Form):
     avatar = forms.ImageField(initial=None, 
                               required=False,
                               widget=forms.ClearableFileInput(attrs={
-                                   'onchange': 'showImage(this);',}))
+                                'class': 'form-control form-control-user',
+                                'onchange': 'showImage(this);',}))
+    
     first_name = forms.CharField(required=True,
-                                 widget=forms.TextInput(attrs={'class': "textinput form-control  form-control-user"}))
+                                 widget=forms.TextInput(
+                                     attrs={'class': "textinput form-control  form-control-user"}))
+    
     last_name = forms.CharField(required=True,
-                                widget=forms.TextInput(attrs={'class': "textinput form-control  form-control-user"}))
+                                widget=forms.TextInput(
+                                    attrs={'class': "textinput form-control  form-control-user"}))
 
     def __init__(self, *args, **kwargs):
         super(UserProfileForm, self).__init__(*args, **kwargs)
-        # If you pass FormHelper constructor a form instance
-        # It builds a default layout with all its fields
-        #self.helper = FormHelper(self)
-        #self.helper.layout = Layout(
-        #    Row(
-        #        Column('first_name', css_class='form-group'),
-        #        css_class='form-row'
-        #    ),
-        #)
         self.fields['first_name'].label = _('First name')
         self.fields['last_name'].label = _('Last name')
+        self.fields['avatar'].label = _('Avatar')
+
+
 
 
 

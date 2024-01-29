@@ -33,8 +33,8 @@ class MyProfileUpdate(View):
             return redirect('home')
         user_profile_form = UserProfileForm(None, None, 
                                         initial={
-                                            'last_name': context['user'].last_name,
-                                            'first_name': context['user'].first_name,
+                                            'last_name': request.user.last_name,
+                                            'first_name': request.user.first_name,
                                         })
         context['avatar_form'] = user_profile_form
         return render(self.request, "my_profile.html", context)
