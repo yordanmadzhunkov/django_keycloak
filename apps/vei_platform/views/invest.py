@@ -41,7 +41,25 @@ def view_campaign_as_manager(request, pk, context, campaign, factory):
     return render(request, "campaign.html", context)
 
 
-def view_campaign_as_investor(request, pk, context, campaign, factory):
+def get_campaign_as_investor(request, pk, context, campaign, factory):
+    profile = get_user_profile(request.user)        
+    my_investments = InvestementInCampaign.objects.filter(campaign=campaign, 
+                                                          investor_profile=profile, 
+                                                          status=InvestementInCampaign.Status.INTERESTED)
+    if len(my_investments) == 0:
+        form = CreateInvestmentForm()
+    else:
+        form = EditInvestmentForm(instance=my_investments[0])
+
+    context['show_invest_form'] = campaign.accept_investments()
+    context['factory'] = factory
+    context['campaign'] = campaign
+    context['investors'] = campaign.get_investors(show_users=False, investor_profile=profile)
+    context['invest_form'] = form
+    return render(request, "campaign.html", context)
+
+
+def post_campaign_as_investor(request, pk, context, campaign, factory):
     profile = get_user_profile(request.user)        
     my_investments = InvestementInCampaign.objects.filter(campaign=campaign, 
                                                           investor_profile=profile, 
@@ -52,6 +70,7 @@ def view_campaign_as_investor(request, pk, context, campaign, factory):
             if 'invest' in request.POST:
                 form = CreateInvestmentForm(request.POST)
                 if form.is_valid():
+                    print(form.cleaned_data)
                     amount = form.cleaned_data['amount']
                     investment = InvestementInCampaign(
                                 amount= amount,
@@ -62,7 +81,7 @@ def view_campaign_as_investor(request, pk, context, campaign, factory):
                     investment.save()
                     form = EditInvestmentForm(instance=investment)
 
-                    messages.success(request, _("You declared interest in amount %d to %s") % (amount, factory.name))
+                    messages.success(request, _("You declared interest in amount %s to %s") % (amount, factory.name))
                 else:
                     messages.error(request, _("Invalid data, please try again"))        
     else:
@@ -92,6 +111,7 @@ def view_campaign_as_investor(request, pk, context, campaign, factory):
     return render(request, "campaign.html", context)
     
     
+    
 def vire_campaign_as_anon(request, pk, context, campaign, factory):
     return render(request, "campaign.html", context)
 
@@ -106,5 +126,18 @@ class Campaign(View):
             if is_manager:
                 return view_campaign_as_manager(request, pk, context, campaign, factory)
             else:
-                return view_campaign_as_investor(request, pk, context, campaign, factory)
+                return get_campaign_as_investor(request, pk, context, campaign, factory)
         return vire_campaign_as_anon(request, pk, context, campaign, factory)
+    
+    def post(self, request, pk, *args, **kwargs):
+        context = common_context(request)
+        campaign = CampaignModel.objects.get(pk=pk)
+        factory = campaign.factory
+        form = None
+        if request.user and request.user.is_authenticated:
+            is_manager = factory.get_manager_profile() == get_user_profile(request.user)
+            if is_manager:
+                return view_campaign_as_manager(request, pk, context, campaign, factory)
+            else:
+                return post_campaign_as_investor(request, pk, context, campaign, factory)
+        return vire_campaign_as_anon(request, pk, context, campaign, factory)    

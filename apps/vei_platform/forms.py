@@ -1,7 +1,7 @@
 from django import forms
 from datetime import date, datetime
 from .models.factory import FactoryProductionPlan, ElectricityFactory, ElectricityFactoryComponents, docfile_content_types
-from .models.finance_modeling import ElectricityPricePlan, InvestementInCampaign
+from .models.finance_modeling import ElectricityPricePlan, InvestementInCampaign, Campaign as CampaignModel
 from .models.profile import UserProfile
 from .models.legal import LegalEntity, find_legal_entity
 
@@ -239,15 +239,55 @@ class SearchForm(forms.Form):
 
 
 class CampaignCreateForm(forms.Form):
-    amount = forms.DecimalField(label=_('Capitalization'),
-                                help_text=_('Total value of factory'),
-                                initial=1000,
-                                widget=forms.widgets.NumberInput(
-                                    attrs={
-                                        'class': 'form-control',
-                                        'inputmode': 'decimal',
-                                    }
-                                ))
+    amount_offered = MoneyField(
+        default_amount=1000,
+        decimal_places=2,
+        label=_('Interest amount'),
+        help_text=_('Amount which you want to participate in this project'),
+    )
+    
+    
+    class Meta:
+        model = CampaignModel
+        fields = ['start_date', 'persent_from_profit', 'duration',]
+        exclude = ['factory', ]
+        labels = {
+            'amount': _('Capitalization'),
+            'start_date': _('Opened'),
+            'persent_from_profit': _('Share from factory [%]'),
+            #'capacity_in_mw': _('Capacity [MW]'),
+            #'tax_id': _('TAX ID'), 
+            #'owner_name': _('Legal entity owning the factory'), 
+            #'factory_type': _('Energy source type'),
+            #'image': _('Image'),
+        }
+
+        widgets = {
+            'start_date': BootstrapDatePicker(attrs={
+                'class': 'form-control',
+                'title': 'Date of transaction',
+                'style': 'width:18ch',
+                'data-date-autoclose': 'true',
+                'data-date-clear-btn': 'false',
+                'data-date-today-btn': 'linked',
+                'data-date-today-highlight': 'true'
+                }),
+        }    
+        
+        
+
+    
+    
+    
+    #amount = forms.DecimalField(label=_('Capitalization'),
+    #                            help_text=_('Total value of factory'),
+    #                            initial=1000,
+    #                            widget=forms.widgets.NumberInput(
+    #                                attrs={
+    #                                    'class': 'form-control',
+    #                                    'inputmode': 'decimal',
+    #                                }
+    #                            ))
 
     persent_from_profit = forms.DecimalField(label=_('Share from factory [%]'),
                                         help_text=_('This share will be sold to investors in this platform. The amount you will recieve is this share times capitalization minus platform commision.'),
@@ -280,7 +320,7 @@ class CampaignCreateForm(forms.Form):
                              required=True,
                              widget=forms.widgets.TextInput(attrs={
                                  'class': 'form-control',
-                                 'autocomplete': 'off',
+                                'autocomplete': 'off',
                                  'pattern': '[0-9\.]+',
                                  'style': 'width:9ch',
                                  'title': _('Enter numbers Only')}))
@@ -298,6 +338,7 @@ class CampaignCreateForm(forms.Form):
                                             'readonly': True,}
                                         )
                                  )
+
     def __init__(self, *args, **kwargs):
         super(CampaignCreateForm, self).__init__(*args, **kwargs)
         # If you pass FormHelper constructor a form instance
@@ -305,26 +346,40 @@ class CampaignCreateForm(forms.Form):
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
             Row(
-                Column('amount', css_class='form-group'),
+                Column('amount_offered', css_class='form-group'),
                 css_class='form-row'
             ),
-            Row(
-                Column('commision', css_class='form-group'),
-                css_class='form-row'
-            ),
-            Submit('create', _('Create campaign'))
+            Submit('create', _('Create campaign')),
+
         )
+
+    
+    #def __init__(self, *args, **kwargs):
+    #    super(CampaignCreateForm, self).__init__(*args, **kwargs)
+    #    # If you pass FormHelper constructor a form instance
+    #    # It builds a default layout with all its fields
+    #    self.helper = FormHelper(self)
+    #    self.helper.layout = Layout(
+    #        Row(
+    #            Column('amount', css_class='form-group'),
+    #            css_class='form-row'
+    #        ),
+    #        Row(
+    #            Column('commision', css_class='form-group'),
+    #            css_class='form-row'
+    #        ),
+    #    )
     
 class CreateInvestmentForm(forms.Form):
-    amount = forms.DecimalField(label=_('Interest amount'),
-                                help_text=_('Amount which you want to participate in this project'),
-                                initial=1000,
-                                widget=forms.widgets.NumberInput(
-                                    attrs={
-                                        'class': 'form-control',
-                                        'inputmode': 'decimal',
-                                    }
-                                ))
+    amount = MoneyField(
+        default_amount=1000,
+        decimal_places=2,
+        label=_('Interest amount'),
+        help_text=_('Amount which you want to participate in this project'),
+    )
+
+
+        
     def __init__(self, *args, **kwargs):
         super(CreateInvestmentForm, self).__init__(*args, **kwargs)
         # If you pass FormHelper constructor a form instance
@@ -435,6 +490,32 @@ class ElectricityFactoryComponentsForm(forms.ModelForm):
 
 
 class FactoryModelForm(forms.ModelForm):
+    class Meta:
+        model = ElectricityFactory
+        fields = '__all__'
+        exclude = ['manager', 'primary_owner']
+        labels = {
+            'name': _('Factory name'),
+            'location': _('Location'),
+            'opened': _('Opened'),
+            'capacity_in_mw': _('Capacity [MW]'),
+            'tax_id': _('TAX ID'), 
+            'owner_name': _('Legal entity owning the factory'), 
+            'factory_type': _('Energy source type'),
+            'image': _('Image'),
+        }
+
+        widgets = {
+            'opened': BootstrapDatePicker(attrs={
+                'class': 'form-control',
+                'title': 'Date of transaction',
+                'style': 'width:18ch',
+                'data-date-autoclose': 'true',
+                'data-date-clear-btn': 'false',
+                'data-date-today-btn': 'linked',
+                'data-date-today-highlight': 'true'
+                }),
+        }    
   
     def __init__(self, *args, **kwargs):
         super(FactoryModelForm, self).__init__(*args, **kwargs)
@@ -488,30 +569,4 @@ class FactoryModelForm(forms.ModelForm):
             save,
         )
 
-    class Meta:
-        model = ElectricityFactory
-        fields = '__all__'
-        exclude = ['manager', 'primary_owner']
-        labels = {
-            'name': _('Factory name'),
-            'location': _('Location'),
-            'opened': _('Opened'),
-            'capacity_in_mw': _('Capacity [MW]'),
-            'tax_id': _('TAX ID'), 
-            'owner_name': _('Legal entity owning the factory'), 
-            'factory_type': _('Energy source type'),
-            'image': _('Image'),
-        }
-
-        widgets = {
-            'opened': BootstrapDatePicker(attrs={
-                'class': 'form-control',
-                'title': 'Date of transaction',
-                'style': 'width:18ch',
-                'data-date-autoclose': 'true',
-                'data-date-clear-btn': 'false',
-                'data-date-today-btn': 'linked',
-                'data-date-today-highlight': 'true'
-                }),
-        }
 

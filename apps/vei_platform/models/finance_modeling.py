@@ -88,6 +88,7 @@ class Campaign(models.Model):
 
     start_date = models.DateField()
     amount = MoneyField(max_digits=16, decimal_places=2, default=Decimal(0), default_currency='BGN')
+    
     persent_from_profit = models.DecimalField(max_digits=4, decimal_places=2)
     duration = models.IntegerField(default=12*15)
     commision = models.DecimalField(
