@@ -34,10 +34,13 @@ class UserProfile(models.Model):
     
 
 def get_user_profile(user):
-    profile = UserProfile.objects.filter(user=user)
-    if len(profile) == 0:
+    if user is None:
         profile = None
     else:
-        profile = profile[0]
+        profile = UserProfile.objects.filter(user=user)
+        if len(profile) == 0:
+            profile = None
+        else:
+            profile = profile[0]
     return profile
 

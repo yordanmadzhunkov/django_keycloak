@@ -5,7 +5,7 @@ from vei_platform.models.factory import ElectricityFactory, FactoryProductionPla
 from vei_platform.models.finance_modeling import Campaign
 from vei_platform.models.finance_modeling import ElectricityPricePlan, Campaign
 from vei_platform.models.profile import get_user_profile
-from vei_platform.forms import FactoryListingForm, FactoryFinancialPlaningForm, FactoryModelForm, ElectricityFactoryComponentsForm
+from vei_platform.forms import CampaignCreateForm, FactoryFinancialPlaningForm, FactoryModelForm, ElectricityFactoryComponentsForm
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
@@ -22,6 +22,7 @@ from django.urls import reverse_lazy
 from django.db import transaction
 from django.forms.models import inlineformset_factory
 from django.utils.translation import gettext as _
+from django.shortcuts import get_object_or_404
 
 def view_offered_factories():
     campaigns = Campaign.objects.order_by('factory')
@@ -77,45 +78,35 @@ def view_campaign_active(request, pk):
     return redirect(factory.get_absolute_url() + '/campaign')
 
 
+class CampaignCreate(CreateView):
+    def get(self, request, pk=None, *args, **kwargs):
+        context = common_context(request)
+        factory = get_object_or_404(ElectricityFactory, pk=pk)
+        #factory = ElectricityFactory.objects.get(pk=pk)
+        context['factory'] = factory
+        context['manager_profile'] = get_user_profile(factory.manager)
+        # Check if user is manager
+        if context['profile'].pk == context['manager_profile'].pk:
+            capacity = factory.get_capacity_in_kw()
+            fraction = Decimal(0.5)
+            form = CampaignCreateForm(initial={
+                'amount': Decimal(1500) * capacity * fraction,
+                'persent_from_profit': fraction * Decimal(100),
+                'start_date': date(2024,12,1),
+                'duration': Decimal(15*12),
+                'commision': Decimal(1.5),
+            })
+            context['new_campaign_form'] = form
+            context['hide_link_buttons'] = True
+        else:
+            messages.error(request, _('Only factory manager can initiate campaign'))
+            return redirect(factory.get_absolute_url())
+        return render(request, "campaign_create.html", context)
 
-@login_required(login_url='/oidc/authenticate/')
-def view_campaign_create(request, pk=None):
-    context = common_context(request)
-    factory = ElectricityFactory.objects.get(pk=pk)
-    context['factory'] = factory
-    context['manager_profile'] = None if factory.manager is None else get_user_profile(factory.manager)
-    context['factory_is_listed'] = Campaign.is_listed(factory)
-
-    campaigns = Campaign.objects.filter(factory=factory).exclude(status=Campaign.Status.CANCELED)
-    total_amount = Decimal(0)
-    total_listed_persent = Decimal(0)
-    total_available = Decimal(0)
-    for campaign in campaigns:
-        total_amount += campaign.amount
-        total_listed_persent += campaign.persent_from_profit
-        total_available += 0
-
-    context['campaigns_total'] = {
-        'amount': total_amount,
-        'available': total_available,
-        'listed': total_listed_persent,
-    }
-
-    context['campaigns'] = campaigns
-
-    if context['manager_profile']:
-        capacity = factory.get_capacity_in_kw()
-        fraction = Decimal(0.5)
-        form = FactoryListingForm(initial={
-            'amount': Decimal(1500) * capacity * fraction,
-            'persent_from_profit': fraction * Decimal(100),
-            'start_date': date(2023,12,1),
-            'duration': Decimal(15*12),
-            'commision': Decimal(1.5),
-        })
-
-    if request.method == 'POST':
-        form = FactoryListingForm(data=request.POST)
+    def post(self, request, pk=None, *args, **kwargs):
+        context = common_context(request)
+        factory = get_object_or_404(ElectricityFactory, pk=pk)
+        form = CampaignCreateForm(data=request.POST)
         if form.is_valid():
             context['form_data'] = form.cleaned_data
             amount = form.cleaned_data['amount']
@@ -138,9 +129,10 @@ def view_campaign_create(request, pk=None):
         else:
             messages.error(request, _('Invalid data, please try again'))
 
-    context['new_campaign_form'] = form
-    context['hide_link_buttons'] = True
-    return render(request, "campaign_create.html", context)
+        context['factory'] = factory
+        context['new_campaign_form'] = form
+        context['hide_link_buttons'] = True
+        return render(request, "campaign_create.html", context)
 
 
 @login_required(login_url='/oidc/authenticate/')

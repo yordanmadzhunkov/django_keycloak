@@ -18,6 +18,7 @@ from django.utils.translation import gettext_lazy as _
 from django import forms
 from django.utils import formats, timezone
 from django.core.validators import MaxValueValidator, MinValueValidator
+from djmoney.forms.fields import MoneyField
 
 class BootstrapDatePicker(forms.DateInput):
     format_re = re.compile(r'(?P<part>%[bBdDjmMnyY])')
@@ -237,7 +238,7 @@ class SearchForm(forms.Form):
                                       'title': _('Text to search')}))
 
 
-class FactoryListingForm(forms.Form):
+class CampaignCreateForm(forms.Form):
     amount = forms.DecimalField(label=_('Capitalization'),
                                 help_text=_('Total value of factory'),
                                 initial=1000,
@@ -276,7 +277,7 @@ class FactoryListingForm(forms.Form):
     duration = forms.CharField(initial='180',
                                label=_('Ducation'),
                                help_text=_('Number of months that investors will recieve percent form the profit proportional to their share. After this period ownership will be transfered to original factory owner. A duration of 15 years is good in most cases.'),
-                             required=False,
+                             required=True,
                              widget=forms.widgets.TextInput(attrs={
                                  'class': 'form-control',
                                  'autocomplete': 'off',
@@ -297,6 +298,22 @@ class FactoryListingForm(forms.Form):
                                             'readonly': True,}
                                         )
                                  )
+    def __init__(self, *args, **kwargs):
+        super(CampaignCreateForm, self).__init__(*args, **kwargs)
+        # If you pass FormHelper constructor a form instance
+        # It builds a default layout with all its fields
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Row(
+                Column('amount', css_class='form-group'),
+                css_class='form-row'
+            ),
+            Row(
+                Column('commision', css_class='form-group'),
+                css_class='form-row'
+            ),
+            Submit('create', _('Create campaign'))
+        )
     
 class CreateInvestmentForm(forms.Form):
     amount = forms.DecimalField(label=_('Interest amount'),

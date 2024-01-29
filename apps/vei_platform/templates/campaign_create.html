@@ -9,18 +9,9 @@
   <div class="container py-5">
     {% include "snippets/factory_card.html"%}
     {% include "campaigns.html" %}
-
-    <div class="row justify-content-center mb-3">
-      <div class="col-md-12 col-xl-10">
-        <form method="post">
-          <table class="table align-middle mb-0 bg-white">
-            {% csrf_token %}
-            <div>{{new_campaign_form}}</div>
-            <td>
-              <input type="submit" value="Предложи на инвестирорите" name="_do_it" class="btn btn-success">
-            </td>
-          </table>
-        </form>
+    <div class="row justify-content-center">
+      <div class="col-md-12 col-xl-10 bg-white">
+        {{ new_campaign_form | crispy }}
       </div>
     </div>
   </div>
