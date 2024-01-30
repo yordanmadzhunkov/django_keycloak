@@ -132,7 +132,7 @@ class Campaign(models.Model):
 
     def progress(self):
         investments = InvestementInCampaign.objects.filter(campaign=self, status='IN')
-        t = Money(0, 'BGN')
+        t = Money(0, self.amount.currency)
         for invest in investments:
             t = t + invest.amount
         res = {}

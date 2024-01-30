@@ -24,6 +24,8 @@ from django.forms.models import inlineformset_factory
 from django.utils.translation import gettext as _
 from django.shortcuts import get_object_or_404
 
+from djmoney.money import Money
+
 def view_offered_factories():
     campaigns = Campaign.objects.order_by('factory')
     prev = None
@@ -90,7 +92,7 @@ class CampaignCreate(CreateView):
             capacity = factory.get_capacity_in_kw()
             fraction = Decimal(0.5)
             form = CampaignCreateForm(initial={
-                'amount': Decimal(1500) * capacity * fraction,
+                'amount_offered': Money(Decimal(1500) * capacity * fraction, currency='BGN'),
                 'persent_from_profit': fraction * Decimal(100),
                 'start_date': date(2024,12,1),
                 'duration': Decimal(15*12),
@@ -109,14 +111,15 @@ class CampaignCreate(CreateView):
         form = CampaignCreateForm(data=request.POST)
         if form.is_valid():
             context['form_data'] = form.cleaned_data
-            amount = form.cleaned_data['amount']
+            amount = form.cleaned_data['amount_offered']
+            print(amount)
             persent_from_profit = form.cleaned_data['persent_from_profit']
             start_date = form.cleaned_data['start_date']
             duration = form.cleaned_data['duration']
             commision = form.cleaned_data['commision']
             campaign = Campaign(
                     start_date=start_date, 
-                    amount=Decimal(amount).quantize(Decimal('1.')), 
+                    amount=amount, 
                     persent_from_profit=Decimal(persent_from_profit).quantize(Decimal('99.99')),
                     duration=Decimal(duration).quantize(Decimal('1.')), 
                     commision=Decimal(commision).quantize(Decimal('99.99')),

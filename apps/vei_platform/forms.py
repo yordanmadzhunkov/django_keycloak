@@ -285,7 +285,6 @@ class CampaignCreateForm(forms.Form):
 
     commision = forms.DecimalField(label=_('Commision [%]'),
                                    help_text=_('%% commision for the platform. This commision is withholded once when the initial amout it''s collected and transfered to the factory originar and each time a payment to investors is carried out in the future.'),
-                                                
                                         initial=1.5,
                                         widget=forms.widgets.TextInput(attrs={
                                             'class': 'form-control',
@@ -302,14 +301,21 @@ class CampaignCreateForm(forms.Form):
         # If you pass FormHelper constructor a form instance
         # It builds a default layout with all its fields
         self.helper = FormHelper(self)
-        create = Submit('complete', _('Finish campaign'))
-        create.field_classes = 'btn btn-success'
+        create = Submit('complete', _('Start campaign'))
+        create.field_classes = 'btn btn-success btn-block'
         self.helper.layout = Layout(
             Row(
                 Column('amount_offered', css_class='form-group'),
-                css_class='form-row'
+                Column('persent_from_profit'),
+                css_class='form-row',
             ),
-            Row(create),
+            Row(
+                Column('start_date'),
+                Column('duration'),
+                css_class='form-row',
+            ),
+            Row(Column('commision')), 
+            Row(Column(create)),
         )
 
        
