@@ -145,7 +145,7 @@ msgid "Date"
 msgstr "Дата"
 
 #: vei_platform/forms.py:402
-msgid "Ducation"
+msgid "Duration"
 msgstr "Продължителност"
 
 #: vei_platform/forms.py:403

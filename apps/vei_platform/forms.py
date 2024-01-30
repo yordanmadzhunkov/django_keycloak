@@ -242,53 +242,11 @@ class CampaignCreateForm(forms.Form):
     amount_offered = MoneyField(
         default_amount=1000,
         decimal_places=2,
-        label=_('Interest amount'),
-        help_text=_('Amount which you want to participate in this project'),
+        label=_('Campaign amount'),
+        help_text=_('Total amount you want to collect for this campaign'),
     )
     
-    
-    class Meta:
-        model = CampaignModel
-        fields = ['start_date', 'persent_from_profit', 'duration',]
-        exclude = ['factory', ]
-        labels = {
-            'amount': _('Capitalization'),
-            'start_date': _('Opened'),
-            'persent_from_profit': _('Share from factory [%]'),
-            #'capacity_in_mw': _('Capacity [MW]'),
-            #'tax_id': _('TAX ID'), 
-            #'owner_name': _('Legal entity owning the factory'), 
-            #'factory_type': _('Energy source type'),
-            #'image': _('Image'),
-        }
-
-        widgets = {
-            'start_date': BootstrapDatePicker(attrs={
-                'class': 'form-control',
-                'title': 'Date of transaction',
-                'style': 'width:18ch',
-                'data-date-autoclose': 'true',
-                'data-date-clear-btn': 'false',
-                'data-date-today-btn': 'linked',
-                'data-date-today-highlight': 'true'
-                }),
-        }    
-        
-        
-
-    
-    
-    
-    #amount = forms.DecimalField(label=_('Capitalization'),
-    #                            help_text=_('Total value of factory'),
-    #                            initial=1000,
-    #                            widget=forms.widgets.NumberInput(
-    #                                attrs={
-    #                                    'class': 'form-control',
-    #                                    'inputmode': 'decimal',
-    #                                }
-    #                            ))
-
+ 
     persent_from_profit = forms.DecimalField(label=_('Share from factory [%]'),
                                         help_text=_('This share will be sold to investors in this platform. The amount you will recieve is this share times capitalization minus platform commision.'),
                                         initial=10.0,
@@ -315,10 +273,10 @@ class CampaignCreateForm(forms.Form):
                                     )
 
     duration = forms.CharField(initial='180',
-                               label=_('Ducation'),
+                               label=_('Duration'),
                                help_text=_('Number of months that investors will recieve percent form the profit proportional to their share. After this period ownership will be transfered to original factory owner. A duration of 15 years is good in most cases.'),
-                             required=True,
-                             widget=forms.widgets.TextInput(attrs={
+                               required=True,
+                               widget=forms.widgets.TextInput(attrs={
                                  'class': 'form-control',
                                 'autocomplete': 'off',
                                  'pattern': '[0-9\.]+',
@@ -344,31 +302,19 @@ class CampaignCreateForm(forms.Form):
         # If you pass FormHelper constructor a form instance
         # It builds a default layout with all its fields
         self.helper = FormHelper(self)
+        create = Submit('complete', _('Finish campaign'))
+        create.field_classes = 'btn btn-success'
         self.helper.layout = Layout(
             Row(
                 Column('amount_offered', css_class='form-group'),
                 css_class='form-row'
             ),
-            Submit('create', _('Create campaign')),
-
+            Row(create),
         )
 
-    
-    #def __init__(self, *args, **kwargs):
-    #    super(CampaignCreateForm, self).__init__(*args, **kwargs)
-    #    # If you pass FormHelper constructor a form instance
-    #    # It builds a default layout with all its fields
-    #    self.helper = FormHelper(self)
-    #    self.helper.layout = Layout(
-    #        Row(
-    #            Column('amount', css_class='form-group'),
-    #            css_class='form-row'
-    #        ),
-    #        Row(
-    #            Column('commision', css_class='form-group'),
-    #            css_class='form-row'
-    #        ),
-    #    )
+       
+  
+
     
 class CreateInvestmentForm(forms.Form):
     amount = MoneyField(
@@ -377,8 +323,6 @@ class CreateInvestmentForm(forms.Form):
         label=_('Interest amount'),
         help_text=_('Amount which you want to participate in this project'),
     )
-
-
         
     def __init__(self, *args, **kwargs):
         super(CreateInvestmentForm, self).__init__(*args, **kwargs)
