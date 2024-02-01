@@ -69,16 +69,6 @@ def view_my_factories(request):
     return render(request, "my_factories.html", context)
 
 
-def view_all_factories_paganated(request):
-    factories_list = ElectricityFactory.objects.all().order_by('pk')
-    paginator = Paginator(factories_list, 5)  # Show 25 contacts per page.
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    context = common_context(request)
-    context['page_obj'] = page_obj
-    context['factory_list_title'] = _('Electrical factories from renewable sources')
-    return render(request, "factories_list.html", context)
-
 class CampaignActive(View):
     def get(self, request, pk=None, *args, **kwargs):
         factory = get_object_or_404(ElectricityFactory, pk=pk)
