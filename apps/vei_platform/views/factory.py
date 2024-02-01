@@ -10,7 +10,8 @@ from vei_platform.forms import CampaignCreateForm, FactoryFinancialPlaningForm, 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.views.generic.edit import CreateView, UpdateView
+from django.views.generic import ListView, CreateView, UpdateView
+from django.views import View
 
 from decimal import Decimal, DecimalException
 from datetime import date
@@ -26,27 +27,35 @@ from django.shortcuts import get_object_or_404
 
 from djmoney.money import Money
 
-def view_offered_factories():
-    campaigns = Campaign.objects.order_by('factory')
-    prev = None
-    listed = []
-    for l in campaigns:
-        if prev != l.factory.pk:
-            #print(l.factory.name)
-            listed.append(l.factory.pk)
-        prev = l.factory.pk
-    return listed
-        
-def view_offered_factories_paganated(request):
-    listed = view_offered_factories()
-    factories_list = ElectricityFactory.objects.filter(pk__in=listed).order_by('pk')
-    paginator = Paginator(factories_list, 5)  # Show 25 contacts per page.
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    context = common_context(request)
-    context['page_obj'] = page_obj
-    context['factory_list_title'] = _('Electrical factories from renewable sources')
-    return render(request, "factories_list.html", context)
+
+
+class FactoriesList(ListView):
+    list_title = _('Electrical factories from renewable sources')
+    model = ElectricityFactory
+    template_name = 'factories_list.html'
+    paginate_by = 5
+
+    def get_queryset(self):
+        listed = self.view_offered_factories()
+        factories_list = ElectricityFactory.objects.filter(pk__in=listed).order_by('pk')
+        return factories_list
+    
+    def get_context_data(self, **kwargs):
+        context = super(FactoriesList, self).get_context_data(**kwargs)
+        context.update(common_context(self.request))
+        context['factory_list_title'] = self.list_title
+        return context
+
+    def view_offered_factories(self):
+        campaigns = Campaign.objects.order_by('factory')
+        prev = None
+        listed = []
+        for l in campaigns:
+            if prev != l.factory.pk:
+                #print(l.factory.name)
+                listed.append(l.factory.pk)
+            prev = l.factory.pk
+        return listed
 
 @login_required(login_url='/oidc/authenticate/')
 def view_my_factories(request):
@@ -70,14 +79,13 @@ def view_all_factories_paganated(request):
     context['factory_list_title'] = _('Electrical factories from renewable sources')
     return render(request, "factories_list.html", context)
 
-
-def view_campaign_active(request, pk):
-    context = common_context(request)
-    factory = ElectricityFactory.objects.get(pk=pk)
-    campaign = Campaign.get_active(factory)
-    if campaign:
-        return redirect(campaign.get_absolute_url())
-    return redirect(factory.get_absolute_url() + '/campaign')
+class CampaignActive(View):
+    def get(self, request, pk=None, *args, **kwargs):
+        factory = get_object_or_404(ElectricityFactory, pk=pk)
+        campaign = Campaign.get_active(factory)
+        if campaign:
+            return redirect(campaign.get_absolute_url())
+        return redirect(factory.get_absolute_url() + '/campaign')
 
 
 class CampaignCreate(CreateView):
@@ -112,7 +120,6 @@ class CampaignCreate(CreateView):
         if form.is_valid():
             context['form_data'] = form.cleaned_data
             amount = form.cleaned_data['amount_offered']
-            print(amount)
             persent_from_profit = form.cleaned_data['persent_from_profit']
             start_date = form.cleaned_data['start_date']
             duration = form.cleaned_data['duration']
@@ -138,91 +145,92 @@ class CampaignCreate(CreateView):
         return render(request, "campaign_create.html", context)
 
 
-@login_required(login_url='/oidc/authenticate/')
-def view_factory_detail(request, pk=None):
-    context = common_context(request)
-    factory = ElectricityFactory.objects.get(pk=pk)
-    context['factory'] = factory
-    
-    campaigns = Campaign.objects.filter(factory=factory).exclude(status=Campaign.Status.CANCELED)
-    context['campaigns'] = campaigns
-    
-    components = ElectricityFactoryComponents.objects.filter(factory=factory)
-    context['components'] = components
+#@login_required(login_url='/oidc/authenticate/')
+class FactoryDetail(View):
+    def get(self, request, pk=None, *args, **kwargs):
+        context = common_context(request)
+        factory = ElectricityFactory.objects.get(pk=pk)
+        context['factory'] = factory
+        
+        campaigns = Campaign.objects.filter(factory=factory).exclude(status=Campaign.Status.CANCELED)
+        context['campaigns'] = campaigns
+        
+        components = ElectricityFactoryComponents.objects.filter(factory=factory)
+        context['components'] = components
 
-    
-    context['production_plans'] = FactoryProductionPlan.objects.filter(
-        factory=factory)
-    context['price_plans'] = ElectricityPricePlan.objects.all()
-    if factory.manager is None:
-        context['manager'] = None
-    else:
-        profile = get_user_profile(factory.manager)
-        context['manager_profile'] = get_user_profile(factory.manager)
+        
+        context['production_plans'] = FactoryProductionPlan.objects.filter(
+            factory=factory)
+        context['price_plans'] = ElectricityPricePlan.objects.all()
+        if factory.manager is None:
+            context['manager'] = None
+        else:
+            profile = get_user_profile(factory.manager)
+            context['manager_profile'] = get_user_profile(factory.manager)
 
-    if request.method == 'POST':
-        form = FactoryFinancialPlaningForm(factory=factory, data=request.POST)
-        if '_add_production' in request.POST:
-            plan = FactoryProductionPlan(
-                name="Работни часове на месец", factory=factory)
-            plan.save()
-            return redirect(plan.get_absolute_url())
-
-        if '_add_price' in request.POST:
-            prices = ElectricityPricePlan(
-                name="Стандартна цена на тока", factory=factory)
-            prices.save()
-            return redirect(prices.get_absolute_url())
-
-
-
-        if '_become_manager' in request.POST:
-            if factory.manager is None:
-                factory.manager = request.user
-                factory.save()
-                messages.success(request, "You are now manager")
-            else:
-                messages.error(request, "Already taken")
-
-        if form.is_valid():
-            context['form_data'] = form.cleaned_data
-            start_year = form.cleaned_data['start_year']
-            end_year = form.cleaned_data['end_year']
-
-            #print(form.cleaned_data)
-
-            plan = FactoryProductionPlan.objects.get(
-                pk=int(form.cleaned_data['production_plan']))
-            if '_edit_production' in request.POST:
+        if request.method == 'POST':
+            form = FactoryFinancialPlaningForm(factory=factory, data=request.POST)
+            if '_add_production' in request.POST:
+                plan = FactoryProductionPlan(
+                    name="Работни часове на месец", factory=factory)
+                plan.save()
                 return redirect(plan.get_absolute_url())
 
-            prices = ElectricityPricePlan.objects.get(
-                pk=int(form.cleaned_data['electricity_prices']))
-            if '_edit_price' in request.POST:
+            if '_add_price' in request.POST:
+                prices = ElectricityPricePlan(
+                    name="Стандартна цена на тока", factory=factory)
+                prices.save()
                 return redirect(prices.get_absolute_url())
 
-            capacity = factory.capacity_in_mw
-            capitalization = form.cleaned_data['capitalization']
-            start_date = form.cleaned_data['start_date']
 
-            rows = []
-            labels = ['Месец', 'Приходи']
-            for year in range(start_year, end_year + 1):
-                for month in range(1, 13):
-                    row = []
-                    p = date(year, month, 1)
-                    row.append(p.strftime('%b %y'))
-                    row.append(
-                        plan.get_working_hours(p) * factory.capacity_in_mw * prices.get_price(p))
 
-                    rows.append(row)
+            if '_become_manager' in request.POST:
+                if factory.manager is None:
+                    factory.manager = request.user
+                    factory.save()
+                    messages.success(request, "You are now manager")
+                else:
+                    messages.error(request, "Already taken")
 
-            table = {'labels': labels, 'rows': rows}
-            context['plan'] = {'table': table}
-    else:
-        form = FactoryFinancialPlaningForm(factory=factory, data=None)
-    context['form'] = form
-    return render(request, "factory.html", context)
+            if form.is_valid():
+                context['form_data'] = form.cleaned_data
+                start_year = form.cleaned_data['start_year']
+                end_year = form.cleaned_data['end_year']
+
+                #print(form.cleaned_data)
+
+                plan = FactoryProductionPlan.objects.get(
+                    pk=int(form.cleaned_data['production_plan']))
+                if '_edit_production' in request.POST:
+                    return redirect(plan.get_absolute_url())
+
+                prices = ElectricityPricePlan.objects.get(
+                    pk=int(form.cleaned_data['electricity_prices']))
+                if '_edit_price' in request.POST:
+                    return redirect(prices.get_absolute_url())
+
+                capacity = factory.capacity_in_mw
+                capitalization = form.cleaned_data['capitalization']
+                start_date = form.cleaned_data['start_date']
+
+                rows = []
+                labels = ['Месец', 'Приходи']
+                for year in range(start_year, end_year + 1):
+                    for month in range(1, 13):
+                        row = []
+                        p = date(year, month, 1)
+                        row.append(p.strftime('%b %y'))
+                        row.append(
+                            plan.get_working_hours(p) * factory.capacity_in_mw * prices.get_price(p))
+
+                        rows.append(row)
+
+                table = {'labels': labels, 'rows': rows}
+                context['plan'] = {'table': table}
+        else:
+            form = FactoryFinancialPlaningForm(factory=factory, data=None)
+        context['form'] = form
+        return render(request, "factory.html", context)
 
 
 
@@ -301,7 +309,7 @@ def extract_error_messages_from(request, formset):
                     messages.error(request, "Файлът го няма - изчезнал е")
 
 
-class FactoryUpdate(UpdateView):
+class FactoryEdit(UpdateView):
     model = ElectricityFactory
     template_name = 'factory_components.html'
     form_class = FactoryModelForm
@@ -310,7 +318,7 @@ class FactoryUpdate(UpdateView):
 
     
     def get_context_data(self, **kwargs):
-        context = super(FactoryUpdate, self).get_context_data(**kwargs)
+        context = super(FactoryEdit, self).get_context_data(**kwargs)
         context.update(common_context(self.request))
         context['factory'] = self.object
         if self.request.POST:
@@ -360,7 +368,7 @@ class FactoryUpdate(UpdateView):
                         component_form.save()
 
         extract_error_messages_from(self.request, formset)
-        return super(FactoryUpdate, self).form_valid(form)
+        return super(FactoryEdit, self).form_valid(form)
 
 
 

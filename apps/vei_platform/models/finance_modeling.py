@@ -100,9 +100,13 @@ class Campaign(models.Model):
         default=Status.INITIALIZED,
     )
     def price_per_kw(self):
+        capacity = self.factory.get_capacity_in_kw()
+        if capacity < Decimal(0.001):
+            return _('Not available')
+
         v = self.amount.amount
         return Money(
-            Decimal(v / (self.factory.get_capacity_in_kw() * self.persent_from_profit * Decimal('0.01'))).quantize(Decimal('1.00')),
+            Decimal(v / ( capacity * self.persent_from_profit * Decimal('0.01'))).quantize(Decimal('1.00')),
             self.amount.currency)
         
     @staticmethod

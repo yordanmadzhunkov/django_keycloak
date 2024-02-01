@@ -22,3 +22,5 @@ class ProjectTests(TestCase):
         self.render_and_compare(context={'some_key': 'some_value'},
                                 template_name=BASE_DIR / 'templates/electricity_prices.html',
                                 ref_file_name=BASE_DIR / 'static_to_collect/electricity_prices_0.html')
+
+
