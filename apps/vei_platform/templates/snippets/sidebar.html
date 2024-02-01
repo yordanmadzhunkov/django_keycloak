@@ -44,14 +44,6 @@
     </li>
 
     {% if user.is_superuser %}
-    <li class="nav-item active">
-        <a class="nav-link" href="{% url 'factories_list_all'  %}">
-            <i class="fas fa-fw fa-warehouse"></i>
-            <span>{% trans "Factory list" %}</span>
-        </a>
-    </li>
-
-
     <!-- Nav Item - Profile Collapse Menu -->
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#admin_collapseUtilities"
@@ -64,7 +56,7 @@
             <div class="bg-white py-2 collapse-inner rounded">
                 <!-- <h6 class="collapse-header">Custom Utilities:</h6> -->
                 <a class="collapse-item" href="{% url 'platform_legal'    %}">{% trans "Platform legal" %} </a>
-                <a class="collapse-item" href="{% url 'scriping_tools'     %}">{% trans "Scriping tools" %}</a>
+                <a class="collapse-item" href="{% url 'scriping_tools'    %}">{% trans "Scriping tools" %}</a>
             </div>
         </div>
     </li>

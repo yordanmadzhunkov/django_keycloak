@@ -5,8 +5,7 @@ from django.urls import path, include
 from django.views.generic.base import TemplateView
 
 from .views.factory import view_factory_production 
-from .views.factory import FactoriesList, FactoryDetail
-from .views.factory import view_my_factories
+from .views.factory import FactoriesList, FactoryDetail, FactoriesOfUserList
 from .views.factory import FactoryCreate, FactoryEdit, CampaignCreate, CampaignActive
 from .views.dashboard import Dashboard
 from .views.home import Home
@@ -34,7 +33,7 @@ urlpatterns = [
     path('campaign/', FactoriesList.as_view(), name='campaigns'),
     path('campaign/<int:pk>', Campaign.as_view(), name='campaign'),
 
-    path('factory/', view_my_factories, name='my_factories'),
+    path('factory/', FactoriesOfUserList.as_view(), name='my_factories'),
 
     path('factory/<int:pk>', FactoryDetail.as_view(), name='view_factory'),
     path('factory/add', FactoryCreate.as_view(), name='factory_create'),

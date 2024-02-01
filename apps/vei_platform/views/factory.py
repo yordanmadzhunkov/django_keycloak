@@ -30,7 +30,7 @@ from djmoney.money import Money
 
 
 class FactoriesList(ListView):
-    list_title = _('Electrical factories from renewable sources')
+    title = _('Electrical factories from renewable sources')
     model = ElectricityFactory
     template_name = 'factories_list.html'
     paginate_by = 5
@@ -43,11 +43,11 @@ class FactoriesList(ListView):
     def get_context_data(self, **kwargs):
         context = super(FactoriesList, self).get_context_data(**kwargs)
         context.update(common_context(self.request))
-        context['factory_list_title'] = self.list_title
+        context['head_title'] = self.title
         return context
 
     def view_offered_factories(self):
-        campaigns = Campaign.objects.order_by('factory')
+        campaigns = Campaign.objects.filter(status=Campaign.Status.ACTIVE).order_by('factory')
         prev = None
         listed = []
         for l in campaigns:
@@ -57,16 +57,30 @@ class FactoriesList(ListView):
             prev = l.factory.pk
         return listed
 
-@login_required(login_url='/oidc/authenticate/')
-def view_my_factories(request):
-    factories_list = ElectricityFactory.objects.filter(manager=request.user).order_by('pk')
-    paginator = Paginator(factories_list, 5)  # Show 25 contacts per page.
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    context = common_context(request)
-    context['page_obj'] = page_obj
-    context['form'] = FactoryModelForm()
-    return render(request, "my_factories.html", context)
+class FactoriesForReview(FactoriesList):
+    def view_offered_factories(self):
+        campaigns = Campaign.objects.filter(status=Campaign.Status.INITIALIZED).order_by('factory')
+        prev = None
+        listed = []
+        for l in campaigns:
+            if prev != l.factory.pk:
+                #print(l.factory.name)
+                listed.append(l.factory.pk)
+            prev = l.factory.pk
+        return listed
+
+
+class FactoriesOfUserList(FactoriesList):
+    title = _('My Factories')
+    
+    def get_queryset(self):
+        return  ElectricityFactory.objects.filter(manager=self.request.user).order_by('pk')
+
+    def get_context_data(self, **kwargs):
+        context = super(FactoriesOfUserList, self).get_context_data(**kwargs)
+        context['add_button'] = True
+        return context
+
 
 
 class CampaignActive(View):
