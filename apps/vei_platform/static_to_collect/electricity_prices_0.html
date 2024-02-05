@@ -1,84 +1,226 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>        
+    <title>
         
-Solar Estates - DASHBOARD
+
 
     </title>
 
     <!-- Custom fonts for this template-->
     <link href="/static/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+        <!-- ================= Favicon ================== -->
+    <!-- Standard -->
+    <link rel="shortcut icon" href="/static/img/Fraction_Energy.ico">
+    <!-- Retina iPad Touch Icon-->
+    <link rel="apple-touch-icon" sizes="144x144" href="/static/img/Fraction_Energy.ico">
+    <!-- Retina iPhone Touch Icon-->
+    <link rel="apple-touch-icon" sizes="114x114" href="/static/img/Fraction_Energy.ico">
+    <!-- Standard iPad Touch Icon-->
+    <link rel="apple-touch-icon" sizes="72x72" href="/static/img/Fraction_Energy.ico">
+    <!-- Standard iPhone Touch Icon-->
+    <link rel="apple-touch-icon" sizes="57x57" href="/static/img/Fraction_Energy.ico">
+
+
 
     <!-- Custom styles for this template-->
     <link href="/static/css/sb-admin-2.css" rel="stylesheet">
+    <link href="/static/vendor/bootstrap-datepicker-1.9.0/css/bootstrap-datepicker3.min.css" rel="stylesheet">
 </head>
 
 <body id="page-top">
+    <!-- Bootstrap core JavaScript-->
+<script src="/static/vendor/jquery/jquery.min.js"></script>
+<script src="/static/vendor/jquery/jquery.formset.js"></script>
+
+<script src="/static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/static/vendor/bootstrap-datepicker-1.9.0/js/bootstrap-datepicker.min.js"></script>
+
+<!-- Custom scripts for all pages-->
+<script src="/static/js/sb-admin-2.min.js"></script>
+
     <!-- Page Wrapper -->
     <div id="wrapper">
+
         
+
+<!-- Sidebar -->
+<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+    <!-- Sidebar - Brand -->
+    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
+        <div class="sidebar-brand-icon rotate-n-15">
+            <img src="/static/img/Fraction_Energy.ico" style="width:60%;"></img>
+        </div>
+        <div class="sidebar-brand-text mx-3"></div>
+    </a>
+
+    <!-- Divider -->
+    <hr class="sidebar-divider my-0">
+
+    <!-- Nav Item - Dashboard -->
+    <li class="nav-item active">
+        <a class="nav-link" href="/dashboard">
+            <i class="fas fa-fw fa-tachometer-alt"></i>
+            <span>Dashboard</span></a>
+
+    </li>
+
+    <li class="nav-item active">
+        <a class="nav-link" href="/campaign/">
+            <i class="fas fa-fw fa-search-dollar"></i>
+            <span>Offers for investors</span>
+        </a>
+    </li>
+
+    <li class="nav-item active">
+        <a class="nav-link" href="/factory/">
+            <i class="fas fa-fw fa-warehouse"></i>
+            <span>Offer your Electrical factory</span>
+        </a>
+    </li>
+
+    <li class="nav-item active">
+        <a class="nav-link" href="/team">
+            <i class="fas fa-fw fa-users"></i>
+            <span>About us</span>
+        </a>
+    </li>
+
+    
+
+
+    <!-- Divider -->
+    <hr class="sidebar-divider">
+    
+    <li class="nav-item active">
+        <a class="nav-link" href="/profile">
+            <i class="fas fa-fw fa-money-check"> </i>
+            <span>Login or Register</span>
+        </a>
+    </li>
+    
+
+    <!-- Divider -->
+    <hr class="sidebar-divider d-none d-md-block">
+
+    <!-- Sidebar Toggler (Sidebar) -->
+    <div class="text-center d-none d-md-inline">
+        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+    </div>
+</ul>
+<!-- End of Sidebar -->
+
         <!-- Content Wrapper -->
         <div id="content-wrapper" class="d-flex flex-column">
+            <!-- Topbar -->
+<nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+
+    <!-- Sidebar Toggle (Topbar) -->
+    <form class="form-inline">
+        <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+            <i class="fa fa-bars"></i>
+        </button>
+    </form>
+    
+    <ul class="navbar-nav ml-auto">
+        <a href="/">
+            <img class="img-fluid" style="width: auto; height: 80px;" src=> </img>
+        </a>
+    </ul>
+
+    <!-- Topbar Navbar -->
+    <ul class="navbar-nav ml-auto">
+        
+        <div class="d-inline-flex p-2">
+    <form action="/i18n/setlang/" method="post">
+        
+        <input name="next" type="hidden" value="" />
+        <select name="language" class="form-control" onchange='this.form.submit()'>
             
+        </select>
+    </form>
+</div>
+        
+        <div class="topbar-divider d-none d-sm-block"></div>
+        
+<!-- Nav Item - User Information -->
+<li class="nav-item dropdown no-arrow">
+    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown"
+        aria-haspopup="true" aria-expanded="false">
+        <span class="mr-2 d-none d-lg-inline text-gray-900 ">
+            
+            Anonymous user
+            
+        </span>
+        
+        <img src="/static/img/undraw_profile_2.svg" alt="" style="width: 45px; height: 45px"
+            class="img-profile rounded-circle" />
+        
+    </a>
+    <!-- Dropdown - User Information -->
+    <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+        
+        <a class="dropdown-item" href="/oidc/authenticate/">
+            <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+            Log in/Register
+        </a>
+        
+    </div>
+</li>
+    </ul>
+</nav>
+<!-- End of Topbar -->
             
             <!-- Main Content -->
             <div id="content">
                 
-    <section style="background-color: #eee;">
-      <div class="container py-5">
-        <form method="post">
+<section style="background-color: #eee;">
+  <div class="container py-5">
+    <form method="post">
+      
+      
+      
+      
+      <input type="submit" value="Save" />
+      <table class="table-striped table-bordered table-sm">
+        <thead>
           
-          
-          
-          
-          <input type="submit" value="Save"/>
-          <table class="table-striped table-bordered table-sm">
-            <thead>
-                
-          </thead>
-          <tbody>
+        </thead>
+        <tbody>
           
         </tbody>
-        </table>
-      </form>
-      </div>
+      </table>
+    </form>
+  </div>
 </section>
 
             </div>
-        
-<!-- Footer -->
+            <!-- Footer -->
 <footer class="sticky-footer bg-white">
     <div class="container my-auto">
         <div class="copyright text-center my-auto">
-            <span>Copyright &copy; </span>
+            <span>Copyright &copy;  </span>
         </div>
     </div>
 </footer>
 <!-- End of Footer -->
-        <!-- End of Content Wrapper -->
+            <!-- End of Content Wrapper -->
         </div>
-    <!-- Scroll to Top Button-->
-    <a class="scroll-to-top rounded" href="#page-top">
-        <i class="fas fa-angle-up"></i>
-    </a>
-    <!-- End of Page Wrapper -->
+        <!-- Scroll to Top Button-->
+        <a class="scroll-to-top rounded" href="#page-top">
+            <i class="fas fa-angle-up"></i>
+        </a>
+        <!-- End of Page Wrapper -->
     </div>
     
-    <!-- Bootstrap core JavaScript-->
-<script src="/static/vendor/jquery/jquery.min.js"></script>
-<script src="/static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    
-<!-- Core plugin JavaScript-->
-<script src="/static/vendor/jquery-easing/jquery.easing.min.js"></script>
-    
-<!-- Custom scripts for all pages-->
-<script src="/static/js/sb-admin-2.min.js"></script>
 </body>
+
 </html>

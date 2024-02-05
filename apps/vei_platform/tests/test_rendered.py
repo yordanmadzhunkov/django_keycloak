@@ -16,7 +16,7 @@ class ProjectTests(TestCase):
             with open(ref_file_name, 'w') as reference_file:
                 reference_file.write(content)
                 self.assertTrue(
-                    False, "Writing to disk ref file = %s " % ref_name)
+                    False, "Writing to disk ref file = %s " % ref_file_name)
 
     def test_render_electricity_prices_0(self):
         self.render_and_compare(context={'some_key': 'some_value'},
