@@ -11,6 +11,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from .restricted_file_field import RestrictedFileField
 from django.utils.translation import gettext_lazy as _
 
+from . import TimeStampMixin
 
 
 
@@ -21,7 +22,7 @@ def user_image_upload_directory_path(instance, filename):
 def factory_component_file_upload_directory_path(instance, filename):
     return "documents/factory_{0}/{1}".format(instance.factory.pk, filename)
 
-class ElectricityFactory(models.Model):
+class ElectricityFactory(TimeStampMixin):
     name = models.CharField(max_length=128)
 
     # Factory type

@@ -1,0 +1,11 @@
+User-Agent: *
+Disallow: 
+Crawl-delay: 5
+Disallow: /profile
+Disallow: /admin
+Disallow: /i18n
+Disallow: /oidc
+Disallow: /ht
+
+{% load vei_platform_utils %}
+Sitemap: https://{% current_domain %}/sitemap.xml

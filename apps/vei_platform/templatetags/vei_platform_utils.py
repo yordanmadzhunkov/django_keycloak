@@ -4,7 +4,7 @@ from django.db import models
 from vei_platform.models.finance_modeling import Campaign
 from vei_platform.models.legal import find_legal_entity
 from vei_platform.models.factory import ElectricityFactory
-
+from django.contrib.sites.models import Site
 from decimal import Decimal
 from os import path
 
@@ -59,3 +59,14 @@ def balance_from_transactions(account):
 @register.filter(is_safe=True)
 def basename(filepath):
     return path.basename(filepath)
+
+
+@register.simple_tag()
+def current_domain():
+    dom = Site.objects.get_current().domain
+    if dom.startswith('http://'):
+        return dom.replace('http://', 'https://')
+    return dom
+    #'http://%s' % Site.objects.get_current().domain
+    #return '%s' % Site.objects.get_current()
+

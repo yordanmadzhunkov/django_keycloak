@@ -82,7 +82,6 @@ class FactoriesOfUserList(FactoriesList):
         return context
 
 
-
 class CampaignActive(View):
     def get(self, request, pk=None, *args, **kwargs):
         factory = get_object_or_404(ElectricityFactory, pk=pk)
@@ -373,8 +372,6 @@ class FactoryEdit(UpdateView):
 
         extract_error_messages_from(self.request, formset)
         return super(FactoryEdit, self).form_valid(form)
-
-
 
     def get_success_url(self):
         return reverse_lazy('view_factory', kwargs={'pk': self.object.pk})

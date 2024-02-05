@@ -1,7 +1,7 @@
 from django.db import models
 from decimal import Decimal
 import re
-
+from . import TimeStampMixin
 
 class LegalEntity(models.Model):
     native_name = models.CharField(max_length=1024)
@@ -17,12 +17,10 @@ class LegalEntity(models.Model):
         return self.native_name
 
 
-class LegalEntitySources(models.Model):
+class LegalEntitySources(TimeStampMixin):
     entity = models.ForeignKey(
         LegalEntity, on_delete=models.CASCADE, default=1)
     url = models.CharField(max_length=1024)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         constraints = [

@@ -5,7 +5,7 @@ from django.urls import path, include
 from django.views.generic.base import TemplateView
 
 from .views.factory import view_factory_production 
-from .views.factory import FactoriesList, FactoryDetail, FactoriesOfUserList
+from .views.factory import FactoriesList, FactoryDetail, FactoriesOfUserList, FactoriesForReview
 from .views.factory import FactoryCreate, FactoryEdit, CampaignCreate, CampaignActive
 from .views.dashboard import Dashboard
 from .views.home import Home
@@ -15,6 +15,12 @@ from .views.electricity_prices import view_electricity_prices
 from .views.scriping_tools import view_scriping_tools
 from .views.invest import Campaign
 from .views.team import Team
+from django.contrib.sitemaps.views import sitemap
+from .sitemaps import ElectricityFactorySitemap
+
+sitemaps = {
+    'factories' : ElectricityFactorySitemap,
+}
 
 urlpatterns = [
     
@@ -22,11 +28,14 @@ urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
     path('oidc/', include('mozilla_django_oidc.urls')),
     path('ht/', include('health_check.urls')),
+    path('robots.txt', TemplateView.as_view(template_name="robots.txt", content_type="text/plain")),    
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     
     path('', Home.as_view(), name="home"),
     path('team', Team.as_view(), name='team'),
 
     path('dashboard', Dashboard.as_view(), name='dashboard'),
+
     path('profile', MyProfileUpdate.as_view(), name='my_profile'),
     path('profile/<int:pk>', Profile.as_view(), name='user_profile'),
 
@@ -34,7 +43,8 @@ urlpatterns = [
     path('campaign/<int:pk>', Campaign.as_view(), name='campaign'),
 
     path('factory/', FactoriesOfUserList.as_view(), name='my_factories'),
-
+    path('factory/review', FactoriesForReview.as_view(), name='factories_for_review'),
+         
     path('factory/<int:pk>', FactoryDetail.as_view(), name='view_factory'),
     path('factory/add', FactoryCreate.as_view(), name='factory_create'),
     path('factory/<int:pk>/active', CampaignActive.as_view(), name='campaign_active'),
