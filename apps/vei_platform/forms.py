@@ -343,6 +343,18 @@ class CreateInvestmentForm(forms.Form):
             Submit('invest', _('Claim interest'))
         )
 
+class CampaingReviewForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super(CampaingReviewForm, self).__init__(*args, **kwargs)
+        # If you pass FormHelper constructor a form instance
+        # It builds a default layout with all its fields
+        self.helper = FormHelper(self)
+        cancel = Submit('cancel', _('Cancel campaign'))
+        cancel.field_classes = 'btn btn-danger'
+        approve = Submit('approve', _('Approve campaign'))
+        approve.field_classes = 'btn btn-success'
+        self.helper.layout = Layout(Row(approve), Row(cancel),)    
+
 class CampaingEditForm(forms.Form):
     def __init__(self, allow_finish, *args, **kwargs):
         super(CampaingEditForm, self).__init__(*args, **kwargs)

@@ -44,13 +44,13 @@
           </div>
           {%if not hide_link_buttons %}
           <div class="col-md-6 col-lg-3 col-xl-3 border-sm-start-none border-start">
-            {% if show_invest_form %}
+            {% if show_form %}
             {% if request.user.is_authenticated %}
-            {% include "snippets/factory_card_show_invest_form.html" %}
+            {% include "snippets/factory_card_show_form.html" %}
             {% else %} <!--request.user.is_authenticated-->
             {% include "snippets/factory_card_no_campaign.html "%}
             {% endif %} <!--request.user.is_authenticated-->
-            {% else %} <!--show_invest_form-->
+            {% else %} <!--show_form-->
             {% if factory|is_listed %}
             {% if request.user.is_authenticated %}
             <!-- Factory is listed, user is authenticated-->
@@ -75,7 +75,7 @@
             {% include "snippets/factory_card_no_campaign.html" %}
             {% endif%}<!--request.user.is_authenticated-->
             {% endif %} <!--factory|is_listed-->
-            {% endif %} <!--show_invest_form-->
+            {% endif %} <!--show_form-->
           </div>
           {%endif%}
         </div>

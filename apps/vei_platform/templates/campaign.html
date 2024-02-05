@@ -50,7 +50,7 @@
     </div>
 
   </div>
-
+  {% if investors|length > 0 %}
   <div class="container py-5">
     <div class="row justify-content-center mb-3">
       <div class="col-md-12 col-xl-10">
@@ -79,6 +79,7 @@
       </div>
     </div>
   </div>
+  {% endif %}
 
 </section>
 {% endblock content %}

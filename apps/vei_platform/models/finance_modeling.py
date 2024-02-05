@@ -99,6 +99,7 @@ class Campaign(models.Model):
         choices=Status.choices,
         default=Status.INITIALIZED,
     )
+    
     def price_per_kw(self):
         capacity = self.factory.get_capacity_in_kw()
         if capacity < Decimal(0.001):
@@ -157,6 +158,9 @@ class Campaign(models.Model):
     def show_in_dashboard(self):
         return self.status != Campaign.Status.CANCELED 
     
+    def need_approval(self):
+        return self.status == Campaign.Status.INITIALIZED
+    
     def status_str(self, when=datetime.now()):
         if when < datetime(year=self.start_date.year,
                           month=self.start_date.month,
@@ -164,7 +168,6 @@ class Campaign(models.Model):
                           hour=8, minute=0, second=0):
             if self.status == Campaign.Status.INITIALIZED:
                 return _('Started')
-                
             if self.status == Campaign.Status.ACTIVE:
                 return _('Active')
             if self.status == Campaign.Status.CANCELED:

@@ -2,7 +2,7 @@ from . import common_context
 from vei_platform.models.factory import ElectricityFactory, FactoryProductionPlan, ElectricityWorkingHoursPerMonth
 from vei_platform.models.finance_modeling import Campaign as CampaignModel, InvestementInCampaign
 from vei_platform.models.profile import get_user_profile
-from vei_platform.forms import CreateInvestmentForm, EditInvestmentForm, CampaingEditForm
+from vei_platform.forms import CreateInvestmentForm, EditInvestmentForm, CampaingEditForm, CampaingReviewForm
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
@@ -23,6 +23,9 @@ class Campaign(LoginRequiredMixin, View):
         self.campaign = campaign
         factory = campaign.factory
         if request.user and request.user.is_authenticated:
+            is_reviewer = request.user.is_staff
+            if is_reviewer and self.campaign.need_approval():
+                return self.get_as_reviewer(request, context)
             is_manager = factory.get_manager_profile() == get_user_profile(request.user)
             if is_manager:
                 return self.get_as_manager(request, context)
@@ -41,23 +44,48 @@ class Campaign(LoginRequiredMixin, View):
         else:
             form = EditInvestmentForm(instance=my_investments[0])
 
-        context['show_invest_form'] = self.campaign.accept_investments()
+        context['show_form'] = self.campaign.accept_investments()
         context['factory'] = self.campaign.factory
         context['campaign'] = self.campaign
         context['investors'] = self.campaign.get_investors(show_users=False, investor_profile=profile)
-        context['invest_form'] = form
+        context['form'] = form
         return render(request, "campaign.html", context)    
     
     def get_as_manager(self, request, context):
         if self.campaign.accept_investments():
             allow_finish = self.campaign.progress()['percent'] >= Decimal(100)
             form = CampaingEditForm(allow_finish)
-            context['invest_form'] = form
-        context['show_invest_form'] = self.campaign.accept_investments()
+            context['form'] = form
+        context['show_form'] = self.campaign.accept_investments()
         context['factory'] = self.campaign.factory
         context['campaign'] = self.campaign
         context['investors'] = self.campaign.get_investors(show_users=True)
         return render(request, "campaign.html", context)
+    
+    def get_as_reviewer(self, request, context):
+        if self.campaign.status == CampaignModel.Status.INITIALIZED:
+            form = CampaingReviewForm()
+            context['form'] = form
+        context['show_form'] = True
+        context['factory'] = self.campaign.factory
+        context['campaign'] = self.campaign
+        #context['investors'] = self.campaign.get_investors(show_users=True)
+        return render(request, "campaign.html", context)
+    
+    
+    def post_as_reviewer(self, request, context):
+        if request.method == 'POST':
+            if 'cancel' in request.POST:
+                self.campaign.status = CampaignModel.Status.CANCELED
+                self.campaign.save()
+                messages.success(request, _("Campaign is canceled"))
+
+            if 'approve' in request.POST:
+                self.campaign.status = CampaignModel.Status.ACTIVE
+                self.campaign.save()
+                messages.success(request, _("Campaign is activated"))
+
+        return redirect(self.campaign.get_absolute_url())
     
     def post_as_manager(self, request, context):
         if self.campaign.accept_investments():
@@ -79,8 +107,8 @@ class Campaign(LoginRequiredMixin, View):
                     else:
                         messages.error(request, _("Not enough accumulated interest to be able to finish the campaing"))
 
-            context['invest_form'] = form
-        context['show_invest_form'] = self.campaign.accept_investments()
+            context['form'] = form
+        context['show_form'] = self.campaign.accept_investments()
         context['factory'] = self.campaign.factory
         context['campaign'] = self.campaign
         context['investors'] = self.campaign.get_investors(show_users=True)
@@ -127,11 +155,11 @@ class Campaign(LoginRequiredMixin, View):
                 else:
                     messages.error(request, _("Error occured when changing the amount"))
 
-        context['show_invest_form'] = self.campaign.accept_investments()
+        context['show_form'] = self.campaign.accept_investments()
         context['factory'] = self.campaign.factory
         context['campaign'] = self.campaign
         context['investors'] = self.campaign.get_investors(show_users=False, investor_profile=profile)
-        context['invest_form'] = form
+        context['form'] = form
         return render(request, "campaign.html", context)    
     
     
@@ -142,6 +170,9 @@ class Campaign(LoginRequiredMixin, View):
         context = common_context(request)
         self.campaign = CampaignModel.objects.get(pk=pk)
         if request.user and request.user.is_authenticated:
+            is_reviewer = request.user.is_staff
+            if is_reviewer and self.campaign.need_approval():
+                return self.post_as_reviewer(request, context)
             is_manager = self.campaign.factory.get_manager_profile() == get_user_profile(request.user)
             if is_manager:
                 return self.post_as_manager(request, context)
