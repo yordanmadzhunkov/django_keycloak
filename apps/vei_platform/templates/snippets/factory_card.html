@@ -30,7 +30,7 @@
             </div>
             <div class="mt-1 mb-0 text-muted small">
               {% if factory.primary_owner %}
-              <span> {% trans "Owner" %} <a href="/entity/{{ factory.primary_owner.pk}}"> {{ factory.owner_name}} </a>
+              <span> {% trans "Owner" %} <a href="{% url 'entity' pk=factory.primary_owner.pk %}"> {{ factory.owner_name}} </a>
                 <br /></span>
               {% else %}
               <span> {% trans "Owner" %} {{ factory.owner_name}} <br /></span>
