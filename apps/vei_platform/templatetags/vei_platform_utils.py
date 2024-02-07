@@ -21,7 +21,7 @@ def total_amount_listed(factory):
         return campaing.amount
     return Decimal(0)
 
-
+ 
 @register.filter(is_safe=True)
 def get_active_campaign(factory):
     return Campaign.get_active(factory)
