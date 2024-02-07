@@ -48,7 +48,7 @@ class Campaign(LoginRequiredMixin, View):
         context['factory'] = self.campaign.factory
         context['campaign'] = self.campaign
         context['investors'] = self.campaign.get_investors(show_users=False, investor_profile=profile)
-        context['form'] = form
+        context['card_form'] = form
         return render(request, "campaign.html", context)    
     
     def get_as_manager(self, request, context):

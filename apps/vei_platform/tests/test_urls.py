@@ -4,7 +4,7 @@ from vei_platform.views.home import Home
 from vei_platform.views.dashboard import Dashboard
 from vei_platform.views.team import Team
 from vei_platform.views.profile import MyProfileUpdate, Profile
-from vei_platform.views.factory import FactoryCreate, FactoryEdit, FactoriesList, FactoryDetail, FactoriesForReview
+from vei_platform.views.factory import FactoryCreate, FactoryEdit, FactoriesList, FactoryDetail, FactoriesForReview, CampaignCreate
 
 class UrlTest(TestCase):
     def test_home_page_url(self):
@@ -46,3 +46,8 @@ class UrlTest(TestCase):
     def test_factories_for_review_page_url(self):
         url = reverse('factories_for_review')
         self.assertEquals(resolve(url).func.view_class, FactoriesForReview.as_view().view_class)
+        
+    def test_factory_campaign_create_page_url(self):
+        url = reverse('campaign_create', kwargs={'pk':2})
+        self.assertEquals(resolve(url).func.view_class, CampaignCreate.as_view().view_class)
+        

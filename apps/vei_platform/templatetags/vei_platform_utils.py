@@ -7,6 +7,8 @@ from vei_platform.models.factory import ElectricityFactory
 from django.contrib.sites.models import Site
 from decimal import Decimal
 from os import path
+from django.utils.translation import gettext as _
+from django.urls import reverse
 
 register = template.Library()
 
@@ -14,29 +16,10 @@ register = template.Library()
 def is_listed(factory):
     return Campaign.is_listed(factory)
 
-@register.filter(is_safe=True)
-def total_amount_listed(factory):
-    campaing = Campaign.get_active(factory)
-    if campaing:
-        return campaing.amount
-    return Decimal(0)
 
- 
 @register.filter(is_safe=True)
 def get_active_campaign(factory):
     return Campaign.get_active(factory)
- 
-@register.filter(is_safe=True)
-def get_campaign_progress_percent(factory):
-    return Campaign.get_active(factory).progress()['percent']
-
-@register.filter(is_safe=True)
-def available_for_investment(factory):
-    return Campaign.get_active(factory).progress()['available']
-
-@register.filter(is_safe=True)
-def get_campaign_progress_amount(factory):
-    return Campaign.get_active(factory).progress()['total']
 
 @register.filter(is_safe=True)
 def has_completed_campaign(factory):
@@ -45,6 +28,36 @@ def has_completed_campaign(factory):
 @register.filter(is_safe=True)
 def last_completed_campaign_amount(factory):
     return Campaign.get_last_completed(factory).progress()['total']
+
+@register.filter(is_safe=True)
+def campaign_links(factory, user):
+    #print (user.is_staff)
+    #factory
+    campaign = Campaign.get_active(factory)
+    if campaign:
+        return [{ 'href': campaign.get_absolute_url(),
+                  'title': _('Active campaign'),
+                  'css_class': 'btn-info',
+        
+        }]
+    else:
+        if factory.manager == user:
+            return [
+                {               
+                    'href': reverse('campaign_create', kwargs={'pk':factory.pk}),
+                    'title': _('Start campaign'),
+                    'css_class': 'btn-success',
+                },
+                {               
+                    'href': reverse('factory_edit', kwargs={'pk':factory.pk}),
+                    'title': _('Edit factory'),
+                    'css_class': 'btn-warning',
+                },
+            ]
+        else:
+            print("manager = %s user = %s" % (factory.manager, user))
+        return []
+    return factory.campaign_links()
 
 @register.filter(is_safe=True)
 def last_completed_campaign_href(factory):

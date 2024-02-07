@@ -42,45 +42,21 @@
               <span> {% trans "Opened" %} {{ factory.opened }} <br /></span>
             </div>
           </div>
-          {%if not hide_link_buttons %}
           <div class="col-md-6 col-lg-3 col-xl-3 border-sm-start-none border-start">
             {% include "snippets/factory_card_progress.html" %}
-
-
-            {% if show_form %}
-            {% if request.user.is_authenticated %}
-            {% include "snippets/factory_card_show_form.html" %}
-            {% else %} <!--request.user.is_authenticated-->
-            {% include "snippets/factory_card_no_campaign.html "%}
-            {% endif %} <!--request.user.is_authenticated-->
-            {% else %} <!--show_form-->
-            {% if factory|is_listed %}
-            {% if request.user.is_authenticated %}
-            <!-- Factory is listed, user is authenticated-->
-            {% if factory.get_manager_profile == profile %}
-            {% include "snippets/factory_card_link_to_active_campaign.html" %}
-            {% else %}<!--factory.get_manager_profile == profile-->
-            {% include "snippets/factory_card_offer_to_invest.html" %}
-            {% endif %}<!--factory.get_manager_profile == profile-->
-            {% else %}<!--request.user.is_authenticated-->
-            <!-- Factory is listed, user is NOT authenticated-->
-            {% include "snippets/factory_card_offer_to_invest.html" %}
-            {% endif%}<!--request.user.is_authenticated-->
-            {% else %} <!--factory|is_listed-->
-            {% if request.user.is_authenticated %}
-            <!-- Factory not listed, user is authenticated-->
-            {% if factory.get_manager_profile == profile %}
-            {% include "snippets/factory_card_offer_start_campaign.html" %}
-            {% else %}<!--factory.get_manager_profile == profile-->
-            {% include "snippets/factory_card_no_campaign.html" %}
-            {% endif %}<!--factory.get_manager_profile == profile-->
-            {% else %}<!--request.user.is_authenticated-->
-            {% include "snippets/factory_card_no_campaign.html" %}
-            {% endif%}<!--request.user.is_authenticated-->
-            {% endif %} <!--factory|is_listed-->
-            {% endif %} <!--show_form-->
+            {%if not hide_link_buttons %}
+            {% for l in factory|campaign_links:request.user %}
+              <div class="d-flex flex-column mt-4">
+                <a href="{{l.href}}">
+                  <button class="btn btn-block {{l.css_class}}" type="button">{{ l.title }}</button>
+                </a>
+              </div>
+            {% endfor %}
+            {%endif%}
+            {% if card_form %}
+            {% crispy card_form %}
+            {% endif %}
           </div>
-          {%endif%}
         </div>
       </div>
     </div>
