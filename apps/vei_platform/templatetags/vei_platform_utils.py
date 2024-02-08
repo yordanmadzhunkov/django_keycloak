@@ -13,13 +13,8 @@ from django.urls import reverse
 register = template.Library()
 
 @register.filter(is_safe=True)
-def is_listed(factory):
-    return Campaign.is_listed(factory)
-
-
-@register.filter(is_safe=True)
 def get_active_campaign(factory):
-    return Campaign.get_active(factory)
+    return Campaign.get_last_campaign(factory)
 
 @register.filter(is_safe=True)
 def has_completed_campaign(factory):
@@ -33,7 +28,7 @@ def last_completed_campaign_amount(factory):
 def campaign_links(factory, user):
     #print (user.is_staff)
     #factory
-    campaign = Campaign.get_active(factory)
+    campaign = Campaign.get_last_campaign(factory)
     if campaign:
         return [{ 'href': campaign.get_absolute_url(),
                   'title': _('Active campaign'),

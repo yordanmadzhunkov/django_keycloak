@@ -10,6 +10,7 @@ from django_q.tasks import async_task
 from django.core.validators import MaxValueValidator, MinValueValidator
 from .restricted_file_field import RestrictedFileField
 from django.utils.translation import gettext_lazy as _
+from django.urls import reverse
 
 from . import TimeStampMixin
 
@@ -92,7 +93,8 @@ class ElectricityFactory(TimeStampMixin):
         return self.capacity_in_mw * Decimal(1000)
 
     def get_absolute_url(self):
-        return "/factory/%s" % self.pk
+        return reverse('view_factory', kwargs={'pk': self.pk})
+
 
     def get_manager_profile(self):
         if self.manager:
