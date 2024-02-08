@@ -19,11 +19,12 @@ from django import template
 from django.forms import formset_factory
 from django.forms.models import model_to_dict
 
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.db import transaction
 from django.forms.models import inlineformset_factory
 from django.utils.translation import gettext as _
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from djmoney.money import Money
 
@@ -72,7 +73,9 @@ class FactoriesForReview(FactoriesList):
         return listed
 
 
-class FactoriesOfUserList(FactoriesList):
+class FactoriesOfUserList(LoginRequiredMixin, FactoriesList):
+    
+    login_url = '/oidc/authenticate/'#reverse_lazy('oidc_authentication_init')
     title = _('My Factories')
     
     def get_queryset(self):

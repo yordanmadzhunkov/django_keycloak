@@ -11,11 +11,8 @@ from django.contrib import messages
 from decimal import Decimal
 from django.utils.translation import gettext as _
 from django.views import View
-from django.contrib.auth.mixins import LoginRequiredMixin
 
-class Campaign(LoginRequiredMixin, View):
-    
-    login_url = '/oidc/authenticate/'
+class Campaign(View):
     
     def get(self, request, pk, *args, **kwargs):
         context = common_context(request)
@@ -32,7 +29,15 @@ class Campaign(LoginRequiredMixin, View):
             else:
                 return self.get_as_investor(request, context)
         return self.get_as_anon(request, context)
-    
+
+
+    def get_as_anon(self, request, context):
+        #context['show_form'] = self.campaign.accept_investments()
+        context['factory'] = self.campaign.factory
+        context['campaign'] = self.campaign
+        context['investors'] = self.campaign.get_investors(show_users=False)
+        context['hide_link_buttons'] = True
+        return render(request, "campaign.html", context)        
     
     def get_as_investor(self, request, context):
         profile = get_user_profile(request.user)        
@@ -49,6 +54,7 @@ class Campaign(LoginRequiredMixin, View):
         context['campaign'] = self.campaign
         context['investors'] = self.campaign.get_investors(show_users=False, investor_profile=profile)
         context['card_form'] = form
+        context['hide_link_buttons'] = True
         return render(request, "campaign.html", context)    
     
     def get_as_manager(self, request, context):
@@ -60,6 +66,7 @@ class Campaign(LoginRequiredMixin, View):
         context['factory'] = self.campaign.factory
         context['campaign'] = self.campaign
         context['investors'] = self.campaign.get_investors(show_users=True)
+        context['hide_link_buttons'] = True
         return render(request, "campaign.html", context)
     
     def get_as_reviewer(self, request, context):
@@ -70,6 +77,8 @@ class Campaign(LoginRequiredMixin, View):
         context['factory'] = self.campaign.factory
         context['campaign'] = self.campaign
         #context['investors'] = self.campaign.get_investors(show_users=True)
+        context['hide_link_buttons'] = True
+        
         return render(request, "campaign.html", context)
     
     
@@ -163,8 +172,7 @@ class Campaign(LoginRequiredMixin, View):
         return render(request, "campaign.html", context)    
     
     
-    def get_as_anon(self, request, context):
-        return render(request, "campaign.html", context)    
+
     
     def post(self, request, pk, *args, **kwargs):
         context = common_context(request)
