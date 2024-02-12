@@ -2,7 +2,7 @@ from . import common_context
 from vei_platform.models.factory import ElectricityFactory, FactoryProductionPlan, ElectricityWorkingHoursPerMonth
 from vei_platform.models.finance_modeling import Campaign as CampaignModel, InvestementInCampaign
 from vei_platform.models.profile import get_user_profile
-from vei_platform.forms import CreateInvestmentForm, EditInvestmentForm, CampaingEditForm, CampaingReviewForm
+from vei_platform.forms import CreateInvestmentForm, EditInvestmentForm, CampaingEditForm, CampaingReviewForm, LoiginOrRegisterForm
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
@@ -11,9 +11,10 @@ from django.contrib import messages
 from decimal import Decimal
 from django.utils.translation import gettext as _
 from django.views import View
+from djmoney.money import Money
 
 class Campaign(View):
-    
+   
     def get(self, request, pk, *args, **kwargs):
         context = common_context(request)
         campaign = CampaignModel.objects.get(pk=pk)
@@ -32,11 +33,11 @@ class Campaign(View):
 
 
     def get_as_anon(self, request, context):
-        #context['show_form'] = self.campaign.accept_investments()
         context['factory'] = self.campaign.factory
         context['campaign'] = self.campaign
         context['investors'] = self.campaign.get_investors(show_users=False)
         context['hide_link_buttons'] = True
+        context['card_form'] = LoiginOrRegisterForm()
         return render(request, "campaign.html", context)        
     
     def get_as_investor(self, request, context):
@@ -45,15 +46,15 @@ class Campaign(View):
                                                           investor_profile=profile, 
                                                           status=InvestementInCampaign.Status.INTERESTED)
         if len(my_investments) == 0:
-            form = CreateInvestmentForm()
+            form = CreateInvestmentForm(initial={'amount': Money(Decimal('1000'), self.campaign.amount.currency)})
         else:
             form = EditInvestmentForm(instance=my_investments[0])
 
-        context['show_form'] = self.campaign.accept_investments()
         context['factory'] = self.campaign.factory
         context['campaign'] = self.campaign
         context['investors'] = self.campaign.get_investors(show_users=False, investor_profile=profile)
-        context['card_form'] = form
+        if self.campaign.accept_investments():
+            context['card_form'] = form
         context['hide_link_buttons'] = True
         return render(request, "campaign.html", context)    
     
@@ -61,8 +62,7 @@ class Campaign(View):
         if self.campaign.accept_investments():
             allow_finish = self.campaign.progress()['percent'] >= Decimal(100)
             form = CampaingEditForm(allow_finish)
-            context['form'] = form
-        context['show_form'] = self.campaign.accept_investments()
+            context['card_form'] = form
         context['factory'] = self.campaign.factory
         context['campaign'] = self.campaign
         context['investors'] = self.campaign.get_investors(show_users=True)
@@ -70,13 +70,11 @@ class Campaign(View):
         return render(request, "campaign.html", context)
     
     def get_as_reviewer(self, request, context):
-        if self.campaign.status == CampaignModel.Status.INITIALIZED:
+        if self.campaign.need_approval():
             form = CampaingReviewForm()
-            context['form'] = form
-        context['show_form'] = True
+            context['card_form'] = form
         context['factory'] = self.campaign.factory
         context['campaign'] = self.campaign
-        #context['investors'] = self.campaign.get_investors(show_users=True)
         context['hide_link_buttons'] = True
         
         return render(request, "campaign.html", context)
@@ -99,29 +97,21 @@ class Campaign(View):
     def post_as_manager(self, request, context):
         if self.campaign.accept_investments():
             allow_finish = self.campaign.progress()['percent'] >= Decimal(100)
-            form = CampaingEditForm(allow_finish)
             if request.method == 'POST':
                 if 'cancel' in request.POST:
-                    form = CampaingEditForm(request.POST)
                     self.campaign.status = CampaignModel.Status.CANCELED
                     self.campaign.save()
                     messages.success(request, _("Campaign is canceled"))
 
                 if 'complete' in request.POST:
-                    form = CampaingEditForm(request.POST)
                     if allow_finish:
                         self.campaign.status = CampaignModel.Status.COMPLETED;
                         self.campaign.save()
                         messages.success(request, _("Campaign is completed"))
                     else:
                         messages.error(request, _("Not enough accumulated interest to be able to finish the campaing"))
-
-            context['form'] = form
-        context['show_form'] = self.campaign.accept_investments()
-        context['factory'] = self.campaign.factory
-        context['campaign'] = self.campaign
-        context['investors'] = self.campaign.get_investors(show_users=True)
-        return render(request, "campaign.html", context)    
+        return redirect(self.campaign.get_absolute_url())
+            
     
     def post_as_investor(self, request, context):
         profile = get_user_profile(request.user)        
@@ -129,21 +119,24 @@ class Campaign(View):
                                                             investor_profile=profile, 
                                                             status=InvestementInCampaign.Status.INTERESTED)
         if len(my_investments) == 0:
-            form = CreateInvestmentForm()
+            form = CreateInvestmentForm(initial={'amount': Money(Decimal('1000'), self.campaign.amount.currency)})
             if 'invest' in request.POST:
                 form = CreateInvestmentForm(request.POST)
                 if form.is_valid():
                     amount = form.cleaned_data['amount']
-                    investment = InvestementInCampaign(
+                    if amount.currency == self.campaign.amount.currency:
+                        investment = InvestementInCampaign(
                                 amount= amount,
                                 campaign=self.campaign,
                                 investor_profile=profile,
                                 status=InvestementInCampaign.Status.INTERESTED
-                    )
-                    investment.save()
-                    form = EditInvestmentForm(instance=investment)
+                        )
+                        investment.save()
+                        form = EditInvestmentForm(instance=investment)
 
-                    messages.success(request, _("You declared interest in amount %s to %s") % (amount, self.campaign.factory.name))
+                        messages.success(request, _("You declared interest in amount %s to %s") % (amount, self.campaign.factory.name))
+                    else:
+                        messages.error(request, _("Currency conversion from %s to %s is not supported" % (amount.currency, self.campaign.amount.currency)))
                 else:
                     messages.error(request, _("Invalid data, please try again"))        
         else:
@@ -152,27 +145,26 @@ class Campaign(View):
                 my_investments[0].status = InvestementInCampaign.Status.CANCELED
                 my_investments[0].save()
                 messages.success(request, _("Your interest have been canceled"))
-                form = CreateInvestmentForm()
+                form = CreateInvestmentForm(initial={'amount': Money(Decimal('1000'), self.campaign.amount.currency)})
 
                     
             if 'save' in request.POST:
                 form = EditInvestmentForm(request.POST)
                 if form.is_valid():
-                    my_investments[0].amount = form.cleaned_data['amount']
-                    my_investments[0].save()
-                    messages.success(request, _("You declared interest in amount changed to %s") % my_investments[0].amount)
+                    amount = form.cleaned_data['amount']
+                    if amount.currency == self.campaign.amount.currency:
+                        my_investments[0].amount = form.cleaned_data['amount']
+                        my_investments[0].save()
+                        messages.success(request, _("You declared interest in amount changed to %s") % my_investments[0].amount)
+                    else:
+                        messages.error(request, _("Currency conversion from %s to %s is not supported" % (amount.currency, self.campaign.amount.currency)))
+
                 else:
                     messages.error(request, _("Error occured when changing the amount"))
+        return redirect(self.campaign.get_absolute_url())
 
-        context['show_form'] = self.campaign.accept_investments()
-        context['factory'] = self.campaign.factory
-        context['campaign'] = self.campaign
-        context['investors'] = self.campaign.get_investors(show_users=False, investor_profile=profile)
-        context['form'] = form
-        return render(request, "campaign.html", context)    
-    
-    
-
+    def post_as_anon(self, request, context):
+        return redirect('oidc_authentication_init')
     
     def post(self, request, pk, *args, **kwargs):
         context = common_context(request)
@@ -186,4 +178,4 @@ class Campaign(View):
                 return self.post_as_manager(request, context)
             else:
                 return self.post_as_investor(request, context)
-        return self.get_as_anon(request, context)    
+        return self.post_as_anon(request, context)    

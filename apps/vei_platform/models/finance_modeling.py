@@ -166,31 +166,20 @@ class Campaign(models.Model):
             
     
     def status_str(self, when=datetime.now()):
-        if when < datetime(year=self.start_date.year,
-                          month=self.start_date.month,
-                          day=self.start_date.day,
-                          hour=8, minute=0, second=0):
-            if self.status == Campaign.Status.INITIALIZED:
-                return _('Started')
-            if self.status == Campaign.Status.ACTIVE:
-                return _('Active')
-            if self.status == Campaign.Status.CANCELED:
-                return _('Canceled')
-            if self.status == Campaign.Status.COMPLETED:
-                return _('Completed')
-        return _('Expired')
+        if self.is_expired(when):
+            return _('Expired')
+        if self.status == Campaign.Status.INITIALIZED:
+            return _('Started')
+        if self.status == Campaign.Status.ACTIVE:
+            return _('Active')
+        if self.status == Campaign.Status.CANCELED:
+            return _('Canceled')
+        if self.status == Campaign.Status.COMPLETED:
+            return _('Completed')
+        return _('Unknown')
 
     def accept_investments(self, when=datetime.now()):
-        if when < datetime(year=self.start_date.year,
-                          month=self.start_date.month,
-                          day=self.start_date.day,
-                          hour=8, minute=0, second=0):
-            
-            if self.status == Campaign.Status.INITIALIZED:
-                return True
-            if self.status == Campaign.Status.ACTIVE:
-                return True
-        return False
+        return not self.is_expired(when) and self.status == Campaign.Status.ACTIVE
     
     def get_investors(self, show_users, investor_profile = None):
         investors = InvestementInCampaign.objects.filter(campaign=self).exclude(status=InvestementInCampaign.Status.CANCELED)

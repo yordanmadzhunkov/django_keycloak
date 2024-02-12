@@ -332,6 +332,12 @@ class CreateInvestmentForm(forms.Form):
         
     def __init__(self, *args, **kwargs):
         super(CreateInvestmentForm, self).__init__(*args, **kwargs)
+        if 'initial' in kwargs.keys():
+            if 'amount' in kwargs['initial'].keys():
+                amount = kwargs['initial']['amount']
+                self.initial['amunt'] = amount
+            
+            
         # If you pass FormHelper constructor a form instance
         # It builds a default layout with all its fields
         self.helper = FormHelper(self)
@@ -342,6 +348,18 @@ class CreateInvestmentForm(forms.Form):
             ),
             Submit('invest', _('Claim interest'))
         )
+
+class LoiginOrRegisterForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super(LoiginOrRegisterForm, self).__init__(*args, **kwargs)
+        # If you pass FormHelper constructor a form instance
+        # It builds a default layout with all its fields
+        self.helper = FormHelper(self)
+        authenticate = Submit('authenticate', _('Login or Register'))
+        authenticate.field_classes = 'btn btn-success btn-block'
+        self.helper.layout = Layout(Row(authenticate))    
+
+
 
 class CampaingReviewForm(forms.Form):
     def __init__(self, *args, **kwargs):
@@ -391,6 +409,8 @@ class EditInvestmentForm(forms.ModelForm):
             cancel,
         )
         self.fields['amount'].label = _('Your interest')
+        #self.fields['amount'].fields[1].choices = [('EUR', 'EUR €')]
+        #[('BGN', 'BGN лв'), ('EUR', 'EUR €'), ('USD', 'USD $')]
 
 
 class CustomImageField(Field):
