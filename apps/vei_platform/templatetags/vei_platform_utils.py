@@ -38,7 +38,7 @@ def campaign_links(factory, user):
     #    }]    
     if campaign:
         return [{ 'href': campaign.get_absolute_url(),
-                  'title': _('Active campaign'),
+                  'title': campaign.status_str(),
                   'css_class': 'btn-info',
         }]
     else:

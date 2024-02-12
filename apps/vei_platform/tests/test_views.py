@@ -12,5 +12,4 @@ class RobotsTest(TestCase):
 
     def test_post(self):
         response = self.client.post("/robots.txt")
-
         self.assertEqual(response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)

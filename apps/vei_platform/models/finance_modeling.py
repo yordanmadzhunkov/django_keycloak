@@ -5,14 +5,10 @@ from decimal import Decimal
 from datetime import date, datetime
 from django.core.validators import MaxValueValidator, MinValueValidator
 from .factory import ElectricityFactory, FactoryProductionPlan
-from .legal import LegalEntity
 from .profile import UserProfile
 
 from django.utils.translation import gettext_lazy as _
-
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from django_q.tasks import async_task
+from django.urls import reverse
 
 from djmoney.models.fields import MoneyField
 from djmoney.money import Money
@@ -109,10 +105,6 @@ class Campaign(models.Model):
         return Money(
             Decimal(v / ( capacity * self.persent_from_profit * Decimal('0.01'))).quantize(Decimal('1.00')),
             self.amount.currency)
-        
-    @staticmethod
-    def is_listed(factory):
-        return Campaign.get_active(factory) != None
     
     @staticmethod
     def get_active(factory, when=datetime.now()):
@@ -158,13 +150,20 @@ class Campaign(models.Model):
         return InvestementInCampaign.objects.filter(campaign=self, status='IN').count()
 
     def get_absolute_url(self):
-        return "/campaign/%s" % self.pk       
+        return reverse('campaign', kwargs={'pk': self.pk}) 
 
     def show_in_dashboard(self):
         return self.status != Campaign.Status.CANCELED 
     
     def need_approval(self):
         return self.status == Campaign.Status.INITIALIZED
+    
+    def is_expired(self, when=datetime.now()):
+        return when >= datetime(year=self.start_date.year,
+                          month=self.start_date.month,
+                          day=self.start_date.day,
+                          hour=8, minute=0, second=0)
+            
     
     def status_str(self, when=datetime.now()):
         if when < datetime(year=self.start_date.year,
