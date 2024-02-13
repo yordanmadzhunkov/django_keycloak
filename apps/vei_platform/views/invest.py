@@ -59,9 +59,7 @@ class Campaign(View):
         return render(request, "campaign.html", context)    
     
     def get_as_manager(self, request, context):
-        allow_finish = self.campaign.allow_finish()
-        allow_extend = self.campaign.allow_extend()
-        context['card_form'] = CampaingEditForm(allow_finish, allow_extend)
+        context['card_form'] = CampaingEditForm(instance=self.campaign)
         context['factory'] = self.campaign.factory
         context['campaign'] = self.campaign
         context['investors'] = self.campaign.get_investors(show_users=True)

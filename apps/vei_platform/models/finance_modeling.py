@@ -147,6 +147,8 @@ class Campaign(models.Model):
         return res
     
     def allow_finish(self):
+        if self.status != Campaign.Status.ACTIVE:
+            return False
         investments = InvestementInCampaign.objects.filter(campaign=self, status='IN')
         t = Money(0, self.amount.currency)
         for invest in investments:
@@ -159,6 +161,9 @@ class Campaign(models.Model):
             if last_campaign == self:
                 return True
         return False
+    
+    def allow_cancel(self):
+        return self.status != Campaign.Status.CANCELED and self.status != Campaign.Status.COMPLETED
 
     def count_investitors(self):
         return InvestementInCampaign.objects.filter(campaign=self, status='IN').count()

@@ -374,37 +374,30 @@ class CampaingReviewForm(forms.Form):
         self.helper.layout = Layout(Row(approve), Row(cancel),)    
 
 class CampaingEditForm(forms.Form):
-    start_date = forms.DateField(label=_('Campaing end date'),
-                                 help_text=_('Until this date investors can declare interest in this project. If enough people declare interst in this project you will be able to complete the campaing'),
-                                 initial=date(2024, 12, 31),
-                                 widget=BootstrapDatePicker(attrs={
-                                    'title': _('Date'),
-                                    'class': 'form-control',
-                                    'style': 'width:18ch',
-                                    'data-date-autoclose': 'true',
-                                    'data-date-clear-btn': 'false',
-                                    'data-date-today-btn': 'linked',
-                                    'data-date-today-highlight': 'true'
-                                    }),
-    )
-
-    def __init__(self, allow_finish, allow_extend=False, *args, **kwargs):
+    
+    
+    def __init__(self, instance, *args, **kwargs):
         super(CampaingEditForm, self).__init__(*args, **kwargs)
         # If you pass FormHelper constructor a form instance
         # It builds a default layout with all its fields
         self.helper = FormHelper(self)
-        cancel = Submit('cancel', _('Cancel campaign'))
-        cancel.field_classes = 'btn btn-danger btn-block'
-        extend = Submit('extend', _('Extend campaign'))
-        extend.field_classes = 'btn btn-warning btn-block'
-        complete = Submit('complete', _('Finish campaign'))
-        complete.field_classes = 'btn btn-success btn-block'
         self.helper.layout = Layout()
-        self.helper.layout.append(Row(cancel))
-        if allow_finish:
+        if instance.allow_cancel():
+            cancel = Submit('cancel', _('Cancel campaign'))
+            cancel.field_classes = 'btn btn-danger btn-block'
+            self.helper.layout.append(Row(cancel))
+        if instance.allow_finish():
+            complete = Submit('complete', _('Finish campaign'))
+            complete.field_classes = 'btn btn-success btn-block'
             self.helper.layout.append(Row(complete))
-        if allow_extend:
-            self.helper.layout.append(Row(extend, Field('start_date')))
+        if instance.allow_extend():
+            extend = Submit('extend', _('Extend campaign'))
+            extend.field_classes = 'btn btn-warning btn-block'
+            self.helper.layout.append(Row(Field('start_date')))
+            self.helper.layout.append(Row(extend))
+        #else:
+        #    self.fields.popitem()
+        #print(type(self.fields))
         
 
 class EditInvestmentForm(forms.ModelForm):
