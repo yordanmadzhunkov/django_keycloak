@@ -59,10 +59,9 @@ class Campaign(View):
         return render(request, "campaign.html", context)    
     
     def get_as_manager(self, request, context):
-        if self.campaign.accept_investments():
-            allow_finish = self.campaign.progress()['percent'] >= Decimal(100)
-            form = CampaingEditForm(allow_finish)
-            context['card_form'] = form
+        allow_finish = self.campaign.allow_finish()
+        allow_extend = self.campaign.allow_extend()
+        context['card_form'] = CampaingEditForm(allow_finish, allow_extend)
         context['factory'] = self.campaign.factory
         context['campaign'] = self.campaign
         context['investors'] = self.campaign.get_investors(show_users=True)

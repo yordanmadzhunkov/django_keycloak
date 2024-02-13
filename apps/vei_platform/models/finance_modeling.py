@@ -146,6 +146,20 @@ class Campaign(models.Model):
         res['available'] = self.amount - t
         return res
     
+    def allow_finish(self):
+        investments = InvestementInCampaign.objects.filter(campaign=self, status='IN')
+        t = Money(0, self.amount.currency)
+        for invest in investments:
+            t = t + invest.amount
+        return t >= self.amount
+    
+    def allow_extend(self, when=datetime.now()):
+        if self.is_expired(when):
+            last_campaign = Campaign.get_last_campaign(self.factory)
+            if last_campaign == self:
+                return True
+        return False
+
     def count_investitors(self):
         return InvestementInCampaign.objects.filter(campaign=self, status='IN').count()
 

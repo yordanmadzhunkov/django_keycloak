@@ -30,7 +30,8 @@
             </div>
             <div class="mt-1 mb-0 text-muted small">
               {% if factory.primary_owner %}
-              <span> {% trans "Owner" %} <a href="{% url 'entity' pk=factory.primary_owner.pk %}"> {{ factory.owner_name}} </a>
+              <span> {% trans "Owner" %} <a href="{% url 'entity' pk=factory.primary_owner.pk %}"> {{
+                  factory.owner_name}} </a>
                 <br /></span>
               {% else %}
               <span> {% trans "Owner" %} {{ factory.owner_name}} <br /></span>
@@ -45,17 +46,18 @@
           <div class="col-md-6 col-lg-3 col-xl-3 border-sm-start-none border-start">
             {%if not hide_link_buttons %}
             {% for l in factory|campaign_links:request.user %}
-              <div class="d-flex flex-column mt-4">
-                <a href="{{l.href}}">
-                  <button class="btn btn-block {{l.css_class}}" type="button">{{ l.title }}</button>
-                </a>
-              </div>
+            <div class="d-flex flex-column mt-4">
+              <a href="{{l.href}}">
+                <button class="btn btn-block {{l.css_class}}" type="button">{{ l.title }}</button>
+              </a>
+            </div>
             {% endfor %}
             {%endif%}
+            {% include "snippets/factory_card_progress.html" %}
+
             {% if card_form %}
             {% crispy card_form %}
             {% endif %}
-            {% include "snippets/factory_card_progress.html" %}
 
           </div>
         </div>
