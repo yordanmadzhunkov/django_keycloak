@@ -17,14 +17,6 @@ def get_active_campaign(factory):
     return Campaign.get_last_campaign(factory)
 
 @register.filter(is_safe=True)
-def has_completed_campaign(factory):
-    return Campaign.get_last_completed(factory) != None
-
-@register.filter(is_safe=True)
-def last_completed_campaign_amount(factory):
-    return Campaign.get_last_completed(factory).progress()['total']
-
-@register.filter(is_safe=True)
 def campaign_links(factory, user):
     #print (user.is_staff)
     #factory

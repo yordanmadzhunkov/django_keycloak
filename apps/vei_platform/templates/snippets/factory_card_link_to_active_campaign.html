@@ -1,8 +1,0 @@
-{% load vei_platform_utils %}
-{% load i18n %}
-<div class="d-flex flex-column mt-4">
-  <a href="{% url 'campaign_active' pk=factory.pk %}">
-    <button class="btn btn-info btn-block" type="button">{% trans "Active campaign" %}</button>
-  </a>
-</div>
-{% include "snippets/factory_card_progress.html" %}

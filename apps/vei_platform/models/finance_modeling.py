@@ -125,7 +125,8 @@ class Campaign(models.Model):
         if len(campaigns) > 0:
             return campaigns[len(campaigns) - 1]
         return None
-   
+    
+    @staticmethod
     def get_last_campaign(factory):
         campaigns = Campaign.objects.filter(factory=factory).order_by('start_date')
         if len(campaigns) > 0:
@@ -133,7 +134,7 @@ class Campaign(models.Model):
         return None
 
     def progress(self):
-        investments = InvestementInCampaign.objects.filter(campaign=self, status='IN')
+        investments = InvestementInCampaign.objects.filter(campaign=self, status=Campaign.Status.INITIALIZED)
         t = Money(0, self.amount.currency)
         for invest in investments:
             t = t + invest.amount
@@ -162,8 +163,8 @@ class Campaign(models.Model):
                 return True
         return False
     
-    def allow_cancel(self):
-        return self.status != Campaign.Status.CANCELED and self.status != Campaign.Status.COMPLETED
+    def allow_cancel(self, when=datetime.now()):
+        return not self.is_expired(when) and self.status != Campaign.Status.CANCELED and self.status != Campaign.Status.COMPLETED
 
     def count_investitors(self):
         return InvestementInCampaign.objects.filter(campaign=self, status='IN').count()
