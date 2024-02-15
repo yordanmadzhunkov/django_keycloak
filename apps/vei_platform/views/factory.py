@@ -87,15 +87,6 @@ class FactoriesOfUserList(LoginRequiredMixin, FactoriesList):
         return context
 
 
-class CampaignActive(View):
-    def get(self, request, pk=None, *args, **kwargs):
-        factory = get_object_or_404(ElectricityFactory, pk=pk)
-        campaign = Campaign.get_active(factory)
-        if campaign:
-            return redirect(campaign.get_absolute_url())
-        return redirect(factory.get_absolute_url() + '/campaign')
-
-
 class CampaignCreate(CreateView):
     def get(self, request, pk=None, *args, **kwargs):
         context = common_context(request)
