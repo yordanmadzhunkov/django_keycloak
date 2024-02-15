@@ -7,7 +7,7 @@ from django.forms import formset_factory
 
 
 from vei_platform.models.profile import get_user_profile
-from vei_platform.models.finance_modeling import ElectricityPricePlan, ElectricityPrice
+from vei_platform.models.campaign import ElectricityPricePlan, ElectricityPrice
 from vei_platform.forms import PricePlanForm, NumberPerMonthForm
 
 from decimal import Decimal, DecimalException

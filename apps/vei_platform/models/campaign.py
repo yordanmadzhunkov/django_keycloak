@@ -119,13 +119,7 @@ class Campaign(models.Model):
                 return c
         return None
     
-    @staticmethod
-    def get_last_completed(factory):
-        campaigns = Campaign.objects.filter(factory=factory, status=Campaign.Status.COMPLETED).order_by('start_date')
-        if len(campaigns) > 0:
-            return campaigns[len(campaigns) - 1]
-        return None
-    
+  
     @staticmethod
     def get_last_campaign(factory):
         campaigns = Campaign.objects.filter(factory=factory).order_by('start_date')

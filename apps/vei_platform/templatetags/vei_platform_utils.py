@@ -1,7 +1,7 @@
 from django import template
 from django.db import models
 
-from vei_platform.models.finance_modeling import Campaign
+from vei_platform.models.campaign import Campaign
 from vei_platform.models.legal import find_legal_entity
 from vei_platform.models.factory import ElectricityFactory
 from django.contrib.sites.models import Site
@@ -52,9 +52,6 @@ def campaign_links(factory, user):
         return []
     return factory.campaign_links()
 
-@register.filter(is_safe=True)
-def last_completed_campaign_href(factory):
-    return Campaign.get_last_completed(factory).get_absolute_url()
 
 @register.filter(is_safe=True)
 def balance_from_transactions(account):

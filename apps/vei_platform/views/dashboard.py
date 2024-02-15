@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 
 from . import common_context
 from vei_platform.models.legal import find_legal_entity
-from vei_platform.models.finance_modeling import InvestementInCampaign, Campaign
+from vei_platform.models.campaign import InvestementInCampaign, Campaign
 from vei_platform.models.profile import get_user_profile
 from vei_platform.models.factory import ElectricityFactory
 from django.utils.translation import gettext as _

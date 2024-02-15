@@ -1,6 +1,6 @@
 from . import common_context
 from vei_platform.models.factory import ElectricityFactory, FactoryProductionPlan, ElectricityWorkingHoursPerMonth
-from vei_platform.models.finance_modeling import Campaign as CampaignModel, InvestementInCampaign
+from vei_platform.models.campaign import Campaign as CampaignModel, InvestementInCampaign
 from vei_platform.models.profile import get_user_profile
 from vei_platform.forms import CreateInvestmentForm, EditInvestmentForm, CampaingEditForm, CampaingReviewForm, LoiginOrRegisterForm
 
