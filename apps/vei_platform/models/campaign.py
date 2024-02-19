@@ -106,32 +106,18 @@ class Campaign(models.Model):
             Decimal(v / ( capacity * self.persent_from_profit * Decimal('0.01'))).quantize(Decimal('1.00')),
             self.amount.currency)
     
-    @staticmethod
-    def get_active(factory, when=datetime.now()):
-        campaigns = Campaign.objects.filter(factory=factory)
-        for c in campaigns:
-            time_ok = when < datetime(year=c.start_date.year,
-                          month=c.start_date.month,
-                          day=c.start_date.day,
-                          hour=8, minute=0, second=0)
-            status_ok = c.status == Campaign.Status.ACTIVE or c.status == Campaign.Status.INITIALIZED
-            if time_ok and status_ok:
-                return c
-        return None
-    
   
     @staticmethod
     def get_last_campaign(factory):
-        campaigns = Campaign.objects.filter(factory=factory).order_by('start_date')
+        campaigns = Campaign.objects.filter(factory=factory).order_by('pk')
         if len(campaigns) > 0:
             return campaigns[len(campaigns) - 1]
         return None
 
     def progress(self):
-        investments = InvestementInCampaign.objects.filter(campaign=self, status=Campaign.Status.INITIALIZED)
         t = Money(0, self.amount.currency)
-        for invest in investments:
-            t = t + invest.amount
+        for investment in self.get_investors():
+            t = t + investment.amount
         res = {}
         res['total'] = t
         r = Decimal(100) * (t / self.amount)
@@ -144,10 +130,9 @@ class Campaign(models.Model):
     def allow_finish(self):
         if self.status != Campaign.Status.ACTIVE:
             return False
-        investments = InvestementInCampaign.objects.filter(campaign=self, status='IN')
         t = Money(0, self.amount.currency)
-        for invest in investments:
-            t = t + invest.amount
+        for investment in self.get_investors():
+            t = t + investment.amount
         return t >= self.amount
     
     def allow_extend(self, when=datetime.now()):
@@ -180,6 +165,8 @@ class Campaign(models.Model):
             
     
     def status_str(self, when=datetime.now()):
+        if self.status == Campaign.Status.COMPLETED:
+            return _('Completed')
         if self.is_expired(when):
             return _('Expired')
         if self.status == Campaign.Status.INITIALIZED:
@@ -188,15 +175,17 @@ class Campaign(models.Model):
             return _('Active')
         if self.status == Campaign.Status.CANCELED:
             return _('Canceled')
-        if self.status == Campaign.Status.COMPLETED:
-            return _('Completed')
+
         return _('Unknown')
 
     def accept_investments(self, when=datetime.now()):
         return not self.is_expired(when) and self.status == Campaign.Status.ACTIVE
     
-    def get_investors(self, show_users, investor_profile = None):
-        investors = InvestementInCampaign.objects.filter(campaign=self).exclude(status=InvestementInCampaign.Status.CANCELED)
+    def get_investors(self):
+        return InvestementInCampaign.objects.filter(campaign=self).exclude(status=InvestementInCampaign.Status.CANCELED)
+
+    def get_investors_for_view(self, show_users, investor_profile = None):
+        investors = self.get_investors()
         res = []
         count = 1
         for investor in investors:

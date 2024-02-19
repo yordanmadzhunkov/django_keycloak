@@ -1,12 +1,13 @@
 from . import common_context
-from vei_platform.models.factory import ElectricityFactory, FactoryProductionPlan, ElectricityWorkingHoursPerMonth
 from vei_platform.models.campaign import Campaign as CampaignModel, InvestementInCampaign
 from vei_platform.models.profile import get_user_profile
-from vei_platform.forms import CreateInvestmentForm, EditInvestmentForm, CampaingEditForm, CampaingReviewForm, LoiginOrRegisterForm
+from vei_platform.forms import CreateInvestmentForm, EditInvestmentForm, CampaingEditForm, LoiginOrRegisterForm
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
+
+from datetime import datetime
 
 from decimal import Decimal
 from django.utils.translation import gettext as _
@@ -22,20 +23,17 @@ class Campaign(View):
         factory = campaign.factory
         if request.user and request.user.is_authenticated:
             is_reviewer = request.user.is_staff
-            if is_reviewer and self.campaign.need_approval():
-                return self.get_as_reviewer(request, context)
             is_manager = factory.get_manager_profile() == get_user_profile(request.user)
-            if is_manager:
-                return self.get_as_manager(request, context)
+            if is_manager or is_reviewer:
+                return self.get_as_manager_or_reviewer(request, context, is_reviewer=is_reviewer)
             else:
                 return self.get_as_investor(request, context)
         return self.get_as_anon(request, context)
 
-
     def get_as_anon(self, request, context):
         context['factory'] = self.campaign.factory
         context['campaign'] = self.campaign
-        context['investors'] = self.campaign.get_investors(show_users=False)
+        context['investors'] = self.campaign.get_investors_for_view(show_users=False)
         context['hide_link_buttons'] = True
         context['card_form'] = LoiginOrRegisterForm()
         return render(request, "campaign.html", context)        
@@ -45,39 +43,28 @@ class Campaign(View):
         my_investments = InvestementInCampaign.objects.filter(campaign=self.campaign, 
                                                           investor_profile=profile, 
                                                           status=InvestementInCampaign.Status.INTERESTED)
-        if len(my_investments) == 0:
-            form = CreateInvestmentForm(initial={'amount': Money(Decimal('1000'), self.campaign.amount.currency)})
-        else:
-            form = EditInvestmentForm(instance=my_investments[0])
+        if self.campaign.accept_investments():
+            if len(my_investments) == 0:
+                context['card_form'] = CreateInvestmentForm(initial={'amount': Money(Decimal('1000'), self.campaign.amount.currency)})
+            else:
+                context['card_form'] = EditInvestmentForm(instance=my_investments[0])
 
         context['factory'] = self.campaign.factory
         context['campaign'] = self.campaign
-        context['investors'] = self.campaign.get_investors(show_users=False, investor_profile=profile)
-        if self.campaign.accept_investments():
-            context['card_form'] = form
+        context['investors'] = self.campaign.get_investors_for_view(show_users=False, investor_profile=profile)
         context['hide_link_buttons'] = True
         return render(request, "campaign.html", context)    
     
-    def get_as_manager(self, request, context):
-        context['card_form'] = CampaingEditForm(instance=self.campaign)
+    def get_as_manager_or_reviewer(self, request, context, is_reviewer):
+        context['card_form'] = CampaingEditForm(instance=self.campaign, is_reviewer=is_reviewer)
         context['factory'] = self.campaign.factory
         context['campaign'] = self.campaign
-        context['investors'] = self.campaign.get_investors(show_users=True)
+        context['investors'] = self.campaign.get_investors_for_view(show_users=True)
         context['hide_link_buttons'] = True
         return render(request, "campaign.html", context)
     
-    def get_as_reviewer(self, request, context):
-        if self.campaign.need_approval():
-            form = CampaingReviewForm()
-            context['card_form'] = form
-        context['factory'] = self.campaign.factory
-        context['campaign'] = self.campaign
-        context['hide_link_buttons'] = True
-        
-        return render(request, "campaign.html", context)
-    
-    
-    def post_as_reviewer(self, request, context):
+
+    def post_as_manager_or_reviewer(self, request, context, is_reviewer):
         if request.method == 'POST':
             if 'cancel' in request.POST:
                 self.campaign.status = CampaignModel.Status.CANCELED
@@ -85,29 +72,35 @@ class Campaign(View):
                 messages.success(request, _("Campaign is canceled"))
 
             if 'approve' in request.POST:
-                self.campaign.status = CampaignModel.Status.ACTIVE
-                self.campaign.save()
-                messages.success(request, _("Campaign is activated"))
+                if is_reviewer:
+                    self.campaign.status = CampaignModel.Status.ACTIVE
+                    self.campaign.save()
+                    messages.success(request, _("Campaign is activated"))
+                else:
+                    messages.error(request, _("Only staff can approve a campaign"))
 
+            if 'extend' in request.POST:
+                form = CampaingEditForm(data=request.POST, instance=self.campaign,)
+                if form.is_valid():
+                    next_deadline = form.cleaned_data['start_date']
+                    if next_deadline > self.campaign.start_date:
+                        self.campaign.start_date = next_deadline
+                        self.campaign.save()
+                        messages.success(request, _("Campaign deadline extended to %s" % (next_deadline)))
+                    else:
+                        messages.error(request, _("Campaign deadline should be further in the future"))
+
+
+            if 'complete' in request.POST:
+                if self.campaign.allow_finish():
+                    self.campaign.status = CampaignModel.Status.COMPLETED;
+                    self.campaign.save()
+                    messages.success(request, _("Campaign is completed"))
+                else:
+                    messages.error(request, _("Not enough accumulated interest to be able to finish the campaing"))
+        
         return redirect(self.campaign.get_absolute_url())
     
-    def post_as_manager(self, request, context):
-        if self.campaign.accept_investments():
-            allow_finish = self.campaign.progress()['percent'] >= Decimal(100)
-            if request.method == 'POST':
-                if 'cancel' in request.POST:
-                    self.campaign.status = CampaignModel.Status.CANCELED
-                    self.campaign.save()
-                    messages.success(request, _("Campaign is canceled"))
-
-                if 'complete' in request.POST:
-                    if allow_finish:
-                        self.campaign.status = CampaignModel.Status.COMPLETED;
-                        self.campaign.save()
-                        messages.success(request, _("Campaign is completed"))
-                    else:
-                        messages.error(request, _("Not enough accumulated interest to be able to finish the campaing"))
-        return redirect(self.campaign.get_absolute_url())
             
     
     def post_as_investor(self, request, context):
@@ -168,11 +161,9 @@ class Campaign(View):
         self.campaign = CampaignModel.objects.get(pk=pk)
         if request.user and request.user.is_authenticated:
             is_reviewer = request.user.is_staff
-            if is_reviewer and self.campaign.need_approval():
-                return self.post_as_reviewer(request, context)
             is_manager = self.campaign.factory.get_manager_profile() == get_user_profile(request.user)
-            if is_manager:
-                return self.post_as_manager(request, context)
+            if is_manager or is_reviewer:
+                return self.post_as_manager_or_reviewer(request, context, is_reviewer)
             else:
                 return self.post_as_investor(request, context)
         return self.post_as_anon(request, context)    

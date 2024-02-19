@@ -61,13 +61,11 @@ class FactoriesList(ListView):
 class FactoriesForReview(FactoriesList):
     def view_offered_factories(self):
         campaigns = Campaign.objects.filter(status=Campaign.Status.INITIALIZED).order_by('factory')
-        
         prev = None
         listed = []
         for l in campaigns:
-            if l.get_active(l.factory):
+            if l.get_last_campaign(l.factory):
                 if prev != l.factory.pk:
-                    #print(l.factory.name)
                     listed.append(l.factory.pk)
                 prev = l.factory.pk
         return listed

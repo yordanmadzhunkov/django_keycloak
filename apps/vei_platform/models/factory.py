@@ -95,7 +95,6 @@ class ElectricityFactory(TimeStampMixin):
     def get_absolute_url(self):
         return reverse('view_factory', kwargs={'pk': self.pk})
 
-
     def get_manager_profile(self):
         if self.manager:
             return get_user_profile(self.manager)

@@ -13,25 +13,16 @@ from django.urls import reverse
 register = template.Library()
 
 @register.filter(is_safe=True)
-def get_active_campaign(factory):
+def get_last_campaign(factory):
     return Campaign.get_last_campaign(factory)
 
 @register.filter(is_safe=True)
 def campaign_links(factory, user):
-    #print (user.is_staff)
-    #factory
     campaign = Campaign.get_last_campaign(factory)
-    #if not user.is_authenticated:
-        #{% trans "You need to login in order to claim interest in project" %}
-        #<a href="{% url 'oidc_authentication_init' %}">{% trans "Login" %}</a>
-    #     return [{ 'href': reverse('oidc_authentication_init'),
-    #               'title': _('You need to login in order to claim interest in project'),
-    #              'css_class': 'btn-success',
-    #    }]    
     if campaign:
         return [{ 'href': campaign.get_absolute_url(),
-                  'title': campaign.status_str(),
-                  'css_class': 'btn-info',
+                  'title': _('View campaign'),
+                  'css_class': 'btn btn-block btn-info',
         }]
     else:
         if factory.manager == user:
@@ -39,12 +30,12 @@ def campaign_links(factory, user):
                 {               
                     'href': reverse('campaign_create', kwargs={'pk':factory.pk}),
                     'title': _('Start campaign'),
-                    'css_class': 'btn-success',
+                    'css_class': 'btn btn-block btn-success',
                 },
                 {               
                     'href': reverse('factory_edit', kwargs={'pk':factory.pk}),
                     'title': _('Edit factory'),
-                    'css_class': 'btn-warning',
+                    'css_class': 'btn btn-block btn-warning',
                 },
             ]
         else:
