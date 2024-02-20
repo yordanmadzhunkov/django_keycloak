@@ -19,14 +19,11 @@ def get_last_campaign(factory):
 @register.filter(is_safe=True)
 def campaign_links(factory, user):
     campaign = Campaign.get_last_campaign(factory)
-    if campaign:
-        return [{ 'href': campaign.get_absolute_url(),
-                  'title': _('View campaign'),
-                  'css_class': 'btn btn-block btn-info',
-        }]
-    else:
-        if factory.manager == user:
-            return [
+    is_manager = factory.manager == user
+    #is_staff = user.is_staff
+
+    if is_manager and (campaign is None or campaign.allow_start_new_campaign()):
+        return [
                 {               
                     'href': reverse('campaign_create', kwargs={'pk':factory.pk}),
                     'title': _('Start campaign'),
@@ -37,11 +34,15 @@ def campaign_links(factory, user):
                     'title': _('Edit factory'),
                     'css_class': 'btn btn-block btn-warning',
                 },
-            ]
-        else:
-            print("manager = %s user = %s" % (factory.manager, user))
-        return []
-    return factory.campaign_links()
+        ]
+
+    if campaign:
+        return [{ 'href': campaign.get_absolute_url(),
+                  'title': _('View campaign'),
+                  'css_class': 'btn btn-block btn-info',
+        }]
+    
+    return []
 
 
 @register.filter(is_safe=True)

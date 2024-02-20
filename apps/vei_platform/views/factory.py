@@ -149,7 +149,7 @@ class FactoryDetail(View):
         factory = ElectricityFactory.objects.get(pk=pk)
         context['factory'] = factory
         
-        campaigns = Campaign.objects.filter(factory=factory).exclude(status=Campaign.Status.CANCELED)
+        campaigns = Campaign.objects.filter(factory=factory)#.exclude(status=Campaign.Status.CANCELED)
         context['campaigns'] = campaigns
         
         components = ElectricityFactoryComponents.objects.filter(factory=factory)

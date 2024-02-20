@@ -147,7 +147,7 @@ class Campaign(View):
                         my_investments[0].save()
                         messages.success(request, _("You declared interest in amount changed to %s") % my_investments[0].amount)
                     else:
-                        messages.error(request, _("Currency conversion from %s to %s is not supported" % (amount.currency, self.campaign.amount.currency)))
+                        messages.error(request, _("Currency conversion from %s to %s is not supported") % (amount.currency, self.campaign.amount.currency))
 
                 else:
                     messages.error(request, _("Error occured when changing the amount"))

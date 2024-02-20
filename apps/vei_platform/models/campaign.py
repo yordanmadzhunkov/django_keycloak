@@ -80,7 +80,6 @@ class Campaign(models.Model):
         ACTIVE = 'Ac', _('Active')
         CANCELED = 'CA', _('Canceled')
         COMPLETED = 'CO', _('Completed')
-        TIMEOUT = 'To', _('Timeout')
 
     start_date = models.DateField()
     amount = MoneyField(max_digits=16, decimal_places=2, default=Decimal(0), default_currency='BGN')
@@ -113,6 +112,11 @@ class Campaign(models.Model):
         if len(campaigns) > 0:
             return campaigns[len(campaigns) - 1]
         return None
+    
+    def allow_start_new_campaign(self, when=datetime.now()):
+        last_campaign = Campaign.get_last_campaign(self.factory)
+        return not last_campaign or last_campaign.is_expired(when) or last_campaign.status == Campaign.Status.CANCELED 
+
 
     def progress(self):
         t = Money(0, self.amount.currency)
@@ -139,7 +143,7 @@ class Campaign(models.Model):
         if self.is_expired(when):
             last_campaign = Campaign.get_last_campaign(self.factory)
             if last_campaign == self:
-                return True
+                return self.status != Campaign.Status.CANCELED and self.status != Campaign.Status.COMPLETED
         return False
     
     def allow_cancel(self, when=datetime.now()):

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-31 12:53+0000\n"
+"POT-Creation-Date: 2024-02-20 05:32+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -102,18 +102,18 @@ msgid ""
 "recieve is this share times capitalization minus platform commision."
 msgstr ""
 
-#: vei_platform/forms.py:261
+#: vei_platform/forms.py:261 vei_platform/forms.py:364
 msgid "Campaing end date"
 msgstr ""
 
-#: vei_platform/forms.py:262
+#: vei_platform/forms.py:262 vei_platform/forms.py:365
 msgid ""
 "Until this date investors can declare interest in this project. If enough "
 "people declare interst in this project you will be able to complete the "
 "campaing"
 msgstr ""
 
-#: vei_platform/forms.py:265
+#: vei_platform/forms.py:265 vei_platform/forms.py:368
 msgid "Date"
 msgstr ""
 
@@ -141,8 +141,7 @@ msgid ""
 "time a payment to investors is carried out in the future."
 msgstr ""
 
-#: vei_platform/forms.py:304
-#: vei_platform/templates/snippets/factory_card_offer_start_campaign.html:18
+#: vei_platform/forms.py:304 vei_platform/templatetags/vei_platform_utils.py:29
 msgid "Start campaign"
 msgstr ""
 
@@ -154,206 +153,208 @@ msgstr ""
 msgid "Amount which you want to participate in this project"
 msgstr ""
 
-#: vei_platform/forms.py:343
-#: vei_platform/templates/snippets/factory_card_offer_to_invest.html:7
+#: vei_platform/forms.py:349
 msgid "Claim interest"
 msgstr ""
 
-#: vei_platform/forms.py:352
+#: vei_platform/forms.py:358 vei_platform/templates/snippets/sidebar.html:91
+msgid "Login or Register"
+msgstr ""
+
+#: vei_platform/forms.py:387
 msgid "Cancel campaign"
 msgstr ""
 
-#: vei_platform/forms.py:354
+#: vei_platform/forms.py:391
 msgid "Finish campaign"
 msgstr ""
 
-#: vei_platform/forms.py:369
+#: vei_platform/forms.py:395
+msgid "Extend campaign"
+msgstr ""
+
+#: vei_platform/forms.py:403
+msgid "Approve campaign"
+msgstr ""
+
+#: vei_platform/forms.py:417
 #: vei_platform/templates/snippets/logout_modal.html:17
 msgid "Cancel"
 msgstr ""
 
-#: vei_platform/forms.py:371 vei_platform/forms.py:490
+#: vei_platform/forms.py:419 vei_platform/forms.py:540
 #: vei_platform/templates/my_profile.html:51
 msgid "Save"
 msgstr ""
 
-#: vei_platform/forms.py:381
+#: vei_platform/forms.py:429
 #: vei_platform/templates/dashboard_investments.html:7
 msgid "Your interest"
 msgstr ""
 
-#: vei_platform/forms.py:395
+#: vei_platform/forms.py:445
 msgid "Component type"
 msgstr ""
 
-#: vei_platform/forms.py:396
+#: vei_platform/forms.py:446
 #: vei_platform/templates/snippets/factory_components.html:11
 msgid "Name"
 msgstr ""
 
-#: vei_platform/forms.py:397
+#: vei_platform/forms.py:447
 msgid "Power [kW]"
 msgstr ""
 
-#: vei_platform/forms.py:398
+#: vei_platform/forms.py:448
 #: vei_platform/templates/snippets/factory_components.html:13
 msgid "Count"
 msgstr ""
 
-#: vei_platform/forms.py:399
+#: vei_platform/forms.py:449
 msgid "Document file [pdf]"
 msgstr ""
 
-#: vei_platform/forms.py:400
+#: vei_platform/forms.py:450
 msgid "Description"
 msgstr ""
 
-#: vei_platform/forms.py:448 vei_platform/templates/dashboard_campaigns.html:10
+#: vei_platform/forms.py:498 vei_platform/templates/dashboard_campaigns.html:10
 #: vei_platform/templates/dashboard_investments.html:11
 msgid "Factory name"
 msgstr ""
 
-#: vei_platform/forms.py:449
-#: vei_platform/templates/snippets/factory_card.html:39
+#: vei_platform/forms.py:499
+#: vei_platform/templates/snippets/factory_card.html:43
 msgid "Location"
 msgstr ""
 
-#: vei_platform/forms.py:450
-#: vei_platform/templates/snippets/factory_card.html:42
+#: vei_platform/forms.py:500
+#: vei_platform/templates/snippets/factory_card.html:46
 msgid "Opened"
 msgstr ""
 
-#: vei_platform/forms.py:451
+#: vei_platform/forms.py:501
 msgid "Capacity [MW]"
 msgstr ""
 
-#: vei_platform/forms.py:452
+#: vei_platform/forms.py:502
 msgid "TAX ID"
 msgstr ""
 
-#: vei_platform/forms.py:453
+#: vei_platform/forms.py:503
 msgid "Legal entity owning the factory"
 msgstr ""
 
-#: vei_platform/forms.py:454
+#: vei_platform/forms.py:504
 msgid "Energy source type"
 msgstr ""
 
-#: vei_platform/forms.py:455
+#: vei_platform/forms.py:505
 #: vei_platform/templates/layout/image_thumbnail.html:23
 msgid "Image"
 msgstr ""
 
-#: vei_platform/forms.py:483
+#: vei_platform/forms.py:533
 msgid "Type energy source"
 msgstr ""
 
-#: vei_platform/forms.py:517
+#: vei_platform/forms.py:567
 msgid "Details about the factory"
 msgstr ""
 
-#: vei_platform/models/factory.py:35
-msgid "Photovoltaic"
-msgstr ""
-
-#: vei_platform/models/factory.py:36
-msgid "Wind turbine"
-msgstr ""
-
-#: vei_platform/models/factory.py:37
-msgid "Hydropower"
-msgstr ""
-
-#: vei_platform/models/factory.py:38
-msgid "Biomass"
-msgstr ""
-
-#: vei_platform/models/factory.py:39
-msgid "Renewable gas"
-msgstr ""
-
-#: vei_platform/models/factory.py:53
-msgid "Bulgaria"
-msgstr ""
-
-#: vei_platform/models/factory.py:115
-msgid "Photovoltaic Panel"
-msgstr ""
-
-#: vei_platform/models/factory.py:116
-msgid "Invertor"
-msgstr ""
-
-#: vei_platform/models/factory.py:117
-msgid "Connector"
-msgstr ""
-
-#: vei_platform/models/factory.py:118
-msgid "Other"
-msgstr ""
-
-#: vei_platform/models/finance_modeling.py:83
+#: vei_platform/models/campaign.py:79
 msgid "Under review"
 msgstr ""
 
-#: vei_platform/models/finance_modeling.py:84
-#: vei_platform/models/finance_modeling.py:169
+#: vei_platform/models/campaign.py:80 vei_platform/models/campaign.py:179
 msgid "Active"
 msgstr ""
 
-#: vei_platform/models/finance_modeling.py:85
-#: vei_platform/models/finance_modeling.py:171
-#: vei_platform/models/finance_modeling.py:211
-#: vei_platform/models/finance_modeling.py:240
+#: vei_platform/models/campaign.py:81 vei_platform/models/campaign.py:181
+#: vei_platform/models/campaign.py:214 vei_platform/models/campaign.py:243
 msgid "Canceled"
 msgstr ""
 
-#: vei_platform/models/finance_modeling.py:86
-#: vei_platform/models/finance_modeling.py:173
-#: vei_platform/models/finance_modeling.py:212
-#: vei_platform/models/finance_modeling.py:242
+#: vei_platform/models/campaign.py:82 vei_platform/models/campaign.py:173
+#: vei_platform/models/campaign.py:215 vei_platform/models/campaign.py:245
 msgid "Completed"
 msgstr ""
 
-#: vei_platform/models/finance_modeling.py:87
-msgid "Timeout"
-msgstr ""
-
-#: vei_platform/models/finance_modeling.py:105
+#: vei_platform/models/campaign.py:101
 msgid "Not available"
 msgstr ""
 
-#: vei_platform/models/finance_modeling.py:166
-msgid "Started"
-msgstr ""
-
-#: vei_platform/models/finance_modeling.py:174
+#: vei_platform/models/campaign.py:175
 msgid "Expired"
 msgstr ""
 
-#: vei_platform/models/finance_modeling.py:197
+#: vei_platform/models/campaign.py:177
+msgid "Started"
+msgstr ""
+
+#: vei_platform/models/campaign.py:183 vei_platform/models/campaign.py:251
+msgid "Unknown"
+msgstr ""
+
+#: vei_platform/models/campaign.py:200
 #, python-format
 msgid "Investor %d"
 msgstr ""
 
-#: vei_platform/models/finance_modeling.py:210
+#: vei_platform/models/campaign.py:213
 msgid "Interested"
 msgstr ""
 
-#: vei_platform/models/finance_modeling.py:238
+#: vei_platform/models/campaign.py:241
 msgid "Claimed interest"
 msgstr ""
 
-#: vei_platform/models/finance_modeling.py:245
+#: vei_platform/models/campaign.py:248
 msgid "Expecting deposit"
 msgstr ""
 
-#: vei_platform/models/finance_modeling.py:247
+#: vei_platform/models/campaign.py:250
 msgid "Campaign expired"
 msgstr ""
 
-#: vei_platform/models/finance_modeling.py:248
-msgid "Unknown"
+#: vei_platform/models/factory.py:37
+msgid "Photovoltaic"
+msgstr ""
+
+#: vei_platform/models/factory.py:38
+msgid "Wind turbine"
+msgstr ""
+
+#: vei_platform/models/factory.py:39
+msgid "Hydropower"
+msgstr ""
+
+#: vei_platform/models/factory.py:40
+msgid "Biomass"
+msgstr ""
+
+#: vei_platform/models/factory.py:41
+msgid "Renewable gas"
+msgstr ""
+
+#: vei_platform/models/factory.py:55
+msgid "Bulgaria"
+msgstr ""
+
+#: vei_platform/models/factory.py:117
+msgid "Photovoltaic Panel"
+msgstr ""
+
+#: vei_platform/models/factory.py:118
+msgid "Invertor"
+msgstr ""
+
+#: vei_platform/models/factory.py:119
+msgid "Connector"
+msgstr ""
+
+#: vei_platform/models/factory.py:120
+msgid "Other"
 msgstr ""
 
 #: vei_platform/models/restricted_file_field.py:39
@@ -373,11 +374,11 @@ msgstr ""
 msgid "Filetype not supported."
 msgstr ""
 
-#: vei_platform/settings/base.py:128
+#: vei_platform/settings/base.py:129
 msgid "English"
 msgstr ""
 
-#: vei_platform/settings/base.py:129
+#: vei_platform/settings/base.py:130
 msgid "Български"
 msgstr ""
 
@@ -403,6 +404,7 @@ msgstr ""
 #: vei_platform/templates/dashboard_campaigns.html:9
 #: vei_platform/templates/dashboard_investments.html:10
 #: vei_platform/templates/factory_listings.html:10
+#: vei_platform/templates/snippets/factory_card_progress.html:9
 msgid "Status"
 msgstr ""
 
@@ -499,6 +501,10 @@ msgstr ""
 msgid "Progress"
 msgstr ""
 
+#: vei_platform/templates/factories_list.html:29
+msgid "Add new"
+msgstr ""
+
 #: vei_platform/templates/factory_header.html:4
 msgid "Power installed (kW): "
 msgstr ""
@@ -541,10 +547,6 @@ msgstr ""
 msgid "Number of investments"
 msgstr ""
 
-#: vei_platform/templates/factory_production.html:39
-msgid "Become manager"
-msgstr ""
-
 #: vei_platform/templates/home.html:6
 msgid "Home"
 msgstr ""
@@ -565,14 +567,6 @@ msgstr ""
 msgid "Clear"
 msgstr ""
 
-#: vei_platform/templates/my_factories.html:18
-msgid "My Factories"
-msgstr ""
-
-#: vei_platform/templates/my_factories.html:23
-msgid "Add new"
-msgstr ""
-
 #: vei_platform/templates/my_profile.html:57
 msgid "E-mail"
 msgstr ""
@@ -586,48 +580,23 @@ msgid "Last login"
 msgstr ""
 
 #: vei_platform/templates/snippets/factory_card.html:33
-#: vei_platform/templates/snippets/factory_card.html:36
+#: vei_platform/templates/snippets/factory_card.html:40
 msgid "Owner"
 msgstr ""
 
-#: vei_platform/templates/snippets/factory_card.html:37
+#: vei_platform/templates/snippets/factory_card.html:41
 msgid "Tax ID"
 msgstr ""
 
-#: vei_platform/templates/snippets/factory_card.html:40
+#: vei_platform/templates/snippets/factory_card.html:44
 msgid "Source"
 msgstr ""
 
-#: vei_platform/templates/snippets/factory_card.html:41
+#: vei_platform/templates/snippets/factory_card.html:45
 msgid "Capacity"
 msgstr ""
 
-#: vei_platform/templates/snippets/factory_card_link_to_active_campaign.html:5
-msgid "Active campaign"
-msgstr ""
-
-#: vei_platform/templates/snippets/factory_card_no_campaign.html:9
-#: vei_platform/templates/snippets/factory_card_offer_start_campaign.html:9
-msgid "Successfully completed campaign for "
-msgstr ""
-
-#: vei_platform/templates/snippets/factory_card_no_campaign.html:18
-msgid "No active campagin"
-msgstr ""
-
-#: vei_platform/templates/snippets/factory_card_offer_login.html:5
-msgid "You need to login in order to claim interest in project"
-msgstr ""
-
-#: vei_platform/templates/snippets/factory_card_offer_login.html:6
-msgid "Login"
-msgstr ""
-
-#: vei_platform/templates/snippets/factory_card_offer_start_campaign.html:23
-msgid "Edit factory"
-msgstr ""
-
-#: vei_platform/templates/snippets/factory_card_progress.html:5
+#: vei_platform/templates/snippets/factory_card_progress.html:13
 msgid "Progress so far"
 msgstr ""
 
@@ -648,14 +617,14 @@ msgid "Document"
 msgstr ""
 
 #: vei_platform/templates/snippets/header_user.html:19
-#: vei_platform/templates/snippets/sidebar.html:82
+#: vei_platform/templates/snippets/sidebar.html:76
 #: vei_platform/templates/snippets/topbar_user.html:28
 msgid "Profile"
 msgstr ""
 
 #: vei_platform/templates/snippets/header_user.html:28
 #: vei_platform/templates/snippets/logout_modal.html:23
-#: vei_platform/templates/snippets/sidebar.html:89
+#: vei_platform/templates/snippets/sidebar.html:83
 #: vei_platform/templates/snippets/topbar_user.html:41
 msgid "Logout"
 msgstr ""
@@ -680,37 +649,33 @@ msgstr ""
 msgid "Offer your Electrical factory"
 msgstr ""
 
-#: vei_platform/templates/snippets/sidebar.html:42
+#: vei_platform/templates/snippets/sidebar.html:43
 #: vei_platform/templates/team.html:6 vei_platform/templates/team.html:15
 msgid "About us"
 msgstr ""
 
-#: vei_platform/templates/snippets/sidebar.html:50
-msgid "Factory list"
-msgstr ""
-
-#: vei_platform/templates/snippets/sidebar.html:60
+#: vei_platform/templates/snippets/sidebar.html:53
 msgid "Admin"
 msgstr ""
 
-#: vei_platform/templates/snippets/sidebar.html:66
+#: vei_platform/templates/snippets/sidebar.html:59
 msgid "Platform legal"
 msgstr ""
 
-#: vei_platform/templates/snippets/sidebar.html:67
+#: vei_platform/templates/snippets/sidebar.html:60
 msgid "Scriping tools"
 msgstr ""
 
-#: vei_platform/templates/snippets/sidebar.html:87
+#: vei_platform/templates/snippets/sidebar.html:61
+msgid "Factories for review"
+msgstr ""
+
+#: vei_platform/templates/snippets/sidebar.html:81
 msgid "My profile"
 msgstr ""
 
-#: vei_platform/templates/snippets/sidebar.html:88
+#: vei_platform/templates/snippets/sidebar.html:82
 msgid "KYC"
-msgstr ""
-
-#: vei_platform/templates/snippets/sidebar.html:97
-msgid "Login or Register"
 msgstr ""
 
 #: vei_platform/templates/snippets/topbar_user.html:10
@@ -757,55 +722,89 @@ msgstr ""
 msgid "Last Login"
 msgstr ""
 
-#: vei_platform/views/factory.py:50 vei_platform/views/factory.py:72
+#: vei_platform/templatetags/vei_platform_utils.py:34
+msgid "Edit factory"
+msgstr ""
+
+#: vei_platform/templatetags/vei_platform_utils.py:41
+msgid "View campaign"
+msgstr ""
+
+#: vei_platform/views/factory.py:34
 msgid "Electrical factories from renewable sources"
 msgstr ""
 
-#: vei_platform/views/factory.py:105
+#: vei_platform/views/factory.py:77
+msgid "My Factories"
+msgstr ""
+
+#: vei_platform/views/factory.py:109
 msgid "Only factory manager can initiate campaign"
 msgstr ""
 
-#: vei_platform/views/factory.py:129
+#: vei_platform/views/factory.py:133
 #, python-format
 msgid "You have successfully started a campaign to collect investors until %s"
 msgstr ""
 
-#: vei_platform/views/factory.py:133 vei_platform/views/factory.py:425
-#: vei_platform/views/invest.py:111
+#: vei_platform/views/factory.py:137 vei_platform/views/factory.py:428
+#: vei_platform/views/invest.py:131
 msgid "Invalid data, please try again"
 msgstr ""
 
-#: vei_platform/views/factory.py:407
+#: vei_platform/views/factory.py:410
 msgid "Electrical factory added"
 msgstr ""
 
-#: vei_platform/views/invest.py:71
+#: vei_platform/views/invest.py:72
 msgid "Campaign is canceled"
 msgstr ""
 
 #: vei_platform/views/invest.py:78
-msgid "Campaign is completed"
+msgid "Campaign is activated"
 msgstr ""
 
 #: vei_platform/views/invest.py:80
+msgid "Only staff can approve a campaign"
+msgstr ""
+
+#: vei_platform/views/invest.py:89
+#, python-format
+msgid "Campaign deadline extended to %s"
+msgstr ""
+
+#: vei_platform/views/invest.py:91
+msgid "Campaign deadline should be further in the future"
+msgstr ""
+
+#: vei_platform/views/invest.py:98
+msgid "Campaign is completed"
+msgstr ""
+
+#: vei_platform/views/invest.py:100
 msgid "Not enough accumulated interest to be able to finish the campaing"
 msgstr ""
 
-#: vei_platform/views/invest.py:109
+#: vei_platform/views/invest.py:127
 #, python-format
 msgid "You declared interest in amount %s to %s"
 msgstr ""
 
-#: vei_platform/views/invest.py:117
+#: vei_platform/views/invest.py:129 vei_platform/views/invest.py:150
+#, python-format
+msgid "Currency conversion from %s to %s is not supported"
+msgstr ""
+
+#: vei_platform/views/invest.py:137
 msgid "Your interest have been canceled"
 msgstr ""
 
-#: vei_platform/views/invest.py:126
+#: vei_platform/views/invest.py:148
 #, python-format
 msgid "You declared interest in amount changed to %s"
 msgstr ""
 
-#: vei_platform/views/invest.py:128
+#: vei_platform/views/invest.py:153
 msgid "Error occured when changing the amount"
 msgstr ""
 

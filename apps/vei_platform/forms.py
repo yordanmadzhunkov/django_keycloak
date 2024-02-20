@@ -397,8 +397,7 @@ class CampaingEditForm(forms.Form):
             self.helper.layout.append(Row(Field('start_date')))
             self.helper.layout.append(Row(extend))
         else:
-            self.fields['start_date'].disabled = True
-            self.fields['start_date'].is_hidden = True
+            del self.fields['start_date']
             
         if is_reviewer and instance.need_approval():
             approve = Submit('approve', _('Approve campaign'))
