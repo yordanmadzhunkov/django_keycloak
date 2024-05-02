@@ -17,6 +17,7 @@ from .views.invest import Campaign
 from .views.team import Team
 from django.contrib.sitemaps.views import sitemap
 from .sitemaps import ElectricityFactorySitemap
+from .views.api import HelloView
 
 sitemaps = {
     'factories' : ElectricityFactorySitemap,
@@ -30,6 +31,7 @@ urlpatterns = [
     path('ht/', include('health_check.urls')),
     path('robots.txt', TemplateView.as_view(template_name="robots.txt", content_type="text/plain")),    
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
+    path('api/hello', HelloView.as_view(), name='hello'),
     
     path('', Home.as_view(), name="home"),
     path('team', Team.as_view(), name='team'),

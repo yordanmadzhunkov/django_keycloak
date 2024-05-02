@@ -1,5 +1,5 @@
 from django.test import TestCase
-from scripers.papagal import *
+from ..papagal import *
 from decimal import Decimal
 
 

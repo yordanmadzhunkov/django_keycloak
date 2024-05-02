@@ -17,7 +17,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-    'django.contrib.sitemaps', 
+    'django.contrib.sitemaps',
 
     'django_extensions',
     'crispy_forms',
@@ -34,6 +34,9 @@ INSTALLED_APPS = [
     'django_q',
     'djmoney',
     'djmoney.contrib.exchange',
+
+    'rest_framework',
+    'rest_framework.authtoken',  # TOKEN ACCESS
 
     'vei_platform'
 ]
@@ -81,6 +84,12 @@ AUTHENTICATION_BACKENDS = (
     # 'mozilla_django_oidc.auth.OIDCAuthenticationBackend',
     # ...
 )
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',  # <-- And here
+    ],
+}
 
 
 OIDC_RP_CLIENT_ID = config('OIDC_RP_CLIENT_ID')
