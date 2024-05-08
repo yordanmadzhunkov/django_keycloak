@@ -3,7 +3,7 @@ from django.core.paginator import Paginator
 from . import common_context
 from vei_platform.models.factory import ElectricityFactory, FactoryProductionPlan, ElectricityWorkingHoursPerMonth, ElectricityFactoryComponents
 from vei_platform.models.campaign import Campaign
-from vei_platform.models.campaign import ElectricityPricePlan, Campaign
+from vei_platform.models.electricity_price import ElectricityPricePlan
 from vei_platform.models.profile import get_user_profile
 from vei_platform.forms import CampaignCreateForm, FactoryFinancialPlaningForm, FactoryModelForm, ElectricityFactoryComponentsForm
 

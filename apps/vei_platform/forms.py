@@ -1,7 +1,8 @@
 from django import forms
 from datetime import date, datetime
 from .models.factory import FactoryProductionPlan, ElectricityFactory, ElectricityFactoryComponents, docfile_content_types
-from .models.campaign import ElectricityPricePlan, InvestementInCampaign, Campaign as CampaignModel
+from .models.campaign import InvestementInCampaign, Campaign as CampaignModel
+from .models.electricity_price import ElectricityPricePlan
 from .models.profile import UserProfile
 from .models.legal import LegalEntity, find_legal_entity
 

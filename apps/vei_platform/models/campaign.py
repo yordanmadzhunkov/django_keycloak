@@ -3,7 +3,6 @@ from django.conf import settings
 # Create your models here.
 from decimal import Decimal
 from datetime import date, datetime
-from django.core.validators import MaxValueValidator, MinValueValidator
 from .factory import ElectricityFactory, FactoryProductionPlan
 from .profile import UserProfile
 
@@ -17,62 +16,6 @@ from uuid import uuid4, UUID
 
 import re
     
-# Financial data related to the platform
-# Evealuation, P/E, available for investment, number of investors
-
-class ElectricityPricePlan(models.Model):
-    name = models.CharField(max_length=128)
-
-    start_year = models.IntegerField(
-        default=2022,
-        validators=[
-            MaxValueValidator(2050),
-            MinValueValidator(1990)
-        ]
-    )
-    end_year = models.IntegerField(
-        default=2025,
-        validators=[
-            MaxValueValidator(2050),
-            MinValueValidator(1990)
-        ]
-    )
-
-    def __str__(self) -> str:
-        return self.name
-
-    def get_price(self, month):
-        prices = ElectricityPrice.objects.filter(
-            plan=self).order_by('-month')
-        if len(prices) > 0:
-            for price in prices:
-                if price.month <= month:
-                    return price.number
-            price = prices[len(prices)-1]
-            return price.number
-        return Decimal(0)
-
-    def get_absolute_url(self):
-        return "/electricity/%s" % self.pk
-
-
-class ElectricityPrice(models.Model):
-    month = models.DateField()
-    price = MoneyField(
-        max_digits=14,
-        decimal_places=2,
-        default_currency='BGN',
-        default=Decimal(0)
-    )
-
-    plan = models.ForeignKey(ElectricityPricePlan, on_delete=models.CASCADE)
-
-    def __str__(self) -> str:
-        return "%s @ %.2f - plan = %s" % (str(self.month), self.number,  self.plan.name)
-
-
-
-
 
 class Campaign(models.Model):
     class Status(models.TextChoices):

@@ -4,6 +4,7 @@ from .models.legal import LegalEntity, LegalEntitySources
 from .models.profile import UserProfile
 from .models.campaign import InvestementInCampaign
 from .models.team import TeamMember
+
 # Register your models here.
 
 admin.site.register(ElectricityFactory)
