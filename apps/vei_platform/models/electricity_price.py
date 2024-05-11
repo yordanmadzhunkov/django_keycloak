@@ -4,6 +4,7 @@ from djmoney.models.fields import Decimal, CurrencyField, MoneyField
 from djmoney.money import Money
 from decimal import Decimal
 from django.core.validators import MaxValueValidator, MinValueValidator
+from datetime import datetime, timezone
 
 
 #class ElectricityPrices(models.Model):
@@ -24,7 +25,11 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 #        default=kWh,
 #    )
 
-
+class ElectricityBillingZone(models.Model):
+    code = models.CharField()
+    name = models.CharField()
+    description = models.TextField()
+    
 
 
 # Financial data related to the platform
@@ -68,13 +73,11 @@ class ElectricityPricePlan(models.Model):
 
 
 
-#class ElectricityPrice(models.Model):
-#    plan = models.ForeignKey(ElectricityPrices, on_delete=models.CASCADE)
-#    when = models.DateTimeField(blank=False, null=False, db_index=True)
-#    price = models.DecimalField(blank=False, null=False)
 
 class ElectricityPrice(models.Model):
-    month = models.DateField()
+    
+    when = models.DateTimeField(blank=False, null=False, db_index=True,default=datetime(year=2024, month=1, day=1, hour=0, minute=0, tzinfo=timezone.utc))
+    
     price = MoneyField(
         max_digits=14,
         decimal_places=2,
@@ -83,6 +86,9 @@ class ElectricityPrice(models.Model):
     )
 
     plan = models.ForeignKey(ElectricityPricePlan, on_delete=models.CASCADE)
+
+    def month(self):
+        return self.when.date()
 
     def __str__(self) -> str:
         return "%s @ %.2f - plan = %s" % (str(self.month), self.number,  self.plan.name)
