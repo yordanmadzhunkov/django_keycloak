@@ -5,39 +5,37 @@ from djmoney.money import Money
 from decimal import Decimal
 from django.core.validators import MaxValueValidator, MinValueValidator
 from datetime import datetime, timezone
+from django.contrib.auth.models import User
 
-
-#class ElectricityPrices(models.Model):
-#    kWh = 'kWh'
-#    MWh = 'MWh'
-#    ELECTRICITY_UNIT_CHOISES = (
-#        (kWh, 'kWh'),
-#        (MWh, 'MWh'),
-#    )
-#    code = models.CharField()
-#    name = models.CharField()
-#    description = models.TextField()
-#    currency = CurrencyField(default='EUR')
-#    electricity_unit = models.CharField(
-#        max_length=3,
-#        choices=ELECTRICITY_UNIT_CHOISES,
-#        null=False, blank=False,
-#        default=kWh,
-#    )
 
 class ElectricityBillingZone(models.Model):
-    code = models.CharField()
-    name = models.CharField()
+    code = models.CharField(max_length=128, null=False, blank=False, unique=True)
+    name = models.CharField(max_length=1024, null=False, blank=False)
     description = models.TextField()
-    
+
+    def __str__(self) -> str:
+        return "%s -> %s" % (self.code, self.name)
 
 
 # Financial data related to the platform
 # Evealuation, P/E, available for investment, number of investors
-
 class ElectricityPricePlan(models.Model):
     name = models.CharField(max_length=128)
-
+    kWh = 'kWh'
+    MWh = 'MWh'
+    ELECTRICITY_UNIT_CHOISES = (
+        (kWh, 'kWh'),
+        (MWh, 'MWh'),
+    )
+    billing_zone = models.ForeignKey(ElectricityBillingZone, on_delete=models.DO_NOTHING, blank=True, default=None)
+    description = models.TextField(max_length=1024*4, null=False, blank=False, default="")
+    currency = CurrencyField(default='EUR')
+    electricity_unit = models.CharField(
+        max_length=3,
+        choices=ELECTRICITY_UNIT_CHOISES,
+        null=False, blank=False,
+        default=kWh,
+    )
     start_year = models.IntegerField(
         default=2022,
         validators=[
@@ -55,7 +53,7 @@ class ElectricityPricePlan(models.Model):
 
     def __str__(self) -> str:
         return self.name
-
+    
     def get_price(self, month):
         prices = ElectricityPrice.objects.filter(
             plan=self).order_by('-month')
@@ -66,7 +64,7 @@ class ElectricityPricePlan(models.Model):
             price = prices[len(prices)-1]
             return price.number
         return Decimal(0)
-
+    
     def get_absolute_url(self):
         return "/electricity/%s" % self.pk
 

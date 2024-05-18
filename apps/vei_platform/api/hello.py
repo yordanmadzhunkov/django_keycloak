@@ -2,7 +2,6 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
-from vei_platform.models.electricity_price import ElectricityPrice, ElectricityPricePlan
 
 # This tutorial basically covers all REST + token auth
 # https://learndjango.com/tutorials/official-django-rest-framework-tutorial-beginners
@@ -22,3 +21,5 @@ class HelloView(APIView):
         else:
             content = {'message': 'Invalid data!!!'}
         return Response(content)
+    
+
