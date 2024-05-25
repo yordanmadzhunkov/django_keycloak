@@ -22,13 +22,15 @@ class ElectricityBillingZoneListAPIView(generics.ListAPIView):
     serializer_class = ElectricityBillingZoneSerializer
 
 
+
 class ElectricityPricesSerializer(serializers.ModelSerializer):
+    billing_zone = serializers.SlugRelatedField(slug_field='code', queryset=ElectricityBillingZone.objects.all())
     class Meta:
         model = ElectricityPricePlan
-        fields = ( "__all__")
-
+        fields = ('name', 'billing_zone', 'description', 'currency', 'electricity_unit', 'slug')
+        read_only_fields = ('slug',)
 
 class ElectricityPricesListAPIView(generics.ListCreateAPIView):
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    #permission_classes = (IsAuthenticatedOrReadOnly,)
     queryset = ElectricityPricePlan.objects.all()
     serializer_class = ElectricityPricesSerializer

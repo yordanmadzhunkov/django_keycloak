@@ -5,8 +5,10 @@ from djmoney.money import Money
 from decimal import Decimal
 from django.core.validators import MaxValueValidator, MinValueValidator
 from datetime import datetime, timezone
-from django.contrib.auth.models import User
-
+from django.utils.text import slugify
+import uuid 
+#from django.contrib.auth.models import User
+#from django_extensions.db.fields import AutoSlugField
 
 class ElectricityBillingZone(models.Model):
     code = models.CharField(max_length=128, null=False, blank=False, unique=True)
@@ -16,11 +18,11 @@ class ElectricityBillingZone(models.Model):
     def __str__(self) -> str:
         return "%s -> %s" % (self.code, self.name)
 
-
 # Financial data related to the platform
 # Evealuation, P/E, available for investment, number of investors
 class ElectricityPricePlan(models.Model):
     name = models.CharField(max_length=128)
+    slug = models.SlugField(unique=True, null=False, blank=False)  # Ensure unique slugs
     kWh = 'kWh'
     MWh = 'MWh'
     ELECTRICITY_UNIT_CHOISES = (
@@ -28,7 +30,7 @@ class ElectricityPricePlan(models.Model):
         (MWh, 'MWh'),
     )
     billing_zone = models.ForeignKey(ElectricityBillingZone, on_delete=models.DO_NOTHING, blank=True, default=None)
-    description = models.TextField(max_length=1024*4, null=False, blank=False, default="")
+    description = models.TextField(max_length=1024*4, null=False, blank=False)
     currency = CurrencyField(default='EUR')
     electricity_unit = models.CharField(
         max_length=3,
@@ -68,6 +70,11 @@ class ElectricityPricePlan(models.Model):
     def get_absolute_url(self):
         return "/electricity/%s" % self.pk
 
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name, allow_unicode=True)  # Handle Unicode characters
+        super().save(*args, **kwargs)
 
 
 
