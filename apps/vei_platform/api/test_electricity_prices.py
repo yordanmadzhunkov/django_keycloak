@@ -74,7 +74,39 @@ class ElectricityPriceAPITestCases(APITestCase):
         self.assertFalse('pk' in response.data.keys())
 
 
+    def test_create_electricity_price_plan_twice(self):
+        """
+        Ensure we have at least one billing zone for Bulgaria
+        """
+        url = reverse('price_series')
+        bg_code = {'code':'BG', 'name': 'Bulgaria'}
+        data = {
+            'name': 'Test plan 1', 
+            'billing_zone': bg_code['code'], 
+            'description': 'Most basic test plan', 
+            'currency': 'EUR',
+            'electricity_unit': 'MWh',
+            }
+        response = self.client.post(url, data, format='json')
+        #print(response.data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['name'], 'Test plan 1')
+        self.assertEqual(response.data['billing_zone'], 'BG')
+        self.assertEqual(response.data['description'], 'Most basic test plan')
+        self.assertEqual(response.data['currency'], 'EUR')
+        self.assertEqual(response.data['electricity_unit'], 'MWh')
+        self.assertEqual(response.data['slug'], 'test-plan-1')
+        self.assertFalse('pk' in response.data.keys())
 
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['name'], 'Test plan 1')
+        self.assertEqual(response.data['billing_zone'], 'BG')
+        self.assertEqual(response.data['description'], 'Most basic test plan')
+        self.assertEqual(response.data['currency'], 'EUR')
+        self.assertEqual(response.data['electricity_unit'], 'MWh')
+        self.assertNotEqual(response.data['slug'], 'test-plan-1')
+        self.assertFalse('pk' in response.data.keys())
 
     def test_create_electricity_price_plan_wrong_unit(self):
         """

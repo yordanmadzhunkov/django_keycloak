@@ -7,8 +7,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from datetime import datetime, timezone
 from django.utils.text import slugify
 import uuid 
-#from django.contrib.auth.models import User
-#from django_extensions.db.fields import AutoSlugField
+
 
 class ElectricityBillingZone(models.Model):
     code = models.CharField(max_length=128, null=False, blank=False, unique=True)
@@ -73,10 +72,26 @@ class ElectricityPricePlan(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name, allow_unicode=True)  # Handle Unicode characters
+            self.slug = unique_slug_generator(self) # Handle Unicode characters
         super().save(*args, **kwargs)
 
 
+def unique_slug_generator(instance, new_slug = None): 
+    if new_slug is not None: 
+        slug = new_slug 
+    else: 
+        slug = slugify(instance.name, allow_unicode=True) 
+    Klass = instance.__class__ 
+    max_length = Klass._meta.get_field('slug').max_length 
+    slug = slug[:max_length] 
+    qs_exists = Klass.objects.filter(slug = slug).exists() 
+    
+    if qs_exists: 
+        new_slug = "{slug}-{randstr}".format( 
+            slug = slug[:max_length-5], randstr = str(uuid.uuid1())[:4]) 
+              
+        return unique_slug_generator(instance, new_slug = new_slug) 
+    return slug
 
 
 class ElectricityPrice(models.Model):
