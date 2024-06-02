@@ -31,6 +31,6 @@ class ElectricityPricesSerializer(serializers.ModelSerializer):
         read_only_fields = ('slug',)
 
 class ElectricityPricesListAPIView(generics.ListCreateAPIView):
-    #permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
     queryset = ElectricityPricePlan.objects.all()
     serializer_class = ElectricityPricesSerializer

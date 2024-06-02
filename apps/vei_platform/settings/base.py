@@ -79,7 +79,7 @@ TEMPLATES = [
 
 # Add 'mozilla_django_oidc' authentication backend
 AUTHENTICATION_BACKENDS = (
-    'show_users.auth.MyOIDCAuthenticationBackend',
+    'vei_platform.auth.MyOIDCAuthenticationBackend',
     "django.contrib.auth.backends.ModelBackend",  # default
     # 'mozilla_django_oidc.auth.OIDCAuthenticationBackend',
     # ...
