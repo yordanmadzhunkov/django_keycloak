@@ -39,6 +39,13 @@ class ElectricityPriceAPIWithUserTestCases(APITestCase):
             }
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['name'], 'Test plan 1')
+        self.assertEqual(response.data['billing_zone'], 'BG')
+        self.assertEqual(response.data['description'], 'Most basic test plan')
+        self.assertEqual(response.data['currency'], 'EUR')
+        self.assertEqual(response.data['electricity_unit'], 'MWh')
+        self.assertEqual(response.data['slug'], 'test-plan-1')
+        self.assertEqual(response.data['owner'], 'testuser')
 
     def test_create_electricity_price_plan_twice(self):
         """
@@ -62,6 +69,8 @@ class ElectricityPriceAPIWithUserTestCases(APITestCase):
         self.assertEqual(response.data['currency'], 'EUR')
         self.assertEqual(response.data['electricity_unit'], 'MWh')
         self.assertEqual(response.data['slug'], 'test-plan-1')
+        self.assertEqual(response.data['owner'], 'testuser')
+
         self.assertFalse('pk' in response.data.keys())
 
         response = self.client.post(url, data, format='json')
@@ -71,6 +80,7 @@ class ElectricityPriceAPIWithUserTestCases(APITestCase):
         self.assertEqual(response.data['description'], 'Most basic test plan')
         self.assertEqual(response.data['currency'], 'EUR')
         self.assertEqual(response.data['electricity_unit'], 'MWh')
+        self.assertEqual(response.data['owner'], 'testuser')
         self.assertNotEqual(response.data['slug'], 'test-plan-1')
         self.assertFalse('pk' in response.data.keys())
 
@@ -98,6 +108,7 @@ class ElectricityPriceAPIWithUserTestCases(APITestCase):
         self.assertEqual(response.data[0]['currency'], 'EUR')
         self.assertEqual(response.data[0]['electricity_unit'], 'MWh')
         self.assertEqual(response.data[0]['slug'], 'test-plan-1')
+        self.assertEqual(response.data[0]['owner'], 'testuser')
 
     def test_create_electricity_price_plan_wrong_unit(self):
         """
