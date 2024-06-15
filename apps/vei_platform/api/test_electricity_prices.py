@@ -13,12 +13,14 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 
+
+from vei_platform.models.electricity_price import ElectricityPricePlan, ElectricityBillingZone
+
 class ElectricityPriceAPIWithUserTestCases(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='testuser', password='123')
         self.client.force_authenticate(self.user)
         
-
     def tearDown(self):
         self.user.delete()
 
@@ -147,7 +149,7 @@ class ElectricityPriceAPITestCases(APITestCase):
                 break
         self.assertTrue(foundBG)
 
-    def test_create_electricity_price_plan(self):
+    def test_get_electricity_price_plan(self):
         """
         Ensure we have at least one billing zone for Bulgaria
         """
@@ -193,5 +195,67 @@ class ElectricityPriceAPITestCases(APITestCase):
 
         
     
+class ElectricityPricePriceSeriesAPITestCases(APITestCase):
+    
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='123')
+        self.client.force_authenticate(self.user)
+        self.billing_zone_object = ElectricityBillingZone.objects.filter(code='BG')[0]
+        #print(ElectricityPricePlan.objects.all())
+        self.plan = ElectricityPricePlan.objects.create(
+            name='Day ahead price pac',
+            electricity_unit = 'kWh',#  ElectricityPricePlan.ELECTRICITY_UNIT_CHOISES.kWh,
+            billing_zone = self.billing_zone_object,
+            currency = 'EUR',
+            owner=self.user,
+        )
+        self.plan.save() # generate slug
+        
+        #print("plan pk = %d" % self.plan.pk)
+        #print(ElectricityPricePlan.objects.all())
+
+        #self.plan = ElectricityPricePlan.objects.create(name='Test plan 1', )
+        #url = reverse('price_series')
+        #bg_code = {'code':'BG', 'name': 'Bulgaria'}
+        #data = {
+        #    'name': 'Test plan 1', 
+        #    'billing_zone': bg_code['code'], 
+        #    'description': 'Most basic test plan', 
+        #    'currency': 'EUR',
+        #    'electricity_unit': 'MWh',
+        #    }
+        #response = self.client.post(url, data, format='json')
+        #self.plan_slug = response
+        
+    def tearDown(self):
+        #print('tear down')
+        #self.plan = None
+        #print(self.plan.slug)
+        self.plan.delete()
+        #print(ElectricityPricePlan.objects.filter(slug=self.plan.slug).delete())
+        #ElectricityPricePlan.objects.all().delete()
+        #print(ElectricityPricePlan.objects.all())
+
+        #   pass    
+        #self.plan.
+
+        self.user.delete()
+        #self.plan = 
+        #print(ElectricityPricePlan.objects.all())
+        #ElectricityPricePlan.objects.filter(pk=self.plan.pk).delete()
+        #print(ElectricityPricePlan.objects.all())
+        
 
  
+    def test_create_price_day_1_hour(self):
+        pass
+        #print('\n')
+        #print(self.billing_zone_object)
+        #print('\n')
+        #self.plan = ElectricityPricePlan.objects.create(
+        #    name='Day ahead price',
+        #    electricity_unit = 'kWh',#  ElectricityPricePlan.ELECTRICITY_UNIT_CHOISES.kWh,
+        #    billing_zone = self.billing_zone_object,
+        #)
+        #self.plan.save()
+        #print(self.plan.slug)

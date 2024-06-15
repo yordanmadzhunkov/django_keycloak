@@ -5,9 +5,6 @@ from rest_framework import generics, serializers
 from vei_platform.models.electricity_price import ElectricityPrice, ElectricityPricePlan, ElectricityBillingZone
 
 
-
-
-
 class ElectricityBillingZoneSerializer(serializers.ModelSerializer):
     class Meta:
         model = ElectricityBillingZone
@@ -34,3 +31,18 @@ class ElectricityPricesListAPIView(generics.ListCreateAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     queryset = ElectricityPricePlan.objects.all()
     serializer_class = ElectricityPricesSerializer
+
+
+class ElectricityPricesSeriesSerializer(serializers.ModelSerializer):
+    billing_zone = serializers.SlugRelatedField(slug_field='code', queryset=ElectricityBillingZone.objects.all())
+    class Meta:
+        model = ElectricityPrice
+        fields = ('start_interval', 'interval_length', 'price', 'currency', 'electricity_unit', 'plan')
+        read_only_fields = ('plan',)
+
+class ElectricityPricesSeriesAPIView(generics.ListCreateAPIView):
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    #queryset = ElectricityPricePlan.objects.all()
+    serializer_class = ElectricityPricesSerializer
+
+    

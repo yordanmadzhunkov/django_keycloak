@@ -7,6 +7,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from datetime import datetime, timezone
 from django.utils.text import slugify
 import uuid 
+from django.contrib.auth.models import User
 
 
 class ElectricityBillingZone(models.Model):
@@ -37,20 +38,7 @@ class ElectricityPricePlan(models.Model):
         null=False, blank=False,
         default=kWh,
     )
-    start_year = models.IntegerField(
-        default=2022,
-        validators=[
-            MaxValueValidator(2050),
-            MinValueValidator(1990)
-        ]
-    )
-    end_year = models.IntegerField(
-        default=2025,
-        validators=[
-            MaxValueValidator(2050),
-            MinValueValidator(1990)
-        ]
-    )
+    owner = models.ForeignKey(User, null=True, blank=True, default=None, on_delete=models.CASCADE)
 
     def __str__(self) -> str:
         return self.name
@@ -96,7 +84,9 @@ def unique_slug_generator(instance, new_slug = None):
 
 class ElectricityPrice(models.Model):
     
-    when = models.DateTimeField(blank=False, null=False, db_index=True,default=datetime(year=2024, month=1, day=1, hour=0, minute=0, tzinfo=timezone.utc))
+    start_interval = models.DateTimeField(blank=False, null=False, db_index=True,
+                                default=datetime(year=2024, month=1, day=1, hour=0, minute=0, tzinfo=timezone.utc))
+    interval_length = models.IntegerField(default=3600)
     
     price = MoneyField(
         max_digits=14,
@@ -108,7 +98,7 @@ class ElectricityPrice(models.Model):
     plan = models.ForeignKey(ElectricityPricePlan, on_delete=models.CASCADE)
 
     def month(self):
-        return self.when.date()
+        return self.start_interval.date()
 
     def __str__(self) -> str:
         return "%s @ %.2f - plan = %s" % (str(self.month), self.number,  self.plan.name)
