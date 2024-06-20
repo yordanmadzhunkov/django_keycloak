@@ -15,6 +15,7 @@ from rest_framework.authtoken.models import Token
 
 
 from vei_platform.models.electricity_price import ElectricityPricePlan, ElectricityBillingZone
+from vei_platform.api.electricity_prices import ElectricityPriceSerializer
 
 class ElectricityPriceAPIWithUserTestCases(APITestCase):
     def setUp(self):
@@ -207,66 +208,54 @@ class ElectricityPriceAPITestCases(APITestCase):
         
     
 class ElectricityPricePriceSeriesAPITestCases(APITestCase):
-    
     def setUp(self):
         self.user = User.objects.create_user(username='testuser', password='123')
         self.client.force_authenticate(self.user)
         self.billing_zone_object = ElectricityBillingZone.objects.filter(code='BG')[0]
-        #print(ElectricityPricePlan.objects.all())
         self.plan = ElectricityPricePlan.objects.create(
             name='Day ahead price pac',
-            electricity_unit = 'kWh',#  ElectricityPricePlan.ELECTRICITY_UNIT_CHOISES.kWh,
+            electricity_unit = 'kWh',
             billing_zone = self.billing_zone_object,
             currency = 'EUR',
             owner=self.user,
         )
-        self.plan.save() # generate slug
-        
-        #print("plan pk = %d" % self.plan.pk)
-        #print(ElectricityPricePlan.objects.all())
-
-        #self.plan = ElectricityPricePlan.objects.create(name='Test plan 1', )
-        #url = reverse('price_series')
-        #bg_code = {'code':'BG', 'name': 'Bulgaria'}
-        #data = {
-        #    'name': 'Test plan 1', 
-        #    'billing_zone': bg_code['code'], 
-        #    'description': 'Most basic test plan', 
-        #    'currency': 'EUR',
-        #    'electricity_unit': 'MWh',
-        #    }
-        #response = self.client.post(url, data, format='json')
-        #self.plan_slug = response
+        self.plan.save()
         
     def tearDown(self):
-        #print('tear down')
-        #self.plan = None
-        #print(self.plan.slug)
         self.plan.delete()
-        #print(ElectricityPricePlan.objects.filter(slug=self.plan.slug).delete())
-        #ElectricityPricePlan.objects.all().delete()
-        #print(ElectricityPricePlan.objects.all())
-
-        #   pass    
-        #self.plan.
-
         self.user.delete()
-        #self.plan = 
-        #print(ElectricityPricePlan.objects.all())
-        #ElectricityPricePlan.objects.filter(pk=self.plan.pk).delete()
-        #print(ElectricityPricePlan.objects.all())
         
+    def test_get_price_day_1_hour(self):
+        """
+        Get price for specific plan by a slug
+        """
+        url = reverse('prices')
+        data = {'plan_slug': self.plan.slug,}
+        response = self.client.get(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertGreaterEqual(len(response.data), 0)
 
+    def test_electricity_price_serializer(self):
+        data = {'plan': self.plan.slug, 
+                'price': '10.19',
+                'start_interval': '2024-05-19T11:00+00:00',
+                'interval_length': 3600,
+        }
+        serializer = ElectricityPriceSerializer(data=data)
+        self.assertTrue(serializer.is_valid(raise_exception=False))
  
+
     def test_create_price_day_1_hour(self):
-        pass
-        #print('\n')
-        #print(self.billing_zone_object)
-        #print('\n')
-        #self.plan = ElectricityPricePlan.objects.create(
-        #    name='Day ahead price',
-        #    electricity_unit = 'kWh',#  ElectricityPricePlan.ELECTRICITY_UNIT_CHOISES.kWh,
-        #    billing_zone = self.billing_zone_object,
-        #)
-        #self.plan.save()
-        #print(self.plan.slug)
+        """
+        Get price for specific plan by a slug
+        """
+        url = reverse('prices')
+        data = {'plan': self.plan.slug, 
+                'price': '10.19',
+                'start_interval': '2024-05-19T11:00',
+                'interval_length': 3600,
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertGreaterEqual(len(response.data), 1)
+

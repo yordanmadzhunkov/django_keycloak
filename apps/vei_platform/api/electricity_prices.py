@@ -35,24 +35,41 @@ class ElectricityPricesSerializer(serializers.ModelSerializer):
         return super().save(**kwargs)
     
 
-class ElectricityPricesListAPIView(generics.ListCreateAPIView):
+class ElectricityPricePlanListAPIView(generics.ListCreateAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     queryset = ElectricityPricePlan.objects.all()
     serializer_class = ElectricityPricesSerializer
 
 
-class ElectricityPricesSeriesSerializer(serializers.ModelSerializer):
-    billing_zone = serializers.SlugRelatedField(slug_field='code', queryset=ElectricityBillingZone.objects.all())
+class ElectricityPriceSerializer(serializers.ModelSerializer):
+    #billing_zone = serializers.SlugRelatedField(slug_field='code', queryset=ElectricityBillingZone.objects.all())
+    plan = serializers.SlugRelatedField(slug_field='slug', queryset=ElectricityPricePlan.objects.all())
+
     class Meta:
         model = ElectricityPrice
-        fields = ('start_interval', 'interval_length', 'price', 'currency', 'electricity_unit', 'plan')
+        fields = ('start_interval', 'interval_length', 'price', 'plan')
         read_only_fields = ('plan',)
 
-class ElectricityPricesSeriesAPIView(generics.ListCreateAPIView):
+
+
+
+class ElectricityPricesAPIView(generics.ListCreateAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
-    #queryset = ElectricityPricePlan.objects.all()
-    serializer_class = ElectricityPricesSerializer
+    serializer_class = ElectricityPriceSerializer
+
+    def get_queryset(self):
+        return ElectricityPrice.objects.all()
+        print(self.request.data)
+        plan_slug = self.request.data.get('plan', None)
+        if plan:
+            plan = ElectricityPricePlan.objects.filter(slug=plan_slug)
+            if len(plan) > 0:
+                print("Plan is OK")
+                return ElectricityPrice.objects.filter(plan=plan)
+        return ElectricityPrice.objects.none()
 
 
 
-    
+
+
+
