@@ -17,6 +17,9 @@ from rest_framework.authtoken.models import Token
 from vei_platform.models.electricity_price import ElectricityPricePlan, ElectricityBillingZone
 from vei_platform.api.electricity_prices import ElectricityPriceSerializer
 
+from datetime import datetime, timezone
+
+
 class ElectricityPriceAPIWithUserTestCases(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='testuser', password='123')
@@ -236,6 +239,9 @@ class ElectricityPricePriceSeriesAPITestCases(APITestCase):
         self.assertGreaterEqual(len(response.data), 0)
 
     def test_electricity_price_serializer(self):
+        """
+        Serialize time and price
+        """
         data = {'plan': self.plan.slug, 
                 'price': '10.19',
                 'start_interval': '2024-05-19T11:00+00:00',
@@ -252,10 +258,51 @@ class ElectricityPricePriceSeriesAPITestCases(APITestCase):
         url = reverse('prices')
         data = {'plan': self.plan.slug, 
                 'price': '10.19',
-                'start_interval': '2024-05-19T11:00',
+                'start_interval': '2024-05-19T11:00+02:00',
                 'interval_length': 3600,
         }
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertGreaterEqual(len(response.data), 1)
+        self.assertGreaterEqual(len(response.data), 4)
+        self.assertEqual(response.data['plan'], self.plan.slug)
+        self.assertEqual(response.data['price'], '10.19')
+        d = datetime.strptime(response.data['start_interval'], "%Y-%m-%dT%H:%M:%S%z")
+        self.assertEqual(datetime(2024, 5, 19, 9, 00, 00, tzinfo=timezone.utc), d)
+
+    def test_get_price_day_1_hour(self):
+        """
+        Get price for specific plan by a slug
+        """
+        self.test_create_price_day_1_hour()
+        url = reverse('prices')
+        data = {'plan': self.plan.slug, }
+        response = self.client.get(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['plan'], self.plan.slug)
+        self.assertEqual(response.data[0]['price'], '10.19')
+        d = datetime.strptime(response.data[0]['start_interval'], "%Y-%m-%dT%H:%M:%S%z")
+        self.assertEqual(datetime(2024, 5, 19, 9, 00, 00, tzinfo=timezone.utc), d)
+    
+    def test_get_price_no_user(self):
+        
+        self.test_create_price_day_1_hour()
+        self.client.logout()
+        url = reverse('prices')
+        data = {'plan': self.plan.slug, }
+        response = self.client.get(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['plan'], self.plan.slug)
+        self.assertEqual(response.data[0]['price'], '10.19')
+        d = datetime.strptime(response.data[0]['start_interval'], "%Y-%m-%dT%H:%M:%S%z")
+        self.assertEqual(datetime(2024, 5, 19, 9, 00, 00, tzinfo=timezone.utc), d)
+
+
+        #url = reverse('prices')
+        #data = {'plan': self.plan.slug, }
+        #response = self.client.get(url, data, format='json')
+        #self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    
+
 
