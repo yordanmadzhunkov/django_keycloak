@@ -4,11 +4,14 @@ from djmoney.models.fields import Decimal, CurrencyField, MoneyField
 from djmoney.money import Money
 from decimal import Decimal
 from django.core.validators import MaxValueValidator, MinValueValidator
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from django.utils.text import slugify
 import uuid 
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 
+from django.db.models import Q
 
 class ElectricityBillingZone(models.Model):
     code = models.CharField(max_length=128, null=False, blank=False, unique=True)
@@ -97,8 +100,19 @@ class ElectricityPrice(models.Model):
 
     plan = models.ForeignKey(ElectricityPricePlan, on_delete=models.CASCADE)
 
+
+            
+
     def month(self):
         return self.start_interval.date()
 
     def __str__(self) -> str:
-        return "%s @ %.2f - plan = %s" % (str(self.month), self.number,  self.plan.name)
+        return "%s @ %s - plan = %s" % (str(self.start_interval), str(self.price),  self.plan.name)
+    
+    #def save(self, *args, **kwargs):
+        #print("Save this bitch")
+    #    if ElectricityPrice.objects.filter(plan = self.plan).count() > 0:
+    #    #if self.start_interval and self.start_date < timezone.now().date():
+    #        raise ValueError("Duplicate found. Improve this error message")
+    #    return super().save(*args, **kwargs)
+        

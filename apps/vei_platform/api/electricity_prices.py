@@ -5,6 +5,10 @@ from rest_framework import generics, serializers
 from vei_platform.models.electricity_price import ElectricityPrice, ElectricityPricePlan, ElectricityBillingZone
 from rest_framework.fields import CurrentUserDefault
 from django.contrib.auth import get_user_model
+from datetime import datetime, timedelta
+from django.db.models import F
+
+#from rest_framework.validators import UniqueForYearValidator
 
 class ElectricityBillingZoneSerializer(serializers.ModelSerializer):
     class Meta:
@@ -41,6 +45,7 @@ class ElectricityPricePlanListAPIView(generics.ListCreateAPIView):
     serializer_class = ElectricityPricesSerializer
 
 
+
 class ElectricityPriceSerializer(serializers.ModelSerializer):
     #billing_zone = serializers.SlugRelatedField(slug_field='code', queryset=ElectricityBillingZone.objects.all())
     plan = serializers.SlugRelatedField(slug_field='slug', queryset=ElectricityPricePlan.objects.all())
@@ -50,8 +55,17 @@ class ElectricityPriceSerializer(serializers.ModelSerializer):
         model = ElectricityPrice
         fields = ('start_interval', 'interval_length', 'price', 'plan')
         read_only_fields = ('plan',)
+        
 
+    def validate(self, data):
+        obj = ElectricityPrice.objects.filter(plan=data['plan'])
+        end_interval = data['start_interval'] + timedelta(seconds=data['interval_length'])
+        if obj.filter(start_interval__gte=data['start_interval'], start_interval__lt=end_interval).exists():
+            raise serializers.ValidationError("Price plan time window overlap")
+        if obj.filter(start_interval__gte=data['start_interval']-F('interval_length')).exists():
+            raise serializers.ValidationError("Price plan time window overlap")
 
+        return data
 
 
 class ElectricityPricesAPIView(generics.ListCreateAPIView):
