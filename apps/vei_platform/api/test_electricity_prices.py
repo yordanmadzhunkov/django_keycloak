@@ -238,15 +238,18 @@ class ElectricityPricePriceSeriesAPITestCases(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreaterEqual(len(response.data), 0)
 
+    def valid_data(self): 
+        return {'plan': self.plan.slug, 
+                'price': '10.19',
+                'start_interval': '2024-05-19T11:00+00:00',
+                'end_interval': '2024-05-19T12:00+00:00',
+        }
+
     def test_electricity_price_serializer(self):
         """
         Serialize time and price
         """
-        data = {'plan': self.plan.slug, 
-                'price': '10.19',
-                'start_interval': '2024-05-19T11:00+00:00',
-                'interval_length': 3600,
-        }
+        data = self.valid_data()
         serializer = ElectricityPriceSerializer(data=data)
         self.assertTrue(serializer.is_valid(raise_exception=False))
  
@@ -259,7 +262,7 @@ class ElectricityPricePriceSeriesAPITestCases(APITestCase):
         data = {'plan': self.plan.slug, 
                 'price': '10.19',
                 'start_interval': '2024-05-19T11:00+02:00',
-                'interval_length': 3600,
+                'end_interval': '2024-05-19T12:00+02:00',
         }
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -268,6 +271,9 @@ class ElectricityPricePriceSeriesAPITestCases(APITestCase):
         self.assertEqual(response.data['price'], '10.19')
         d = datetime.strptime(response.data['start_interval'], "%Y-%m-%dT%H:%M:%S%z")
         self.assertEqual(datetime(2024, 5, 19, 9, 00, 00, tzinfo=timezone.utc), d)
+        d = datetime.strptime(response.data['end_interval'], "%Y-%m-%dT%H:%M:%S%z")
+        self.assertEqual(datetime(2024, 5, 19, 10, 00, 00, tzinfo=timezone.utc), d)
+
 
     def test_get_price_day_1_hour(self):
         """
@@ -305,11 +311,7 @@ class ElectricityPricePriceSeriesAPITestCases(APITestCase):
         Create price for specific plan without user
         """
         url = reverse('prices')
-        data = {'plan': self.plan.slug, 
-                'price': '10.19',
-                'start_interval': '2024-05-19T11:00+02:00',
-                'interval_length': 3600,
-        }
+        data = self.valid_data()
         self.client.logout()
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -321,54 +323,131 @@ class ElectricityPricePriceSeriesAPITestCases(APITestCase):
         Get price for specific plan by a slug
         """
         url = reverse('prices')
-        data = {'plan': self.plan.slug, 
-                'price': '10.19',
-                'start_interval': '2024-05-19T11:00+02:00',
-                'interval_length': 3600,
-        }
+        data = self.valid_data()
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertGreaterEqual(len(response.data), 4)
         self.assertEqual(response.data['plan'], self.plan.slug)
         self.assertEqual(response.data['price'], '10.19')
         d = datetime.strptime(response.data['start_interval'], "%Y-%m-%dT%H:%M:%S%z")
-        self.assertEqual(datetime(2024, 5, 19, 9, 00, 00, tzinfo=timezone.utc), d)
+        self.assertEqual(datetime(2024, 5, 19, 11, 00, 00, tzinfo=timezone.utc), d)
 
         # Second post
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_create_price_overlaping_time_windows(self):
+    def test_create_price_non_overlaping_time_windows(self):
         """
         Get price for specific plan by a slug
         """
         url = reverse('prices')
-        data = {'plan': self.plan.slug, 
-                'price': '10.19',
-                'start_interval': '2024-05-19T11:00+02:00',
-                'interval_length': 3600,
-        }
+        data = self.valid_data()
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertGreaterEqual(len(response.data), 4)
         self.assertEqual(response.data['plan'], self.plan.slug)
         self.assertEqual(response.data['price'], '10.19')
         d = datetime.strptime(response.data['start_interval'], "%Y-%m-%dT%H:%M:%S%z")
-        self.assertEqual(datetime(2024, 5, 19, 9, 00, 00, tzinfo=timezone.utc), d)
-
-        data['start_interval'] = '2024-05-19T10:00+02:00',
-        data['price'] = '12.12'
+        self.assertEqual(datetime(2024, 5, 19, 11, 00, 00, tzinfo=timezone.utc), d)
+        data = {'plan': self.plan.slug, 
+                'price': '12.12',
+                'start_interval': '2024-05-19T10:00+00:00',
+                'end_interval': '2024-05-19T11:00:00+00:00',
+        }
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
 
-        # 
-        data['start_interval'] = '2024-05-19T11:30+02:00',
+        data = {'plan': self.plan.slug, 
+                'price': '12.12',
+                'start_interval': '2024-05-19T12:00+00:00',
+                'end_interval': '2024-05-19T13:00:00+00:00',
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+
+    def test_create_price_overlaping_time_windows_left(self):
+        url = reverse('prices')
+        data = self.valid_data()
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertGreaterEqual(len(response.data), 4)
+        self.assertEqual(response.data['plan'], self.plan.slug)
+        self.assertEqual(response.data['price'], '10.19')
+        d = datetime.strptime(response.data['start_interval'], "%Y-%m-%dT%H:%M:%S%z")
+        self.assertEqual(datetime(2024, 5, 19, 11, 00, 00, tzinfo=timezone.utc), d)
+
+        data = {'plan': self.plan.slug, 
+                'price': '12.12',
+                'start_interval': '2024-05-19T10:30+00:00',
+                'end_interval': '2024-05-19T11:30:00+00:00',
+        }
+
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-        data['start_interval'] = '2024-05-19T10:30+02:00',
+    def test_create_price_overlaping_time_windows_right(self):
+        url = reverse('prices')
+        data = self.valid_data()
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertGreaterEqual(len(response.data), 4)
+        self.assertEqual(response.data['plan'], self.plan.slug)
+        self.assertEqual(response.data['price'], '10.19')
+        d = datetime.strptime(response.data['start_interval'], "%Y-%m-%dT%H:%M:%S%z")
+        self.assertEqual(datetime(2024, 5, 19, 11, 00, 00, tzinfo=timezone.utc), d)
+
+        data = {'plan': self.plan.slug, 
+                'price': '12.12',
+                'start_interval': '2024-05-19T11:30+00:00',
+                'end_interval': '2024-05-19T12:30:00+00:00',
+        }
+
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        #print(response.data)
+
+    def test_create_price_overlaping_time_windows_outer(self):
+        url = reverse('prices')
+        data = self.valid_data()
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertGreaterEqual(len(response.data), 4)
+        self.assertEqual(response.data['plan'], self.plan.slug)
+        self.assertEqual(response.data['price'], '10.19')
+        d = datetime.strptime(response.data['start_interval'], "%Y-%m-%dT%H:%M:%S%z")
+        self.assertEqual(datetime(2024, 5, 19, 11, 00, 00, tzinfo=timezone.utc), d)
+        d = datetime.strptime(response.data['end_interval'], "%Y-%m-%dT%H:%M:%S%z")
+        self.assertEqual(datetime(2024, 5, 19, 12, 00, 00, tzinfo=timezone.utc), d)
+
+        data = {'plan': self.plan.slug, 
+                'price': '12.12',
+                'start_interval': '2024-05-19T10:30+00:00',
+                'end_interval': '2024-05-19T13:30:00+00:00',
+        }
+
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_create_price_overlaping_time_windows_inner(self):
+        url = reverse('prices')
+        data = self.valid_data()
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertGreaterEqual(len(response.data), 4)
+        self.assertEqual(response.data['plan'], self.plan.slug)
+        self.assertEqual(response.data['price'], '10.19')
+        d = datetime.strptime(response.data['start_interval'], "%Y-%m-%dT%H:%M:%S%z")
+        self.assertEqual(datetime(2024, 5, 19, 11, 00, 00, tzinfo=timezone.utc), d)
+        d = datetime.strptime(response.data['end_interval'], "%Y-%m-%dT%H:%M:%S%z")
+        self.assertEqual(datetime(2024, 5, 19, 12, 00, 00, tzinfo=timezone.utc), d)
 
+        data = {'plan': self.plan.slug, 
+                'price': '12.12',
+                'start_interval': '2024-05-19T11:20+00:00',
+                'end_interval': '2024-05-19T11:30:00+00:00',
+        }
+
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

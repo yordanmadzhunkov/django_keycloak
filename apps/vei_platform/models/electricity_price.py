@@ -89,7 +89,8 @@ class ElectricityPrice(models.Model):
     
     start_interval = models.DateTimeField(blank=False, null=False, db_index=True,
                                 default=datetime(year=2024, month=1, day=1, hour=0, minute=0, tzinfo=timezone.utc))
-    interval_length = models.IntegerField(default=3600)
+    end_interval = models.DateTimeField(blank=False, null=False, db_index=True,
+                                default=datetime(year=2024, month=1, day=1, hour=1, minute=0, tzinfo=timezone.utc))
     
     price = MoneyField(
         max_digits=14,
@@ -109,10 +110,3 @@ class ElectricityPrice(models.Model):
     def __str__(self) -> str:
         return "%s @ %s - plan = %s" % (str(self.start_interval), str(self.price),  self.plan.name)
     
-    #def save(self, *args, **kwargs):
-        #print("Save this bitch")
-    #    if ElectricityPrice.objects.filter(plan = self.plan).count() > 0:
-    #    #if self.start_interval and self.start_date < timezone.now().date():
-    #        raise ValueError("Duplicate found. Improve this error message")
-    #    return super().save(*args, **kwargs)
-        
