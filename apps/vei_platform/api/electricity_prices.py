@@ -1,12 +1,7 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework import generics, serializers
 from vei_platform.models.electricity_price import ElectricityPrice, ElectricityPricePlan, ElectricityBillingZone
-from rest_framework.fields import CurrentUserDefault
-from django.contrib.auth import get_user_model
-from datetime import datetime, timedelta
-from django.db.models import F
+from django.db.models import Q
 
 #from rest_framework.validators import UniqueForYearValidator
 
@@ -45,7 +40,6 @@ class ElectricityPricePlanListAPIView(generics.ListCreateAPIView):
     serializer_class = ElectricityPricesSerializer
 
 
-from django.db.models import Q
 
 
 def create_query_for_finding_overlapping_intervals(start_date_column, end_date_column_name, start_dt, end_dt,
@@ -73,16 +67,16 @@ def create_query_for_finding_overlapping_intervals(start_date_column, end_date_c
     q_end_dt__lt = f'{end_date_column_name}__lt'
     q_end_dt__lte = f'{end_date_column_name}__lte'
 
-    q_is_contained = Q(**{q_start_dt__gte: start_dt}) & Q(**{q_end_dt__lte: end_dt})
-    q_contains = Q(**{q_start_dt__lte: start_dt}) & Q(**{q_end_dt__gte: end_dt})
-    q_slides_before = Q(**{q_start_dt__lt: start_dt}) & Q(**{q_end_dt__lt: end_dt})
-    q_slides_after = Q(**{q_start_dt__gt: start_dt}) & Q(**{q_end_dt__gt: end_dt})
+    q_is_contained  = Q(**{q_start_dt__gte: start_dt}) & Q(**{q_end_dt__lte: end_dt})
+    q_contains      = Q(**{q_start_dt__lte: start_dt}) & Q(**{q_end_dt__gte: end_dt})
+    q_slides_before = Q(**{q_start_dt__lt:  start_dt}) & Q(**{q_end_dt__lt:  end_dt})
+    q_slides_after  = Q(**{q_start_dt__gt:  start_dt}) & Q(**{q_end_dt__gt:  end_dt})
     if closed_interval:
         q_slides_before = q_slides_before & Q(**{q_end_dt__gte: start_dt})
-        q_slides_after = q_slides_after & Q(**{q_start_dt__lte: end_dt})
+        q_slides_after  = q_slides_after & Q(**{q_start_dt__lte: end_dt})
     else:
         q_slides_before = q_slides_before & Q(**{q_end_dt__gt: start_dt})
-        q_slides_after = q_slides_after & Q(**{q_start_dt__lt: end_dt})
+        q_slides_after  = q_slides_after & Q(**{q_start_dt__lt: end_dt})
 
     return q_contains | q_is_contained | q_slides_before | q_slides_after
 
@@ -100,8 +94,12 @@ class ElectricityPriceSerializer(serializers.ModelSerializer):
         
  
     def validate(self, data):
-        query_obj = create_query_for_finding_overlapping_intervals('start_interval', 'end_interval', data['start_interval'], data['end_interval'], closed_interval=False)
-        if ElectricityPrice.objects.filter(plan=data['plan']).filter(query_obj).exists():
+        query_overlapping_intervals = create_query_for_finding_overlapping_intervals('start_interval',
+                                                                    'end_interval',
+                                                                    data['start_interval'],
+                                                                    data['end_interval'], 
+                                                                    closed_interval=False)
+        if ElectricityPrice.objects.filter(plan=data['plan']).filter(query_overlapping_intervals).exists():
             raise serializers.ValidationError("Price plan time window overlap")
         return super().validate(data)
 
@@ -113,10 +111,22 @@ class ElectricityPricesAPIView(generics.ListCreateAPIView):
     #queryset = ElectricityPrice.objects.all()
 
     def get_queryset(self):
+        print(self.request.query_params)
+
         plan_slug = self.request.query_params.get('plan')
         if plan_slug:
-            plan = ElectricityPricePlan.objects.get(slug=plan_slug)            
-            return ElectricityPrice.objects.filter(plan=plan)
+            plan = ElectricityPricePlan.objects.get(slug=plan_slug)
+            start_interval = self.request.query_params.get('start_interval')
+            end_interval = self.request.query_params.get('end_interval')
+            obj = ElectricityPrice.objects.filter(plan=plan)
+            if start_interval and end_interval:
+                query_overlapping_intervals = create_query_for_finding_overlapping_intervals('start_interval',
+                                                                    'end_interval',
+                                                                    start_interval,
+                                                                    end_interval, 
+                                                                    closed_interval=False)
+                obj = obj.filter(query_overlapping_intervals)
+            return obj
         return ElectricityPrice.objects.none()
 
 

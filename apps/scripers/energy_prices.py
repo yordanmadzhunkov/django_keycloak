@@ -2,7 +2,7 @@
 import requests
 from prettytable import PrettyTable
 from decimal import Decimal
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from tzlocal import get_localzone # $ pip install tzlocal
 
 # Send a GET request to a website
@@ -137,26 +137,173 @@ class EnergyPrices:
 class VeiPlatformAPI:
     token = None
     endpoint_base_url = 'http://127.0.0.1:8000/'
+    hello_url         = 'api/v1/hello'
+    billing_zone_url  = 'api/v1/billing_zones'
+    plans_url         = 'api/v1/plans'
+    prices_url        = 'api/v1/prices'
+
 
     def __init__(self, endpoint_url, token):
         self.token = token
         self.endpoint_base_url = endpoint_url
         self.headers = {'Authorization': 'Token ' + token}
 
+    def check_billing_zone(self, billing_zone):
+        response = requests.get(self.endpoint_base_url + self.billing_zone_url,
+                data={}, 
+                headers=self.headers,
+        )
+        if response.status_code == 200:
+            found = None
+            for zone in response.json():
+                if zone['code'] == billing_zone:
+                    found = zone
+        else:
+            return {'error': 'response Status is not OK'}
+        
+        if not found:
+            return {'error': 'Billing zone ' + billing_zone + 'is NOT supported'}
+        
+        return {'check_billing_zone': 'OK', 
+                'code': found['code'], 
+                'name': found['name']
+                }
+    
+    def get_plan(self, billing_zone, name=None):
+        response = requests.get(self.endpoint_base_url + self.plans_url,
+                data={}, 
+                headers=self.headers,
+        )
+        if response.status_code == 200:
+            target_plan = None
+            for plan in response.json():
+                if plan['billing_zone'] == billing_zone:
+                    if name is None or name == plan['name']:
+                        target_plan = plan
+                        break
+                    else:
+                        print('skipping %s' % str(plan) )
+
+            return {'plan': target_plan}
+        else:
+            return {'error': 'response Status is not OK'}
+        
+    def create_plan(self, billing_zone, name):
+        data = {
+                    'name': name, 
+                    'billing_zone': billing_zone, 
+                    'description': 'Most basic day ahead plan', 
+                    'currency': 'EUR',
+                    'electricity_unit': 'MWh',
+        }
+        response = requests.post(self.endpoint_base_url + self.plans_url,
+                data=data, 
+                headers=self.headers,
+        )
+        if response.status_code == 201:
+            plan = response.json()
+            # plan ['name'] == 'Day ahead'
+            # plan ['billing_zone'] == 'BG')
+            # plan ['description'], 'Most basic test plan')
+            # plan ['currency'] == 'EUR'
+            # plan ['electricity_unit'] == 'MWh'
+            # plan ['slug'] == 'day-ahead-1')
+            # paln ['owner'] == 'energy_bot
+            print('created ' + str(plan))
+            return {'plan': plan}
+        else:
+            return {'error': 'response Status is not CREATED'}
+        
+
+    def get_or_create_plan(self, billing_zone):
+        res = self.check_billing_zone(billing_zone)
+        if 'errors' in res.keys():
+            return res
+        zone_name = res['name']
+        plan_name = 'Day ahead %s' % zone_name
+        res.update(self.get_plan(billing_zone=billing_zone, name=plan_name))
+
+        if not 'errors' in res.keys() and 'plan' in res.keys():
+            if res['plan'] is None:
+                res.update(self.create_plan(billing_zone=billing_zone, name=plan_name))
+        return res
+
 
     def post_prices(self, billing_zone, prices):
+        res = self.get_or_create_plan(billing_zone)
+        if 'errors' in res.keys() or not 'plan' in res.keys():
+            return res
+        # print('We have a plan = ' + str(res))
+        # print(prices)
         data = {
             'blz': billing_zone,
             'unit': prices['unit'],
             'price': prices['price'],
             'unix_seconds': prices['unix_seconds'],
         }
-        res = requests.post(
-               self.endpoint_base_url + "api/hello", # The URL of the API you want to access
-                data=data, # The data you want to send to the API
-                headers=self.headers, # The headers you want to send to the API
-        )
-        return res
+
+        unit = prices['unit']
+        price = prices['price']
+        time_slot_in_unix = prices['unix_seconds']
+        plan_slug = res['plan']['slug']
+
+        prices_table = PrettyTable(["UTC Date", "UTC Time", "Price " + unit, "Status"])
+        prices_table.title = 'Name = ' + res['plan']['name'] + \
+                            ' Slug = ' + res['plan']['slug']
+        # skipping {
+        # 'name': 'Day ahead', 
+        # 'billing_zone': 'SK', 
+        # 'description': 'Most basic day ahead plan', 
+        # 'currency': 'EUR', 
+        # 'electricity_unit': 'MWh', 
+        # 'slug': 'day-ahead-17fb', 
+        # 'owner': 'energy_bot'}
+
+
+        for i in range(len(price)):
+            start_interval = datetime.fromtimestamp(time_slot_in_unix[i], tz=timezone.utc)
+            end_interval = start_interval + timedelta(hours=1)
+            p = Decimal(price[i]).quantize(Decimal('0.01'))
+            data = {
+                'plan': plan_slug, 
+                'price': str(p),
+                'start_interval': start_interval.strftime("%Y-%m-%dT%H:%M:%S%z"),
+                'end_interval': end_interval.strftime("%Y-%m-%dT%H:%M:%S%z"),
+            }
+
+            params = {
+                'plan': plan_slug, 
+                'start_interval': start_interval.strftime("%Y-%m-%dT%H:%M:%S%z"),
+                'end_interval': end_interval.strftime("%Y-%m-%dT%H:%M:%S%z"),
+            }
+
+            response = requests.get(self.endpoint_base_url + self.prices_url,
+                params=params, 
+                headers=self.headers,
+            )
+            if response.status_code == 200:
+                if len(response.json()) == 0:
+                    response = requests.post(self.endpoint_base_url + self.prices_url,
+                        data=data, 
+                        headers=self.headers,
+                    )
+                    if response.status_code == 201:
+                        status = 'Created'
+                    else:
+                        status = str(response.json())
+                else:
+                    if p == Decimal(response.json()[0]['price']):
+                        status = 'Price match'
+                    else:
+                        status = 'Price don''t match ' + str(response.json()[0]['price'])
+            else:
+                status = str(response.json())
+
+            prices_table.add_row([start_interval.strftime('%Y-%m-%d'), 
+                                  start_interval.strftime('%H:%M:%S %Z'), 
+                                  p, status,])
+
+        return prices_table
 
 
 if __name__ == '__main__':
@@ -170,7 +317,8 @@ if __name__ == '__main__':
         if prices:
             energy_prices_api.print_prices(prices, zone)
             res = vei_platform.post_prices(zone, prices)
-            break
+            print(res)
+ #           break
         else:
             print("Fail to fetch zone = " + zone)
 
