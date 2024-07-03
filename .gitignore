@@ -107,6 +107,7 @@ celerybeat.pid
 # Environments
 .env
 .env_test
+.env_energybot
 oidc.env
 .venv
 env/

@@ -20,3 +20,10 @@ services: # the different images that will be running as containers
     entrypoint: /entrypoint/entrypoint_qcluster.sh
     env_file:
       - .env
+
+  scripe_energy_prices:
+    build: .
+    image: dataintensive/vei_platform:${DJANGO_GIT_TAG}
+    entrypoint: /entrypoint/entrypoint_energybot.sh
+    env_file:
+      - .env_energybot
