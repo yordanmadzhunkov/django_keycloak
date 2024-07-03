@@ -5,6 +5,10 @@ from decimal import Decimal
 from datetime import datetime, timezone, timedelta
 from tzlocal import get_localzone # $ pip install tzlocal
 
+
+from decouple import config
+
+
 # Send a GET request to a website
 #res = requests.get(
 #    "https://www.example.com/", # The URL of the API you want to access
@@ -217,13 +221,13 @@ class VeiPlatformAPI:
 
     def get_or_create_plan(self, billing_zone):
         res = self.check_billing_zone(billing_zone)
-        if 'errors' in res.keys():
+        if 'error' in res.keys():
             return res
         zone_name = res['name']
         plan_name = 'Day ahead %s' % zone_name
         res.update(self.get_plan(billing_zone=billing_zone, name=plan_name))
 
-        if not 'errors' in res.keys() and 'plan' in res.keys():
+        if not 'error' in res.keys() and 'plan' in res.keys():
             if res['plan'] is None:
                 res.update(self.create_plan(billing_zone=billing_zone, name=plan_name))
         return res
@@ -231,7 +235,7 @@ class VeiPlatformAPI:
 
     def post_prices(self, billing_zone, prices):
         res = self.get_or_create_plan(billing_zone)
-        if 'errors' in res.keys() or not 'plan' in res.keys():
+        if 'error' in res.keys() or not 'plan' in res.keys():
             return res
         # print('We have a plan = ' + str(res))
         # print(prices)
@@ -306,19 +310,37 @@ class VeiPlatformAPI:
         return prices_table
 
 
+import json
+
+
 if __name__ == '__main__':
-    print('Running Energy prices as main function')
+
+    ENERGY_BOT_TARGETS = config('ENERGY_BOT_TARGETS', '[{"url": "http://127.0.0.1:8000/", "token":"6da8aa16d75593c3d9c7029acc59caf59dd5a446"},{"url":"https://fractionenergy.eu/", "token":"dfgsgfdsfsdgd"}]')
+
+    target_list = json.loads(ENERGY_BOT_TARGETS)
+
+    for target in target_list:
+        print("Target %s token=%.4s.." % (target['url'], target['token']))
+
     energy_prices_api = EnergyPrices()
-    vei_platform = VeiPlatformAPI('http://127.0.0.1:8000/', 
-                                  token='6da8aa16d75593c3d9c7029acc59caf59dd5a446')
     #energy_prices_api.fetch_and_print_openapi_specs()
+
+    
+    
     for zone in energy_prices_api.billing_zones.keys():
         prices = energy_prices_api.fetch_prices_day_ahead(zone)
         if prices:
             energy_prices_api.print_prices(prices, zone)
-            res = vei_platform.post_prices(zone, prices)
-            print(res)
- #           break
+            for target in target_list:
+                try:
+                    vei_platform = VeiPlatformAPI(target['url'], token=target['token'])
+                    res = vei_platform.post_prices(zone, prices)
+                    if isinstance(res, dict) and 'error' in res.keys():
+                        print("Error \"%s\" when processing Target %s token=%.4s.." % (res['error'], target['url'], target['token']))
+                    print(res)
+                except Exception as e:
+                    message = getattr(e, 'message', repr(e))
+                    print("Exception %s when processing Target %s token=%.4s.." % (message, target['url'], target['token']))
         else:
             print("Fail to fetch zone = " + zone)
 
