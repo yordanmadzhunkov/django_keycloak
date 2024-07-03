@@ -30,3 +30,5 @@ crispy-bootstrap4
 pillow
 psutil
 bs4
+
+prettytable==3.9.0
