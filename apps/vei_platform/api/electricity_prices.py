@@ -111,8 +111,6 @@ class ElectricityPricesAPIView(generics.ListCreateAPIView):
     #queryset = ElectricityPrice.objects.all()
 
     def get_queryset(self):
-        print(self.request.query_params)
-
         plan_slug = self.request.query_params.get('plan')
         if plan_slug:
             plan = ElectricityPricePlan.objects.get(slug=plan_slug)
