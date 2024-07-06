@@ -71,8 +71,14 @@ class MyProfileUpdate(View):
                 messages.error(request, _('Profile error'))
 
         if 'generate_token' in request.POST:
-            token = Token.objects.create(user=user)
-            #context['user_token'] = token.key
+            tokens = Token.objects.filter(user=request.user)
+            if len(tokens) > 0:
+                token = tokens.first()
+                # Change the key
+                token.key = token.generate_key()
+                token.save()
+            else:
+                token = Token.objects.create(user=user)
 
         self.add_token_info(request, context)
         context['avatar_form'] = user_profile_form
@@ -81,5 +87,5 @@ class MyProfileUpdate(View):
     
 
     def add_token_info(self, request, context):
-        tokens = Token.objects.filter(user=request.user).order_by('-created')
+        tokens = Token.objects.filter(user=request.user)
         context['user_token'] = tokens.first().key if len(tokens) > 0 else 'None'
