@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
+from rest_framework.authtoken.models import Token
 
 
 from vei_platform.models.profile import UserProfile, get_user_profile
@@ -37,6 +38,7 @@ class MyProfileUpdate(View):
                                             'first_name': request.user.first_name,
                                         })
         context['avatar_form'] = user_profile_form
+        self.add_token_info(request, context)
         return render(self.request, "my_profile.html", context)
     
     def post(self, request):
@@ -48,24 +50,36 @@ class MyProfileUpdate(View):
         user = User.objects.get(username=request.user)
         user_profile_form = UserProfileForm(request.POST, request.FILES)
     
-        if user_profile_form.is_valid():
-            avatar = user_profile_form.cleaned_data.get('avatar')
-            first_name = user_profile_form.cleaned_data.get('first_name')
-            last_name = user_profile_form.cleaned_data.get('last_name')
+        if 'save' in request.POST:
+            if user_profile_form.is_valid():
+                avatar = user_profile_form.cleaned_data.get('avatar')
+                first_name = user_profile_form.cleaned_data.get('first_name')
+                last_name = user_profile_form.cleaned_data.get('last_name')
 
-            if avatar is not None:
-                profile.avatar = avatar
-                profile.save()
-                messages.success(request, _('%s saved as avatar') % avatar)
+                if avatar is not None:
+                    profile.avatar = avatar
+                    profile.save()
+                    messages.success(request, _('%s saved as avatar') % avatar)
 
-            if (first_name is not None and first_name != user.first_name) or (last_name is not None and last_name != user.last_name):
-                user.first_name = first_name
-                user.last_name = last_name
-                user.save()
-                messages.success(request, _('Full name set to: %s %s') % (first_name, last_name))
-                context['user'] = user
-        else:
-            messages.error(request, _('Profile error'))
+                if (first_name is not None and first_name != user.first_name) or (last_name is not None and last_name != user.last_name):
+                    user.first_name = first_name
+                    user.last_name = last_name
+                    user.save()
+                    messages.success(request, _('Full name set to: %s %s') % (first_name, last_name))
+                    context['user'] = user
+            else:
+                messages.error(request, _('Profile error'))
+
+        if 'generate_token' in request.POST:
+            token = Token.objects.create(user=user)
+            #context['user_token'] = token.key
+
+        self.add_token_info(request, context)
         context['avatar_form'] = user_profile_form
         context['profile'] = get_user_profile(request.user)
         return render(request, "my_profile.html", context)
+    
+
+    def add_token_info(self, request, context):
+        tokens = Token.objects.filter(user=request.user).order_by('-created')
+        context['user_token'] = tokens.first().key if len(tokens) > 0 else 'None'
