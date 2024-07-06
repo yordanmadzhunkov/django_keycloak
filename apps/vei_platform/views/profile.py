@@ -73,10 +73,10 @@ class MyProfileUpdate(View):
         if 'generate_token' in request.POST:
             tokens = Token.objects.filter(user=request.user)
             if len(tokens) > 0:
-                token = tokens.first()
-                # Change the key
-                token.key = token.generate_key()
-                token.save()
+                new_key = tokens[0].generate_key()
+                tokens.update(key=new_key)
+                #token = tokens.first()
+                #token.delete()
             else:
                 token = Token.objects.create(user=user)
 
