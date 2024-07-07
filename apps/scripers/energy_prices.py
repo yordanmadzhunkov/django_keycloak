@@ -153,17 +153,18 @@ class VeiPlatformAPI:
         self.headers = {'Authorization': 'Token ' + token}
 
     def check_billing_zone(self, billing_zone):
-        response = requests.get(self.endpoint_base_url + self.billing_zone_url,
-                data={}, 
-                headers=self.headers,
-        )
+        full_url = self.endpoint_base_url + self.billing_zone_url
+        response = requests.get(full_url, data={}, headers=self.headers, )
         if response.status_code == 200:
             found = None
             for zone in response.json():
                 if zone['code'] == billing_zone:
                     found = zone
         else:
-            return {'error': 'response Status is not OK'}
+            return {'error': 'response check_billing_zone Status is not OK',
+                    'status': response.status_code,
+                    'reason': response.reason,
+                    }
         
         if not found:
             return {'error': 'Billing zone ' + billing_zone + 'is NOT supported'}
