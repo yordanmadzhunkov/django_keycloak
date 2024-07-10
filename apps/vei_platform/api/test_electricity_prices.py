@@ -16,6 +16,7 @@ from rest_framework.authtoken.models import Token
 
 from vei_platform.models.electricity_price import ElectricityPricePlan, ElectricityBillingZone
 from vei_platform.api.electricity_prices import ElectricityPriceSerializer
+from vei_platform.models.electricity_price import ElectricityPrice
 
 from datetime import datetime, timezone
 
@@ -227,13 +228,17 @@ class ElectricityPricePriceSeriesAPITestCases(APITestCase):
     def tearDown(self):
         self.plan.delete()
         self.user.delete()
+
+    def checkTime(self, year, month, day, hour, minute, resp):
+        self.assertEqual(datetime(year, month, day, hour, minute, 00, tzinfo=timezone.utc), 
+                         datetime.strptime(resp, "%Y-%m-%dT%H:%M:%S%z"))
         
     def test_get_price_day_1_hour(self):
         """
         Get price for specific plan by a slug
         """
         url = reverse('prices')
-        data = {'plan_slug': self.plan.slug,}
+        data = {'plan': self.plan.slug,}
         response = self.client.get(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreaterEqual(len(response.data), 0)
@@ -269,11 +274,8 @@ class ElectricityPricePriceSeriesAPITestCases(APITestCase):
         self.assertGreaterEqual(len(response.data), 4)
         self.assertEqual(response.data['plan'], self.plan.slug)
         self.assertEqual(response.data['price'], '10.19')
-        d = datetime.strptime(response.data['start_interval'], "%Y-%m-%dT%H:%M:%S%z")
-        self.assertEqual(datetime(2024, 5, 19, 9, 00, 00, tzinfo=timezone.utc), d)
-        d = datetime.strptime(response.data['end_interval'], "%Y-%m-%dT%H:%M:%S%z")
-        self.assertEqual(datetime(2024, 5, 19, 10, 00, 00, tzinfo=timezone.utc), d)
-
+        self.checkTime(2024, 5, 19, 9, 0, response.data['start_interval'])
+        self.checkTime(2024, 5, 19, 10, 0, response.data['end_interval'])
 
     def test_get_price_day_1_hour(self):
         """
@@ -287,8 +289,9 @@ class ElectricityPricePriceSeriesAPITestCases(APITestCase):
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['plan'], self.plan.slug)
         self.assertEqual(response.data[0]['price'], '10.19')
-        d = datetime.strptime(response.data[0]['start_interval'], "%Y-%m-%dT%H:%M:%S%z")
-        self.assertEqual(datetime(2024, 5, 19, 9, 00, 00, tzinfo=timezone.utc), d)
+        self.checkTime(2024, 5, 19, 9, 0, response.data[0]['start_interval'])
+        self.checkTime(2024, 5, 19, 10, 0, response.data[0]['end_interval'])
+
     
     def test_get_price_no_user(self):
         """
@@ -303,8 +306,9 @@ class ElectricityPricePriceSeriesAPITestCases(APITestCase):
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['plan'], self.plan.slug)
         self.assertEqual(response.data[0]['price'], '10.19')
-        d = datetime.strptime(response.data[0]['start_interval'], "%Y-%m-%dT%H:%M:%S%z")
-        self.assertEqual(datetime(2024, 5, 19, 9, 00, 00, tzinfo=timezone.utc), d)
+        self.checkTime(2024, 5, 19, 9, 0, response.data[0]['start_interval'])
+        self.checkTime(2024, 5, 19, 10, 0, response.data[0]['end_interval'])
+
 
     def test_create_price_no_user(self):
         """
@@ -329,8 +333,8 @@ class ElectricityPricePriceSeriesAPITestCases(APITestCase):
         self.assertGreaterEqual(len(response.data), 4)
         self.assertEqual(response.data['plan'], self.plan.slug)
         self.assertEqual(response.data['price'], '10.19')
-        d = datetime.strptime(response.data['start_interval'], "%Y-%m-%dT%H:%M:%S%z")
-        self.assertEqual(datetime(2024, 5, 19, 11, 00, 00, tzinfo=timezone.utc), d)
+        self.checkTime(2024, 5, 19, 11, 0, response.data['start_interval'])
+        self.checkTime(2024, 5, 19, 12, 0, response.data['end_interval'])
 
         # Second post
         response = self.client.post(url, data, format='json')
@@ -375,15 +379,13 @@ class ElectricityPricePriceSeriesAPITestCases(APITestCase):
         self.assertGreaterEqual(len(response.data), 4)
         self.assertEqual(response.data['plan'], self.plan.slug)
         self.assertEqual(response.data['price'], '10.19')
-        d = datetime.strptime(response.data['start_interval'], "%Y-%m-%dT%H:%M:%S%z")
-        self.assertEqual(datetime(2024, 5, 19, 11, 00, 00, tzinfo=timezone.utc), d)
-
+        self.checkTime(2024, 5, 19, 11, 00, response.data['start_interval'])
+        self.checkTime(2024, 5, 19, 12, 00, response.data['end_interval'])
         data = {'plan': self.plan.slug, 
                 'price': '12.12',
                 'start_interval': '2024-05-19T10:30+00:00',
                 'end_interval': '2024-05-19T11:30:00+00:00',
         }
-
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -395,9 +397,8 @@ class ElectricityPricePriceSeriesAPITestCases(APITestCase):
         self.assertGreaterEqual(len(response.data), 4)
         self.assertEqual(response.data['plan'], self.plan.slug)
         self.assertEqual(response.data['price'], '10.19')
-        d = datetime.strptime(response.data['start_interval'], "%Y-%m-%dT%H:%M:%S%z")
-        self.assertEqual(datetime(2024, 5, 19, 11, 00, 00, tzinfo=timezone.utc), d)
-
+        self.checkTime(2024, 5, 19, 11, 00, response.data['start_interval'])
+        self.checkTime(2024, 5, 19, 12, 00, response.data['end_interval'])
         data = {'plan': self.plan.slug, 
                 'price': '12.12',
                 'start_interval': '2024-05-19T11:30+00:00',
@@ -406,7 +407,6 @@ class ElectricityPricePriceSeriesAPITestCases(APITestCase):
 
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        #print(response.data)
 
     def test_create_price_overlaping_time_windows_outer(self):
         url = reverse('prices')
@@ -416,11 +416,8 @@ class ElectricityPricePriceSeriesAPITestCases(APITestCase):
         self.assertGreaterEqual(len(response.data), 4)
         self.assertEqual(response.data['plan'], self.plan.slug)
         self.assertEqual(response.data['price'], '10.19')
-        d = datetime.strptime(response.data['start_interval'], "%Y-%m-%dT%H:%M:%S%z")
-        self.assertEqual(datetime(2024, 5, 19, 11, 00, 00, tzinfo=timezone.utc), d)
-        d = datetime.strptime(response.data['end_interval'], "%Y-%m-%dT%H:%M:%S%z")
-        self.assertEqual(datetime(2024, 5, 19, 12, 00, 00, tzinfo=timezone.utc), d)
-
+        self.checkTime(2024, 5, 19, 11, 00, response.data['start_interval'])
+        self.checkTime(2024, 5, 19, 12, 00, response.data['end_interval'])
         data = {'plan': self.plan.slug, 
                 'price': '12.12',
                 'start_interval': '2024-05-19T10:30+00:00',
@@ -492,4 +489,82 @@ class ElectricityPricePriceSeriesAPITestCases(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
 
+
+
+
+    def test_create_price_bulk(self):
+        """
+        Get create a list of price for same plan
+        """
+        url = reverse('prices')
+        data = [
+            {'plan': self.plan.slug, 
+             'price': '10.19',
+             'start_interval': '2024-05-19T11:00+00:00',
+             'end_interval': '2024-05-19T12:00+00:00',},
+            {'plan': self.plan.slug, 
+             'price': '11.21',
+             'start_interval': '2024-05-19T12:00+00:00',
+             'end_interval': '2024-05-19T13:00+00:00',},
+            {'plan': self.plan.slug, 
+             'price': '12.10',
+             'start_interval': '2024-05-19T13:00+00:00',
+             'end_interval': '2024-05-19T14:00+00:00',}
+        ]
+
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertGreaterEqual(len(response.data), 3)
+        self.assertEqual(response.data[0]['plan'], self.plan.slug)
+        self.assertEqual(response.data[1]['plan'], self.plan.slug)
+        self.assertEqual(response.data[2]['plan'], self.plan.slug)
+
+        self.assertEqual(response.data[0]['price'], '10.19')
+        self.assertEqual(response.data[1]['price'], '11.21')
+        self.assertEqual(response.data[2]['price'], '12.10')
+
+        self.checkTime(2024, 5, 19, 11, 00, response.data[0]['start_interval'])
+        self.checkTime(2024, 5, 19, 12, 00, response.data[1]['start_interval'])
+        self.checkTime(2024, 5, 19, 13, 00, response.data[2]['start_interval'])
+
+        self.checkTime(2024, 5, 19, 12, 00, response.data[0]['end_interval'])
+        self.checkTime(2024, 5, 19, 13, 00, response.data[1]['end_interval'])
+        self.checkTime(2024, 5, 19, 14, 00, response.data[2]['end_interval'])
+
+
+    def test_create_price_bulk_one_overlap(self):
+        """
+        Get create a list of price for same plan
+        """
+        url = reverse('prices')
+        data = [
+            {'plan': self.plan.slug, 
+             'price': '10.19',
+             'start_interval': '2024-05-19T11:00+00:00',
+             'end_interval': '2024-05-19T12:00+00:00',},
+            {'plan': self.plan.slug, 
+             'price': '11.21',
+             'start_interval': '2024-05-19T12:00+00:00',
+             'end_interval': '2024-05-19T13:00+00:00',},
+            {'plan': self.plan.slug, 
+             'price': '12.10',
+             'start_interval': '2024-05-19T13:00+00:00',
+             'end_interval': '2024-05-19T14:00+00:00',}
+        ]
+
+        response = self.client.post(url, data[1], format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertGreaterEqual(len(response.data), 3)
+        self.assertEqual(response.data[0], {})
+        self.assertEqual(response.data[1]['non_field_errors'][0], 'Price plan time window overlap')
+        self.assertEqual(response.data[2], {})
+
+        response = self.client.get(path=reverse('prices'), 
+                                   data={'plan': self.plan.slug,}, 
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertGreaterEqual(len(response.data), 1)
 

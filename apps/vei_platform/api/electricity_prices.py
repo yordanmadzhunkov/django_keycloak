@@ -126,6 +126,12 @@ class ElectricityPricesAPIView(generics.ListCreateAPIView):
                 obj = obj.filter(query_overlapping_intervals)
             return obj
         return ElectricityPrice.objects.none()
+    
+    def get_serializer(self, *args, **kwargs):
+        # https://medium.com/swlh/efficient-bulk-create-with-django-rest-framework-f73da6af7ddc
+        if isinstance(kwargs.get("data", {}), list):
+            kwargs["many"] = True
+        return super().get_serializer(*args, **kwargs)
 
 
 
