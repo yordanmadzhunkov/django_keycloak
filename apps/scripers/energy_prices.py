@@ -150,7 +150,9 @@ class VeiPlatformAPI:
     def __init__(self, endpoint_url, token):
         self.token = token
         self.endpoint_base_url = endpoint_url
-        self.headers = {'Authorization': 'Token ' + token}
+        self.headers = {'Authorization': 'Token ' + token,
+                        'Content-Type': 'application/json',
+                        }
 
     def check_billing_zone(self, billing_zone):
         full_url = self.endpoint_base_url + self.billing_zone_url
@@ -193,7 +195,7 @@ class VeiPlatformAPI:
         else:
             return {'error': 'response Status is not OK'}
         
-    def create_plan(self, billing_zone, name):
+    def create_plan(self, billing_zone, name) -> dict:
         data = {
                     'name': name, 
                     'billing_zone': billing_zone, 
@@ -234,6 +236,88 @@ class VeiPlatformAPI:
         return res
 
 
+    def time_params(self, start_interval, end_interval):
+        res = { 
+            'start_interval': start_interval.strftime("%Y-%m-%dT%H:%M:%S%z"),
+            'end_interval': end_interval.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        }
+        return res
+
+
+    def compute_time_windows(self, timestamps, window_size=timedelta(hours=1)):
+        start_timestamp = timestamps[0]
+        end_timestamp = timestamps[0] 
+        for i in range(len(timestamps)):
+            if start_timestamp > timestamps[i]:
+                start_timestamp = timestamps[i]
+            if end_timestamp < timestamps[i]:
+                end_timestamp = timestamps[i]
+        start_interval = datetime.fromtimestamp(start_timestamp, tz=timezone.utc)
+        end_interval = datetime.fromtimestamp(end_timestamp, tz=timezone.utc)
+        end_interval = end_interval + window_size
+        return start_interval, end_interval
+
+    
+    def compute_ovelaping_prices(self, plan, timestamps, price):
+        start_interval, end_interval = self.compute_time_windows(timestamps)
+        params = self.time_params(start_interval, end_interval)
+        #print("PARAMS = " + str(params))
+        params['plan'] = plan
+    
+        response = requests.get(self.endpoint_base_url + self.prices_url,
+            params=params, 
+            headers=self.headers,
+        )
+        new_prices_to_post = []
+        matched_prices = []
+        wrong_price = []
+        #print(params)
+        if response.status_code == 200:
+            server_prices = response.json()
+            server_prices.sort(key=lambda x: x['start_interval'])
+            #timestamps.sort()
+
+            j = 0
+
+            for i in range(len(timestamps)):
+                start_interval = datetime.fromtimestamp(timestamps[i], tz=timezone.utc)
+                end_interval = start_interval + timedelta(hours=1)
+                data = {
+                    'plan': plan, 
+                    'price': str(Decimal(price[i]).quantize(Decimal('0.01'))),
+                }
+                data.update(self.time_params(start_interval, end_interval))
+
+                while j < len(server_prices):
+                    s = datetime.strptime(server_prices[j]['start_interval'], "%Y-%m-%dT%H:%M:%S%z")
+                    if s < start_interval:
+                        j = j + 1
+                    else:
+                        break
+
+                if j < len(server_prices): 
+                    s = datetime.strptime(server_prices[j]['start_interval'], "%Y-%m-%dT%H:%M:%S%z")
+                    if s == start_interval:
+                        if data['price'] == server_prices[j]['price']:
+                            matched_prices.append(data)
+                        else:
+                            wrong_price.append(data)
+                        j = j + 1
+                        continue
+                    
+                new_prices_to_post.append(data)
+
+        return new_prices_to_post, matched_prices, wrong_price   
+
+        
+
+    def response_to_pretty_table(self, response, plan_slug, unit, status):
+        prices_table = PrettyTable(["UTC Date & Time", "Price " + unit, "Status"])
+        prices_table.title = ' Slug = ' + plan_slug       
+        for val in response:
+            prices_table.add_row([val['start_interval'], val['price'], status])
+        return prices_table
+
     def post_prices(self, billing_zone, prices):
         res = self.get_or_create_plan(billing_zone)
         if 'error' in res.keys() or not 'plan' in res.keys():
@@ -252,64 +336,25 @@ class VeiPlatformAPI:
         time_slot_in_unix = prices['unix_seconds']
         plan_slug = res['plan']['slug']
 
-        prices_table = PrettyTable(["UTC Date", "UTC Time", "Price " + unit, "Status"])
-        prices_table.title = 'Name = ' + res['plan']['name'] + \
-                            ' Slug = ' + res['plan']['slug']
-        # skipping {
-        # 'name': 'Day ahead', 
-        # 'billing_zone': 'SK', 
-        # 'description': 'Most basic day ahead plan', 
-        # 'currency': 'EUR', 
-        # 'electricity_unit': 'MWh', 
-        # 'slug': 'day-ahead-17fb', 
-        # 'owner': 'energy_bot'}
+        new_prices_to_post, matched_prices, wrong_price  = self.compute_ovelaping_prices(plan_slug, time_slot_in_unix, price)
+        if len(new_prices_to_post) == 0:
+
+            res['info'] = "Skiping update on %s because there is not new prices, Matched prices count = %d" \
+                % (plan_slug, len(matched_prices))
+            return res
 
 
-        for i in range(len(price)):
-            start_interval = datetime.fromtimestamp(time_slot_in_unix[i], tz=timezone.utc)
-            end_interval = start_interval + timedelta(hours=1)
-            p = Decimal(price[i]).quantize(Decimal('0.01'))
-            data = {
-                'plan': plan_slug, 
-                'price': str(p),
-                'start_interval': start_interval.strftime("%Y-%m-%dT%H:%M:%S%z"),
-                'end_interval': end_interval.strftime("%Y-%m-%dT%H:%M:%S%z"),
-            }
-
-            params = {
-                'plan': plan_slug, 
-                'start_interval': start_interval.strftime("%Y-%m-%dT%H:%M:%S%z"),
-                'end_interval': end_interval.strftime("%Y-%m-%dT%H:%M:%S%z"),
-            }
-
-            response = requests.get(self.endpoint_base_url + self.prices_url,
-                params=params, 
-                headers=self.headers,
-            )
-            if response.status_code == 200:
-                if len(response.json()) == 0:
-                    response = requests.post(self.endpoint_base_url + self.prices_url,
-                        data=data, 
+        bulk_data = new_prices_to_post
+        if len(bulk_data) > 0:
+            response = requests.post(self.endpoint_base_url + self.prices_url,
+                        data=json.dumps(bulk_data), 
                         headers=self.headers,
-                    )
-                    if response.status_code == 201:
-                        status = 'Created'
-                    else:
-                        status = str(response.json())
-                else:
-                    if p == Decimal(response.json()[0]['price']):
-                        status = 'Price match'
-                    else:
-                        status = 'Price don''t match ' + str(response.json()[0]['price'])
+            )
+            if response.status_code == 201:
+                return self.response_to_pretty_table(response.json(), plan_slug, unit, 'Created')
             else:
-                status = str(response.json())
-
-            prices_table.add_row([start_interval.strftime('%Y-%m-%d'), 
-                                  start_interval.strftime('%H:%M:%S %Z'), 
-                                  p, status,])
-
-        return prices_table
-
+                res['error'] = "failed to create bulk data"
+        return res
 
 import json
 
@@ -335,13 +380,34 @@ if __name__ == '__main__':
             for target in target_list:
                 try:
                     vei_platform = VeiPlatformAPI(target['url'], token=target['token'])
+                    res = vei_platform.get_or_create_plan(zone)
+                    if isinstance(res, dict):
+                        if 'error' in res.keys() or not 'plan' in res.keys():
+                            print("Error \"%s\" when processing Target %s token=%.4s.." 
+                                  % (res['error'], target['url'], target['token']))
+                            
+                    #plan = res['plan']
+                    plan_slug = res['plan']['slug']
+
+                    #res = self.get_or_create_plan(billing_zone)
+                    #if 'error' in res.keys() :
+                    #    return res
+
+
                     res = vei_platform.post_prices(zone, prices)
-                    if isinstance(res, dict) and 'error' in res.keys():
-                        print("Error \"%s\" when processing Target %s token=%.4s.." % (res['error'], target['url'], target['token']))
-                    print(res)
+                    if isinstance(res, dict):
+                        if 'error' in res.keys():
+                            print("Error \"%s\" when processing Target %s token=%.4s.." 
+                                  % (res['error'], target['url'], target['token']))
+                        if 'info' in res.keys():
+                            print("Info \"%s\" when processing Target %s token=%.4s.." 
+                                  % (res['info'], target['url'], target['token']))
+                    else:
+                        print(res)
                 except Exception as e:
                     message = getattr(e, 'message', repr(e))
                     print("Exception %s when processing Target %s token=%.4s.." % (message, target['url'], target['token']))
+                    raise e
         else:
             print("Fail to fetch zone = " + zone)
 
