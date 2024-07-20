@@ -19,3 +19,8 @@ AUTHENTICATION_BACKENDS = (
     # 'mozilla_django_oidc.auth.OIDCAuthenticationBackend',
     # ...
 )
+
+# https://nurettinabaci.com/enable-https-in-django-localhost-e18d8861b892
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True

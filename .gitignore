@@ -119,3 +119,7 @@ venv.bak/
 .vscode/
 static/
 media/
+
+apps/certs/cert.pem  
+apps/certs/key.pem
+
