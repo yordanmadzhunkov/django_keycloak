@@ -571,3 +571,31 @@ class FactoryModelForm(forms.ModelForm):
         )
 
 
+class ElectricityPlanForm(forms.Form):
+
+    def __init__(self, plans, *args, **kwargs):
+        super(ElectricityPlanForm, self).__init__(*args, **kwargs)
+        choices = []
+        for plan in plans:
+            choices.append((plan.slug, plan.name))
+        plan_field = forms.TypedChoiceField( 
+                   choices = choices, 
+                   label = _('Plan'),
+                   coerce = str
+                  ) 
+        self.fields['plan'] = plan_field
+
+        save = Submit('show', _('Show'), css_class='btn btn-primary')
+        save.field_classes = 'btn btn-success'
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Row(
+                Column('plan', css_class='form-group col-md-10 mb-2'),
+                css_class='form-row'
+            ),
+            Row(
+                save,
+                css_class='form-row'
+            ),
+        )

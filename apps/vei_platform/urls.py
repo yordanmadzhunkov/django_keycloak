@@ -11,7 +11,7 @@ from .views.dashboard import Dashboard
 from .views.home import Home
 from .views.profile import Profile, MyProfileUpdate
 from .views.legal_entity import view_entity_detail, view_my_entity_detail, view_entity_platform
-from .views.electricity_prices import view_electricity_prices
+from .views.electricity_prices import ElectricityChart, ElectricityPlanView
 from .views.scriping_tools import view_scriping_tools
 from .views.invest import Campaign
 from .views.team import Team
@@ -51,10 +51,11 @@ urlpatterns = [
     path('factory/<int:pk>/campaign', CampaignCreate.as_view(), name='campaign_create'),
     path('factory/<int:pk>/edit', FactoryEdit.as_view(), name='factory_edit'),
 
+    path('price_chart/', ElectricityChart.as_view(), name='energy_price_chart'),
+    path('electricity', ElectricityPlanView.as_view(), name='view_electricity_plan'),
+
     path('production/<int:pk>', view_factory_production,
          name='view_factory_production'),
-    path('electricity/<int:pk>', view_electricity_prices,
-         name='view_electricity_prices'),
     path('entity/<int:pk>', view_entity_detail, name='entity'),
     path('entity/my_entity', view_my_entity_detail, name='my_entity'),
     path('entity/platform', view_entity_platform, name='platform_legal'),

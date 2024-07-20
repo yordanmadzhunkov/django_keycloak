@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+
+{% block head_title %}
+{% trans "Electricity price" %}
+{% endblock%}
+{% block content %}
+<section>
+    <div class="row justify-content-center mb-3">
+        <section style="background-color: #eee;">
+            <div class="container py-5">
+                {% crispy form %}
+            </div>
+        </section>
+        <div id="container" style="width: 75%;">
+            <canvas id="energy-price-chart"
+                data-url="{% url 'energy_price_chart' %}?plan={{ plan_slug | urlencode}}"></canvas>
+        </div>
+    </div>
+</section>
+
+<script>
+    $(function () {
+        var $my_chart = $("#energy-price-chart");
+        $.ajax({
+            url: $my_chart.data("url"),
+            success: function (data) {
+                var ctx = $my_chart[0].getContext("2d");
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: 'Day ahead',
+                            data: data.data,
+                            fill: false,
+                            tension: 0.1,
+                            borderColor: 'rgb(0, 99, 132)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        legend: {
+                            position: 'bottom',
+                        },
+                        title: {
+                            display: true,
+                            text: data.title
+                        },
+                        scales: {
+                            y: {
+                                min: 0,
+                                max: 1000
+                            }
+                        },
+                    }
+                });
+
+            }
+        });
+
+    });
+
+</script>
+{% endblock content %}
