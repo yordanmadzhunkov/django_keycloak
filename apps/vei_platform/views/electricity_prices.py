@@ -99,7 +99,7 @@ class ElectricityChart(View):
         labels = []
         data = []
         for p in prices:
-            labels.append(str(p.start_interval))
+            labels.append(str(p.start_interval.strftime("%Y-%m-%d %H:%M:%S")))
             data.append(str(p.price).replace('BGN',''))
         print(data)
         #labels = ['11:00 pm', '12:00 pm', '13:00 pm']
