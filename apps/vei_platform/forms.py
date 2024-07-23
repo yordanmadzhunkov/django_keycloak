@@ -585,17 +585,28 @@ class ElectricityPlanForm(forms.Form):
                   ) 
         self.fields['plan'] = plan_field
 
-        save = Submit('show', _('Show'), css_class='btn btn-primary')
-        save.field_classes = 'btn btn-success'
+        CURRENCY_CHOISES = (
+            ('EUR', 'EUR'),
+            ('BGN', 'BGN'),
+        )
+
+        currency = forms.TypedChoiceField( 
+                   choices = CURRENCY_CHOISES, 
+                   label = _('Currency'),
+                   coerce = str
+                  ) 
+        self.fields['currency'] = currency
+
+
+        show = Submit('show', _('Show'), css_class='btn btn-primary')
+        show.field_classes = 'btn btn-success'
 
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
             Row(
-                Column('plan', css_class='form-group col-md-10 mb-2'),
-                css_class='form-row'
-            ),
-            Row(
-                save,
+                Column('plan', css_class='form-group col-md-8 mb-2'),
+                Column('currency', css_class='form-group col-md-4 mb-2'),
+                show,
                 css_class='form-row'
             ),
         )

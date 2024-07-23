@@ -85,6 +85,7 @@ class ElectricityPlanView(View):
         if form.is_valid():
             context['form_data'] = form.cleaned_data
             context['plan_slug'] = form.cleaned_data['plan']
+            context['display_currency'] = form.cleaned_data['currency']
             print(context)
         context['form'] = form
         return render(request, "electricity_plan.html", context)
@@ -92,21 +93,33 @@ class ElectricityPlanView(View):
 
 class ElectricityChart(View):
     def get(self, request, *args, **kwargs):
-
         plan_slug = request.GET.get('plan')
         plan = get_object_or_404(ElectricityPricePlan, slug=plan_slug)
-        prices = ElectricityPrice.objects.filter(plan=plan)
+        display_currency = request.GET.get('display_currency')
+        if display_currency is None:
+            display_currency = 'EUR'
+        prices = ElectricityPrice.objects.filter(plan=plan).order_by('-start_interval')[:24]
         labels = []
         data = []
         for p in prices:
             labels.append(str(p.start_interval.strftime("%Y-%m-%d %H:%M:%S")))
-            data.append(str(p.price).replace('BGN',''))
-        print(data)
+            # HACK, all EUR prices are stored in the DB with default BGN currency
+            price = str(p.price).replace('BGN','')
+            # Decimal(price) * Decimal ('1.95583'):
+            if display_currency == 'BGN':
+                price = Decimal(price) * Decimal ('1.95583')
+            else:
+                price = Decimal(price)
+
+            data.append(str(price))
+        #print(data)
         #labels = ['11:00 pm', '12:00 pm', '13:00 pm']
         #data = [100.2, 230.48, 302]
-
+        #y_scale = plan.currency+'/'+plan.electricity_unit
+        y_scale = display_currency+'/'+plan.electricity_unit
         return JsonResponse(data={
             'labels': labels,
             'data': data,
-            'title': 'You can\'t hit that'
+            'plan_name': plan.name + ' ' + y_scale,
+            'y_scale': y_scale,
         })

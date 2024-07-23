@@ -21,7 +21,7 @@
 
         <div id="container" style="width: 90%;">
             <canvas id="energy-price-chart"
-                data-url="{% url 'energy_price_chart' %}?plan={{ plan_slug | urlencode}}"></canvas>
+                data-url="{% url 'energy_price_chart' %}?plan={{ plan_slug | urlencode}}&display_currency={{display_currency|urlencode}}"></canvas>
         </div>
     </div>
 </section>
@@ -38,11 +38,12 @@
                     data: {
                         labels: data.labels,
                         datasets: [{
-                            label: 'Day ahead',
+                            label: data.plan_name,
                             data: data.data,
                             fill: false,
                             stepped: true,
-                            step: 'after',
+                            //step: 'before',
+                            step: 'middle',
                             tension: 0.1,
                             borderColor: 'rgb(0, 99, 132)',
                             backgroundColor: 'rgba(255, 99, 132, 0.2)',
@@ -94,10 +95,15 @@
                                     }
                                 }
                             },
-                            /*y: {
-                                min: 0,
-                                max: 500
-                            }*/
+                            y: {
+                                display: true,
+                                title: {
+                                    display: true,
+                                    text: data.y_scale,
+                                },
+                                //min: 0,
+                                //max: 500
+                            }
                         },
                     }
                 });
