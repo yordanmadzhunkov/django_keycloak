@@ -11,6 +11,8 @@ from vei_platform.forms import PricePlanForm, NumberPerMonthForm
 from decimal import Decimal, DecimalException
 from django.utils.translation import gettext as _
 
+#from django.utils import timezone
+import pytz
 
 #@login_required(login_url='/oidc/authenticate/')
 #def view_electricity_prices(request, pk=None):
@@ -86,11 +88,13 @@ class ElectricityPlanView(View):
             context['form_data'] = form.cleaned_data
             context['plan_slug'] = form.cleaned_data['plan']
             context['display_currency'] = form.cleaned_data['currency']
-            print(context)
+            context['timezone'] = form.cleaned_data['timezone']
+            context['days'] = form.cleaned_data['days']
+
+            #print(context)
         context['form'] = form
         return render(request, "electricity_plan.html", context)
     
-
 class ElectricityChart(View):
     def get(self, request, *args, **kwargs):
         plan_slug = request.GET.get('plan')
@@ -98,11 +102,26 @@ class ElectricityChart(View):
         display_currency = request.GET.get('display_currency')
         if display_currency is None:
             display_currency = 'EUR'
-        prices = ElectricityPrice.objects.filter(plan=plan).order_by('-start_interval')[:24]
+        num_days = request.GET.get('days')
+        if num_days is None:
+            num_days = 1
+        else:
+            num_days = int(num_days)
+            if num_days < 1 or num_days > 30:
+                num_days = 1
+
+        prices = ElectricityPrice.objects.filter(plan=plan).order_by('-start_interval')[:24*num_days]
         labels = []
         data = []
+        requested_timezone = request.GET.get('timezone')
+        if requested_timezone is None:
+            requested_timezone = 'UTC'
+        tz = pytz.timezone(requested_timezone)
+        #pytz.tzinfo.StaticTzInfo
+        #offset_str = datetime.datetime.now().astimezone(pytz_tz).strftime("%z")
+        x_scale = requested_timezone + ' timezone'
         for p in prices:
-            labels.append(str(p.start_interval.strftime("%Y-%m-%d %H:%M:%S")))
+            labels.append(str(p.start_interval.astimezone(tz).strftime("%Y-%m-%d %H:%M:%S")))
             # HACK, all EUR prices are stored in the DB with default BGN currency
             price = str(p.price).replace('BGN','')
             # Decimal(price) * Decimal ('1.95583'):
@@ -112,14 +131,12 @@ class ElectricityChart(View):
                 price = Decimal(price)
 
             data.append(str(price))
-        #print(data)
-        #labels = ['11:00 pm', '12:00 pm', '13:00 pm']
-        #data = [100.2, 230.48, 302]
-        #y_scale = plan.currency+'/'+plan.electricity_unit
+
         y_scale = display_currency+'/'+plan.electricity_unit
         return JsonResponse(data={
             'labels': labels,
             'data': data,
             'plan_name': plan.name + ' ' + y_scale,
             'y_scale': y_scale,
+            'x_scale': x_scale,
         })

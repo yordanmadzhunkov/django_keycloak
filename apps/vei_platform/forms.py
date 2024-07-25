@@ -570,7 +570,7 @@ class FactoryModelForm(forms.ModelForm):
             save,
         )
 
-
+from .models.timezone_choises import TIMEZONE_CHOICES
 class ElectricityPlanForm(forms.Form):
 
     def __init__(self, plans, *args, **kwargs):
@@ -596,6 +596,16 @@ class ElectricityPlanForm(forms.Form):
                    coerce = str
                   ) 
         self.fields['currency'] = currency
+    
+        timezone = forms.TypedChoiceField( 
+                   choices = TIMEZONE_CHOICES, 
+                   label = _('Timezone'),
+                   initial = 'UTC',
+                   coerce = str,
+                  ) 
+        self.fields['timezone'] = timezone
+        days = forms.IntegerField(max_value=30,min_value=1,required=True,initial=1)
+        self.fields['days'] = days
 
 
         show = Submit('show', _('Show'), css_class='btn btn-primary')
@@ -604,8 +614,10 @@ class ElectricityPlanForm(forms.Form):
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
             Row(
-                Column('plan', css_class='form-group col-md-8 mb-2'),
-                Column('currency', css_class='form-group col-md-4 mb-2'),
+                Column('plan', css_class='form-group col-md-5 mb-2'),
+                Column('currency', css_class='form-group col-md-2 mb-2'),
+                Column('timezone', css_class='form-group col-md-3 mb-2'),
+                Column('days', css_class='form-group col-md-2 mb-1'),
                 show,
                 css_class='form-row'
             ),

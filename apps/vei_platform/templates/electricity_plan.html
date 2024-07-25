@@ -9,7 +9,7 @@
 {% endblock%}
 {% block content %}
 <section>
-    <div class="row justify-content-center mb-3">
+    <div class="justify-content-center">
         <section style="background-color: #eee;">
             <div class="container py-5">
                 {% crispy form %}
@@ -21,7 +21,7 @@
 
         <div id="container" style="width: 90%;">
             <canvas id="energy-price-chart"
-                data-url="{% url 'energy_price_chart' %}?plan={{ plan_slug | urlencode}}&display_currency={{display_currency|urlencode}}"></canvas>
+                data-url="{% url 'energy_price_chart' %}?plan={{ plan_slug | urlencode}}&display_currency={{display_currency|urlencode}}&timezone={{timezone|urlencode}}&days={{days|urlencode}}"></canvas>
         </div>
     </div>
 </section>
@@ -75,7 +75,7 @@
                                 display: true,
                                 title: {
                                     display: true,
-                                    text: 'Date'
+                                    text: data.x_scale,
                                 },
                                 ticks: {
                                     autoSkip: false,
