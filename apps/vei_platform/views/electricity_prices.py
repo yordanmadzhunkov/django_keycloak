@@ -95,6 +95,10 @@ class ElectricityPlanView(View):
         context['form'] = form
         return render(request, "electricity_plan.html", context)
     
+
+def datetime_to_chartjs_format(dt, tz):
+    return str(dt.astimezone(tz).strftime("%Y-%m-%d %H:%M:%S"))
+
 class ElectricityChart(View):
     def get(self, request, *args, **kwargs):
         plan_slug = request.GET.get('plan')
@@ -120,8 +124,14 @@ class ElectricityChart(View):
         #pytz.tzinfo.StaticTzInfo
         #offset_str = datetime.datetime.now().astimezone(pytz_tz).strftime("%z")
         x_scale = requested_timezone + ' timezone'
+        x_min = None
+        x_max = None
+        
         for p in prices:
-            labels.append(str(p.start_interval.astimezone(tz).strftime("%Y-%m-%d %H:%M:%S")))
+            t = datetime_to_chartjs_format(p.start_interval, tz)
+            if x_max is None:
+                x_max = datetime_to_chartjs_format(p.end_interval, tz)
+            labels.append(t)
             # HACK, all EUR prices are stored in the DB with default BGN currency
             price = str(p.price).replace('BGN','')
             # Decimal(price) * Decimal ('1.95583'):
@@ -131,7 +141,11 @@ class ElectricityChart(View):
                 price = Decimal(price)
 
             data.append(str(price))
-
+        x_min = datetime_to_chartjs_format(p.start_interval, tz=tz)
+        data = data[::-1]
+        labels = labels[::-1]
+        data.append(data[-1])
+        labels.append(x_max)
         y_scale = display_currency+'/'+plan.electricity_unit
         return JsonResponse(data={
             'labels': labels,
@@ -139,4 +153,6 @@ class ElectricityChart(View):
             'plan_name': plan.name + ' ' + y_scale,
             'y_scale': y_scale,
             'x_scale': x_scale,
+            'x_min': x_min,
+            'x_max': x_max,
         })

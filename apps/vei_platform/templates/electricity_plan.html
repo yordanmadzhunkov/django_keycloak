@@ -42,8 +42,8 @@
                             data: data.data,
                             fill: false,
                             stepped: true,
-                            //step: 'before',
-                            step: 'middle',
+                            step: 'after',
+                            //step: 'middle',
                             tension: 0.1,
                             borderColor: 'rgb(0, 99, 132)',
                             backgroundColor: 'rgba(255, 99, 132, 0.2)',
@@ -72,6 +72,8 @@
                                 time: {
                                     unit: 'hour'
                                 },
+                                min: data.x_min,
+                                max: data.x_max,
                                 display: true,
                                 title: {
                                     display: true,
