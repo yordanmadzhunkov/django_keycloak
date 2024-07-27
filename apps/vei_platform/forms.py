@@ -20,6 +20,10 @@ from django import forms
 from django.utils import formats, timezone
 from django.core.validators import MaxValueValidator, MinValueValidator
 from djmoney.forms.fields import MoneyField
+from .models.timezone_choises import TIMEZONE_CHOICES
+from .settings.base import CURRENCY_CHOICES
+
+
 
 class BootstrapDatePicker(forms.DateInput):
     format_re = re.compile(r'(?P<part>%[bBdDjmMnyY])')
@@ -198,12 +202,19 @@ class UserProfileForm(forms.Form):
     last_name = forms.CharField(required=True,
                                 widget=forms.TextInput(
                                     attrs={'class': "textinput form-control  form-control-user"}))
-
+    timezone = forms.TypedChoiceField( 
+                   choices = TIMEZONE_CHOICES, 
+                   label = _('Timezone'),
+                   coerce = str,
+                  ) 
+    
     def __init__(self, *args, **kwargs):
         super(UserProfileForm, self).__init__(*args, **kwargs)
         self.fields['first_name'].label = _('First name')
         self.fields['last_name'].label = _('Last name')
         self.fields['avatar'].label = _('Avatar')
+        self.fields['timezone'].label = _('Timezone')
+
 
 
 
@@ -570,10 +581,10 @@ class FactoryModelForm(forms.ModelForm):
             save,
         )
 
-from .models.timezone_choises import TIMEZONE_CHOICES
+
 class ElectricityPlanForm(forms.Form):
 
-    def __init__(self, plans, *args, **kwargs):
+    def __init__(self, plans, initial_timezone=None, *args, **kwargs):
         super(ElectricityPlanForm, self).__init__(*args, **kwargs)
         choices = []
         for plan in plans:
@@ -585,22 +596,17 @@ class ElectricityPlanForm(forms.Form):
                   ) 
         self.fields['plan'] = plan_field
 
-        CURRENCY_CHOISES = (
-            ('EUR', 'EUR'),
-            ('BGN', 'BGN'),
-        )
-
         currency = forms.TypedChoiceField( 
-                   choices = CURRENCY_CHOISES, 
+                   choices = CURRENCY_CHOICES, 
                    label = _('Currency'),
                    coerce = str
                   ) 
         self.fields['currency'] = currency
-    
+        initial_timezone = kwargs.get('initial_timezone','UTC')
         timezone = forms.TypedChoiceField( 
                    choices = TIMEZONE_CHOICES, 
                    label = _('Timezone'),
-                   initial = 'UTC',
+                   initial = initial_timezone,
                    coerce = str,
                   ) 
         self.fields['timezone'] = timezone
