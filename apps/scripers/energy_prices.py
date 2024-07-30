@@ -2,11 +2,150 @@
 import requests
 from prettytable import PrettyTable
 from decimal import Decimal
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone as dt_timezone
 from tzlocal import get_localzone # $ pip install tzlocal
+import json
+#from scripers.ibex import IBexScriper
+#from .ibex import IBexScriper
 
 
 from decouple import config
+import requests
+from prettytable import PrettyTable
+from bs4 import BeautifulSoup
+from requests_html import HTMLSession, HtmlElement
+from datetime import datetime, timedelta
+from pytz import timezone, utc
+from decimal import Decimal
+
+def timestamp_to_datetime(timestamp):
+    return datetime.fromtimestamp(timestamp, tz=dt_timezone.utc)
+
+
+def energy_price_entry(start_interval, price):
+    end_interval = start_interval + timedelta(hours=1)
+    return {
+        #'plan': 'day-ahead-bulgaria-2', 
+        'price': str((Decimal(price) / Decimal('1.95583')).quantize(Decimal('0.01'))),
+        'start_interval': start_interval,#.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        'end_interval': end_interval,#.strftime("%Y-%m-%dT%H:%M:%S%z"),
+    }
+
+
+def parse_ibex(soup):
+    table1 = soup.find("table", {"id": "wpdtSimpleTable-33"})
+    table_rows = table1.find_all('tr')
+    first = True 
+    localtimezone = timezone('Europe/Sofia')
+    entries = []
+    for tr in table_rows:
+        tag = 'th' if first else 'td'
+        td = tr.find_all(tag) 
+        row = [i.text.replace('\n', '').strip() for i in td]
+        if first:
+            row[0] = 'Hour'
+            row[1] = 'Unit'
+            head = row
+            prices_pretty_table = PrettyTable(row)
+        else:
+            if len(head) == len(row):
+                prices_pretty_table.add_row(row)
+                for i in range(len(row) - 2):
+                    price = row[i + 2]
+                    date = head[i + 2].split(',')[1]
+                    month = int(date.split('/')[0])
+                    day = int(date.split('/')[1])
+                    hour = int(row[0].split('-')[0])
+                    year = datetime.now().year
+                    d = datetime(year=year, month=month, day=day, hour=hour, minute=0, second=0)
+                    d = localtimezone.localize(d)
+                    d = d.astimezone(utc)
+                    entry = energy_price_entry(d, price)
+                    entry['unit'] = row[1]
+                    entries.append(entry)
+        first = False
+    return sorted(entries, key=lambda k: k['start_interval'])
+
+
+def prepare_entries_for_post(entries):
+    res = {}
+    price = []
+    unix_seconds = []
+    for p in entries:
+        res['unit'] = p['unit']
+        unix_seconds.append(int(p['start_interval'].timestamp()))
+        price.append(p['price'])
+    res['unit'] = entries[0]['unit']
+    res['price'] = price
+    res['unix_seconds'] = unix_seconds
+    return res
+
+
+def render_entries_to_pretty_table(entries):
+    prices_pretty_table = PrettyTable(["Date & time", "price", "unit"])
+    for p in entries:
+        prices_pretty_table.add_row([
+            p['start_interval'],
+            p['price'],
+            p['unit'],
+            ]
+        )
+    return prices_pretty_table
+
+
+
+
+class IBexScriper:
+    base_url = 'https://ibex.bg/'
+    #'https://ibex.bg/%D0%B4%D0%B0%D0%BD%D0%BD%D0%B8-%D0%B7%D0%B0-%D0%BF%D0%B0%D0%B7%D0%B0%D1%80%D0%B0/%D0%BF%D0%B0%D0%B7%D0%B0%D1%80%D0%B5%D0%BD-%D1%81%D0%B5%D0%B3%D0%BC%D0%B5%D0%BD%D1%82-%D0%B4%D0%B5%D0%BD-%D0%BD%D0%B0%D0%BF%D1%80%D0%B5%D0%B4/day-ahead-prices-and-volumes-v2-0/'
+    prices_path = '%d0%b4%d0%b0%d0%bd%d0%bd%d0%b8-%d0%b7%d0%b0-%d0%bf%d0%b0%d0%b7%d0%b0%d1%80%d0%b0/%d0%bf%d0%b0%d0%b7%d0%b0%d1%80%d0%b5%d0%bd-%d1%81%d0%b5%d0%b3%d0%bc%d0%b5%d0%bd%d1%82-%d0%b4%d0%b5%d0%bd-%d0%bd%d0%b0%d0%bf%d1%80%d0%b5%d0%b4/day-ahead-prices-and-volumes-v2-0/'
+    headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
+    billing_zones = {
+        "BG": "Bulgaria",
+    }
+    
+    def fetch_prices_day_ahead(self, billing_zone='BG'):
+        if billing_zone != 'BG':
+            return
+        session = HTMLSession()
+        prices = session.get(self.base_url + self.prices_path, headers=self.headers)
+        prices.html.render()  # this call executes the js in the page
+        table1 = prices.html.find("#wpdtSimpleTable-33")[0]
+        soup = BeautifulSoup(table1.html, 'html.parser')
+        ibex_data = parse_ibex(soup)
+        return prepare_entries_for_post(ibex_data)
+    
+    def parse_soup(self, soup):
+        entries = parse_ibex(soup)
+        print(entries)
+        
+    def get_currency_and_unit(self, prices):
+        return prices['unit'].split('/')
+    
+
+    def print_prices(self, prices, billing_zone):
+        unit = prices['unit']
+        price = prices['price']
+        time_slot_in_unix = prices['unix_seconds']
+
+        prices_table = PrettyTable(["UTC Date", "UTC Time", "Price " + unit, "Local Time", "Local Date"])
+        prices_table.title = 'Billing zone = ' + self.billing_zones[billing_zone]
+        for i in range(len(price)):
+            d = timestamp_to_datetime(time_slot_in_unix[i])
+            p = Decimal(price[i]).quantize(Decimal('0.01'))
+            #print(d + ' '  + str(price[i]) + ' ' + unit)
+            ld = d.astimezone(get_localzone())
+            prices_table.add_row([d.strftime('%Y-%m-%d'), 
+                                      d.strftime('%H:%M:%S %Z'), 
+                                      p, 
+                                      ld.strftime('%H:%M:%S %Z'),
+                                      ld.strftime('%Y-%m-%d')])
+        print(prices_table)
+
+
+    def get_plan_name(self, zone_name):
+        plan_name = 'BG Day ahead'
+        return plan_name
 
 
 # Send a GET request to a website
@@ -35,7 +174,7 @@ from decouple import config
 #    output = res.json()
 #    print(output)
 
-class EnergyPrices:
+class EnergyChartsAPI:
     base_url = 'https://api.energy-charts.info'
     billing_zones = {
                 "AT": "Austria",
@@ -125,7 +264,7 @@ class EnergyPrices:
         prices_table = PrettyTable(["UTC Date", "UTC Time", "Price " + unit, "Local Time", "Local Date"])
         prices_table.title = 'Billing zone = ' + self.billing_zones[billing_zone]
         for i in range(len(price)):
-            d = datetime.fromtimestamp(time_slot_in_unix[i], tz=timezone.utc)
+            d = timestamp_to_datetime(time_slot_in_unix[i])
             p = Decimal(price[i]).quantize(Decimal('0.01'))
             #print(d + ' '  + str(price[i]) + ' ' + unit)
             ld = d.astimezone(get_localzone())
@@ -136,6 +275,12 @@ class EnergyPrices:
                                       ld.strftime('%Y-%m-%d')])
         print(prices_table)
 
+    def get_plan_name(self, zone_name):
+        plan_name = 'Day ahead %s' % zone_name
+        return plan_name
+
+    def get_currency_and_unit(self, prices):
+        return prices['unit'].split('/')
 
 
 class VeiPlatformAPI:
@@ -195,44 +340,34 @@ class VeiPlatformAPI:
         else:
             return {'error': 'response Status is not OK'}
         
-    def create_plan(self, billing_zone, name) -> dict:
+    def create_plan(self, billing_zone, name, currency='EUR', electricity_unit='MWh' ) -> dict:
         data = {
                     'name': name, 
                     'billing_zone': billing_zone, 
                     'description': 'Most basic day ahead plan', 
-                    'currency': 'EUR',
-                    'electricity_unit': 'MWh',
+                    'currency': currency,
+                    'electricity_unit': electricity_unit,
         }
         response = requests.post(self.endpoint_base_url + self.plans_url,
-                data=data, 
+                data=json.dumps(data), 
                 headers=self.headers,
         )
         if response.status_code == 201:
             plan = response.json()
-            # plan ['name'] == 'Day ahead'
-            # plan ['billing_zone'] == 'BG')
-            # plan ['description'], 'Most basic test plan')
-            # plan ['currency'] == 'EUR'
-            # plan ['electricity_unit'] == 'MWh'
-            # plan ['slug'] == 'day-ahead-1')
-            # paln ['owner'] == 'energy_bot
             print('created ' + str(plan))
             return {'plan': plan}
         else:
             return {'error': 'response Status is not CREATED'}
         
 
-    def get_or_create_plan(self, billing_zone):
-        res = self.check_billing_zone(billing_zone)
-        if 'error' in res.keys():
-            return res
-        zone_name = res['name']
-        plan_name = 'Day ahead %s' % zone_name
-        res.update(self.get_plan(billing_zone=billing_zone, name=plan_name))
-
+    def get_or_create_plan(self, billing_zone, plan_name = None, currency='EUR', energy_unit='MWh'):
+        res = self.get_plan(billing_zone=billing_zone, name=plan_name)
+        print(res)
         if not 'error' in res.keys() and 'plan' in res.keys():
             if res['plan'] is None:
-                res.update(self.create_plan(billing_zone=billing_zone, name=plan_name))
+                new_plan = self.create_plan(billing_zone=billing_zone, name=plan_name, currency=currency, electricity_unit=energy_unit)
+                print(new_plan)
+                res.update(new_plan)
         return res
 
 
@@ -252,8 +387,8 @@ class VeiPlatformAPI:
                 start_timestamp = timestamps[i]
             if end_timestamp < timestamps[i]:
                 end_timestamp = timestamps[i]
-        start_interval = datetime.fromtimestamp(start_timestamp, tz=timezone.utc)
-        end_interval = datetime.fromtimestamp(end_timestamp, tz=timezone.utc)
+        start_interval = timestamp_to_datetime(start_timestamp)
+        end_interval = timestamp_to_datetime(end_timestamp)
         end_interval = end_interval + window_size
         return start_interval, end_interval
 
@@ -280,7 +415,7 @@ class VeiPlatformAPI:
             j = 0
 
             for i in range(len(timestamps)):
-                start_interval = datetime.fromtimestamp(timestamps[i], tz=timezone.utc)
+                start_interval = timestamp_to_datetime(timestamps[i])
                 end_interval = start_interval + timedelta(hours=1)
                 data = {
                     'plan': plan, 
@@ -318,24 +453,13 @@ class VeiPlatformAPI:
             prices_table.add_row([val['start_interval'], val['price'], status])
         return prices_table
 
-    def post_prices(self, billing_zone, prices):
-        res = self.get_or_create_plan(billing_zone)
-        if 'error' in res.keys() or not 'plan' in res.keys():
-            return res
-        # print('We have a plan = ' + str(res))
-        # print(prices)
-        data = {
-            'blz': billing_zone,
-            'unit': prices['unit'],
-            'price': prices['price'],
-            'unix_seconds': prices['unix_seconds'],
-        }
-
+    def post_prices(self, plan_info, prices):
+        print(plan_info)
         unit = prices['unit']
         price = prices['price']
         time_slot_in_unix = prices['unix_seconds']
-        plan_slug = res['plan']['slug']
-
+        plan_slug = plan_info['slug']
+        res = {}
         new_prices_to_post, matched_prices, wrong_price  = self.compute_ovelaping_prices(plan_slug, time_slot_in_unix, price)
         if len(new_prices_to_post) == 0:
 
@@ -356,60 +480,63 @@ class VeiPlatformAPI:
                 res['error'] = "failed to create bulk data"
         return res
 
-import json
 
 
-if __name__ == '__main__':
+def report_result(res, showInfo=True):
+    if isinstance(res, dict):
+        if 'error' in res.keys():
+            print("Error \"%s\" when processing Target %s token=%.4s.." 
+                                  % (res['error'], target['url'], target['token']))
+        if showInfo and 'info' in res.keys():
+            print("Info \"%s\" when processing Target %s token=%.4s.." 
+                                  % (res['info'], target['url'], target['token']))
+    else:
+        print(res)    
 
-    ENERGY_BOT_TARGETS = config('ENERGY_BOT_TARGETS', '[{"url": "http://127.0.0.1:8000/", "token":"6da8aa16d75593c3d9c7029acc59caf59dd5a446"},{"url":"https://fractionenergy.eu/", "token":"dfgsgfdsfsdgd"}]')
-
-    target_list = json.loads(ENERGY_BOT_TARGETS)
-
-    for target in target_list:
-        print("Target %s token=%.4s.." % (target['url'], target['token']))
-
-    energy_prices_api = EnergyPrices()
-    #energy_prices_api.fetch_and_print_openapi_specs()
-
-    
-    
+def process_scriper(energy_prices_api, target_list):
     for zone in energy_prices_api.billing_zones.keys():
         prices = energy_prices_api.fetch_prices_day_ahead(zone)
         if prices:
+            currency, energy_unit = energy_prices_api.get_currency_and_unit(prices)
             energy_prices_api.print_prices(prices, zone)
             for target in target_list:
                 try:
                     vei_platform = VeiPlatformAPI(target['url'], token=target['token'])
-                    res = vei_platform.get_or_create_plan(zone)
-                    if isinstance(res, dict):
-                        if 'error' in res.keys() or not 'plan' in res.keys():
-                            print("Error \"%s\" when processing Target %s token=%.4s.." 
-                                  % (res['error'], target['url'], target['token']))
-                            
-                    #plan = res['plan']
-                    plan_slug = res['plan']['slug']
-
-                    #res = self.get_or_create_plan(billing_zone)
-                    #if 'error' in res.keys() :
-                    #    return res
-
-
-                    res = vei_platform.post_prices(zone, prices)
-                    if isinstance(res, dict):
-                        if 'error' in res.keys():
-                            print("Error \"%s\" when processing Target %s token=%.4s.." 
-                                  % (res['error'], target['url'], target['token']))
-                        if 'info' in res.keys():
-                            print("Info \"%s\" when processing Target %s token=%.4s.." 
-                                  % (res['info'], target['url'], target['token']))
-                    else:
-                        print(res)
+                    billing_zone_info = vei_platform.check_billing_zone(zone)
+                    if 'error' in billing_zone_info.keys():
+                        report_result(billing_zone_info)
+                        continue
+                    plan_name = energy_prices_api.get_plan_name(billing_zone_info['name'])
+                    plan_info = vei_platform.get_or_create_plan(zone, plan_name, currency, energy_unit)
+                    report_result(plan_info)
+                    if 'plan' in plan_info.keys():
+                        report_result(vei_platform.post_prices(plan_info['plan'], prices))
+                    break
                 except Exception as e:
                     message = getattr(e, 'message', repr(e))
                     print("Exception %s when processing Target %s token=%.4s.." % (message, target['url'], target['token']))
                     raise e
         else:
             print("Fail to fetch zone = " + zone)
+
+if __name__ == '__main__':
+
+    # ENERGY_BOT_TARGETS = config('ENERGY_BOT_TARGETS', '[{"url": "http://127.0.0.1:8000/", "token":"6da8aa16d75593c3d9c7029acc59caf59dd5a446"},{"url":"https://fractionenergy.eu/", "token":"dfgsgfdsfsdgd"}]')
+    ENERGY_BOT_TARGETS = config('ENERGY_BOT_TARGETS', '[{"url": "http://127.0.0.1:8000/", "token":"6da8aa16d75593c3d9c7029acc59caf59dd5a446"},')
+    
+    target_list = json.loads(ENERGY_BOT_TARGETS)
+
+    for target in target_list:
+        print("Target %s token=%.4s.." % (target['url'], target['token']))
+
+    process_scriper(IBexScriper(), target_list)
+    process_scriper(EnergyChartsAPI(), target_list)
+    
+    #energy_prices_api.fetch_and_print_openapi_specs()
+
+    
+    
+
 
 
  
