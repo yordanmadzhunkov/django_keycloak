@@ -9,6 +9,6 @@ DATABASES = {
     }
 }
 
-SECRET_KEY = '-05sgp9!deq=q1nltm@^^2cc+v29i(tyybv3v2t77qi66czazj'
+SECRET_KEY = "-05sgp9!deq=q1nltm@^^2cc+v29i(tyybv3v2t77qi66czazj"
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"

@@ -8,20 +8,63 @@ import uuid
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('vei_platform', '0008_alter_legalentity_legal_form_platformlegalentity'),
+        ("vei_platform", "0008_alter_legalentity_legal_form_platformlegalentity"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='BankTransaction',
+            name="BankTransaction",
             fields=[
-                ('uuid', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('amount', models.DecimalField(decimal_places=2, default=0.0, help_text='Account of the transaction.', max_digits=20, verbose_name='Amount')),
-                ('fee', models.DecimalField(decimal_places=2, default=0.0, help_text='Fee assosiated with the transaction.', max_digits=20, verbose_name='Fee')),
-                ('other_account_iban', models.TextField(blank=True, default='', max_length=100, null=True)),
-                ('occured_at', models.DateTimeField()),
-                ('description', models.CharField(blank=True, help_text='A description to be included with this individual transaction', max_length=256, verbose_name='Tx Description')),
-                ('account', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='vei_platform.bankaccount')),
+                (
+                    "uuid",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                (
+                    "amount",
+                    models.DecimalField(
+                        decimal_places=2,
+                        default=0.0,
+                        help_text="Account of the transaction.",
+                        max_digits=20,
+                        verbose_name="Amount",
+                    ),
+                ),
+                (
+                    "fee",
+                    models.DecimalField(
+                        decimal_places=2,
+                        default=0.0,
+                        help_text="Fee assosiated with the transaction.",
+                        max_digits=20,
+                        verbose_name="Fee",
+                    ),
+                ),
+                (
+                    "other_account_iban",
+                    models.TextField(blank=True, default="", max_length=100, null=True),
+                ),
+                ("occured_at", models.DateTimeField()),
+                (
+                    "description",
+                    models.CharField(
+                        blank=True,
+                        help_text="A description to be included with this individual transaction",
+                        max_length=256,
+                        verbose_name="Tx Description",
+                    ),
+                ),
+                (
+                    "account",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="vei_platform.bankaccount",
+                    ),
+                ),
             ],
         ),
     ]

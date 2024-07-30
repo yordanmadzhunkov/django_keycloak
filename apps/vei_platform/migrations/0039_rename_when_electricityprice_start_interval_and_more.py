@@ -9,31 +9,37 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('vei_platform', '0038_alter_electricitypriceplan_slug'),
+        ("vei_platform", "0038_alter_electricitypriceplan_slug"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='electricityprice',
-            old_name='when',
-            new_name='start_interval',
+            model_name="electricityprice",
+            old_name="when",
+            new_name="start_interval",
         ),
         migrations.RemoveField(
-            model_name='electricitypriceplan',
-            name='end_year',
+            model_name="electricitypriceplan",
+            name="end_year",
         ),
         migrations.RemoveField(
-            model_name='electricitypriceplan',
-            name='start_year',
+            model_name="electricitypriceplan",
+            name="start_year",
         ),
         migrations.AddField(
-            model_name='electricityprice',
-            name='interval_length',
+            model_name="electricityprice",
+            name="interval_length",
             field=models.IntegerField(default=3600),
         ),
         migrations.AddField(
-            model_name='electricitypriceplan',
-            name='owner',
-            field=models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="electricitypriceplan",
+            name="owner",
+            field=models.ForeignKey(
+                blank=True,
+                default=None,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

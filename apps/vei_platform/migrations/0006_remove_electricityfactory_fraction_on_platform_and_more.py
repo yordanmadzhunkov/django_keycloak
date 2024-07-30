@@ -8,25 +8,73 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('vei_platform', '0005_alter_solarestatelisting_factory'),
+        ("vei_platform", "0005_alter_solarestatelisting_factory"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='electricityfactory',
-            name='fraction_on_platform',
+            model_name="electricityfactory",
+            name="fraction_on_platform",
         ),
         migrations.CreateModel(
-            name='BankAccount',
+            name="BankAccount",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('owner_name', models.CharField(max_length=1024)),
-                ('iban', models.TextField(max_length=100)),
-                ('balance', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=24)),
-                ('initial_balance', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=24)),
-                ('currency', models.CharField(choices=[('BGN', 'Bulgarian lev'), ('EUR', 'Euro'), ('USD', 'Unated States Dolar')], default='BGN', max_length=4)),
-                ('status', models.CharField(choices=[('UN', 'Unverified'), ('IN', 'Inactive'), ('AC', 'Active')], default='UN', max_length=2)),
-                ('owner', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, to='vei_platform.legalentity')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("owner_name", models.CharField(max_length=1024)),
+                ("iban", models.TextField(max_length=100)),
+                (
+                    "balance",
+                    models.DecimalField(
+                        decimal_places=2, default=Decimal("0"), max_digits=24
+                    ),
+                ),
+                (
+                    "initial_balance",
+                    models.DecimalField(
+                        decimal_places=2, default=Decimal("0"), max_digits=24
+                    ),
+                ),
+                (
+                    "currency",
+                    models.CharField(
+                        choices=[
+                            ("BGN", "Bulgarian lev"),
+                            ("EUR", "Euro"),
+                            ("USD", "Unated States Dolar"),
+                        ],
+                        default="BGN",
+                        max_length=4,
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("UN", "Unverified"),
+                            ("IN", "Inactive"),
+                            ("AC", "Active"),
+                        ],
+                        default="UN",
+                        max_length=2,
+                    ),
+                ),
+                (
+                    "owner",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="vei_platform.legalentity",
+                    ),
+                ),
             ],
         ),
     ]

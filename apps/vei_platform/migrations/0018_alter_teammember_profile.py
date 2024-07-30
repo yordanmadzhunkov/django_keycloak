@@ -7,13 +7,19 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('vei_platform', '0017_teammember'),
+        ("vei_platform", "0017_teammember"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='teammember',
-            name='profile',
-            field=models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.DO_NOTHING, to='vei_platform.userprofile'),
+            model_name="teammember",
+            name="profile",
+            field=models.ForeignKey(
+                blank=True,
+                default=None,
+                null=True,
+                on_delete=django.db.models.deletion.DO_NOTHING,
+                to="vei_platform.userprofile",
+            ),
         ),
     ]

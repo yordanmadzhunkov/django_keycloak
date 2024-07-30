@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('vei_platform', '0035_electricitypriceplan_billing_zone_and_more'),
+        ("vei_platform", "0035_electricitypriceplan_billing_zone_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='electricitypriceplan',
-            name='slug',
+            model_name="electricitypriceplan",
+            name="slug",
             field=models.SlugField(blank=True, default=None, null=True),
         ),
         migrations.AlterField(
-            model_name='electricitypriceplan',
-            name='description',
+            model_name="electricitypriceplan",
+            name="description",
             field=models.TextField(max_length=4096),
         ),
     ]

@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('vei_platform', '0021_alter_electricityfactorycomponents_docfile'),
+        ("vei_platform", "0021_alter_electricityfactorycomponents_docfile"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='electricityfactorycomponents',
-            name='description',
+            model_name="electricityfactorycomponents",
+            name="description",
             field=models.TextField(blank=True, default=None, null=True),
         ),
     ]

@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('vei_platform', '0011_investementinlisting_delete_solarestateinvestor'),
+        ("vei_platform", "0011_investementinlisting_delete_solarestateinvestor"),
     ]
 
     operations = [
         migrations.RenameModel(
-            old_name='SolarEstateListing',
-            new_name='FactoryListing',
+            old_name="SolarEstateListing",
+            new_name="FactoryListing",
         ),
     ]

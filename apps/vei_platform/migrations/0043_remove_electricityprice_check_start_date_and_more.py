@@ -6,16 +6,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('vei_platform', '0042_electricityprice_check_start_date'),
+        ("vei_platform", "0042_electricityprice_check_start_date"),
     ]
 
     operations = [
         migrations.RemoveConstraint(
-            model_name='electricityprice',
-            name='check_start_date',
+            model_name="electricityprice",
+            name="check_start_date",
         ),
         migrations.AddConstraint(
-            model_name='electricityprice',
-            constraint=models.CheckConstraint(check=models.Q(('start_interval__lt', models.F('start_interval'))), name='check_start_date'),
+            model_name="electricityprice",
+            constraint=models.CheckConstraint(
+                check=models.Q(("start_interval__lt", models.F("start_interval"))),
+                name="check_start_date",
+            ),
         ),
     ]

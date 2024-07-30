@@ -1,7 +1,11 @@
 from . import common_context, get_balance, get_user_profile
 
 from vei_platform.models.profile import get_user_profile
-from vei_platform.forms import BankAccountForm, BankAccountDepositForm, PlatformWithdrawForm
+from vei_platform.forms import (
+    BankAccountForm,
+    BankAccountDepositForm,
+    PlatformWithdrawForm,
+)
 from vei_platform.models.legal import find_legal_entity
 from vei_platform.models.factory import ElectricityFactory
 from vei_platform.templatetags.vei_platform_utils import balance_from_transactions

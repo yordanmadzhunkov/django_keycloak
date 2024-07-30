@@ -8,33 +8,40 @@ import djmoney.models.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('vei_platform', '0034_auto_20240511_1716'),
+        ("vei_platform", "0034_auto_20240511_1716"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='electricitypriceplan',
-            name='billing_zone',
-            field=models.ForeignKey(blank=True, default=None, on_delete=django.db.models.deletion.DO_NOTHING, to='vei_platform.electricitybillingzone'),
+            model_name="electricitypriceplan",
+            name="billing_zone",
+            field=models.ForeignKey(
+                blank=True,
+                default=None,
+                on_delete=django.db.models.deletion.DO_NOTHING,
+                to="vei_platform.electricitybillingzone",
+            ),
         ),
         migrations.AddField(
-            model_name='electricitypriceplan',
-            name='currency',
-            field=djmoney.models.fields.CurrencyField(default='EUR', max_length=3),
+            model_name="electricitypriceplan",
+            name="currency",
+            field=djmoney.models.fields.CurrencyField(default="EUR", max_length=3),
         ),
         migrations.AddField(
-            model_name='electricitypriceplan',
-            name='description',
-            field=models.TextField(default='', max_length=4096),
+            model_name="electricitypriceplan",
+            name="description",
+            field=models.TextField(default="", max_length=4096),
         ),
         migrations.AddField(
-            model_name='electricitypriceplan',
-            name='electricity_unit',
-            field=models.CharField(choices=[('kWh', 'kWh'), ('MWh', 'MWh')], default='kWh', max_length=3),
+            model_name="electricitypriceplan",
+            name="electricity_unit",
+            field=models.CharField(
+                choices=[("kWh", "kWh"), ("MWh", "MWh")], default="kWh", max_length=3
+            ),
         ),
         migrations.AlterField(
-            model_name='electricitybillingzone',
-            name='code',
+            model_name="electricitybillingzone",
+            name="code",
             field=models.CharField(max_length=128, unique=True),
         ),
     ]

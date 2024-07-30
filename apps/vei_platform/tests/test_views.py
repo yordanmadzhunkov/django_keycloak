@@ -1,6 +1,7 @@
 from django.test import TestCase
 from http import HTTPStatus
 
+
 class RobotsTest(TestCase):
     def test_get(self):
         response = self.client.get("/robots.txt")

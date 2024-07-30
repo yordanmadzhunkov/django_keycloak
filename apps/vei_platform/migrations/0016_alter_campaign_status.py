@@ -6,13 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('vei_platform', '0015_rename_listing_investementincampaign_campaign'),
+        ("vei_platform", "0015_rename_listing_investementincampaign_campaign"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='campaign',
-            name='status',
-            field=models.CharField(choices=[('UN', 'Under review'), ('Ac', 'Active'), ('CA', 'Canceled'), ('CO', 'Completed'), ('To', 'Timeout')], default='UN', max_length=2),
+            model_name="campaign",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("UN", "Under review"),
+                    ("Ac", "Active"),
+                    ("CA", "Canceled"),
+                    ("CO", "Completed"),
+                    ("To", "Timeout"),
+                ],
+                default="UN",
+                max_length=2,
+            ),
         ),
     ]

@@ -7,13 +7,18 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('vei_platform', '0004_alter_solarestatelisting_factory'),
+        ("vei_platform", "0004_alter_solarestatelisting_factory"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='solarestatelisting',
-            name='factory',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, to='vei_platform.electricityfactory'),
+            model_name="solarestatelisting",
+            name="factory",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.DO_NOTHING,
+                to="vei_platform.electricityfactory",
+            ),
         ),
     ]

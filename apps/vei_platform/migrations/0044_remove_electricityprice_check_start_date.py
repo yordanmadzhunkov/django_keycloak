@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('vei_platform', '0043_remove_electricityprice_check_start_date_and_more'),
+        ("vei_platform", "0043_remove_electricityprice_check_start_date_and_more"),
     ]
 
     operations = [
         migrations.RemoveConstraint(
-            model_name='electricityprice',
-            name='check_start_date',
+            model_name="electricityprice",
+            name="check_start_date",
         ),
     ]

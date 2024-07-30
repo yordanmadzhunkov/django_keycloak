@@ -9,13 +9,19 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('vei_platform', '0040_alter_electricitypriceplan_owner'),
+        ("vei_platform", "0040_alter_electricitypriceplan_owner"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='electricitypriceplan',
-            name='owner',
-            field=models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="electricitypriceplan",
+            name="owner",
+            field=models.ForeignKey(
+                blank=True,
+                default=None,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

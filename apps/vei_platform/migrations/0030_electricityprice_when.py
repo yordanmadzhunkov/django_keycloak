@@ -7,14 +7,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('vei_platform', '0029_alter_campaign_status'),
+        ("vei_platform", "0029_alter_campaign_status"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='electricityprice',
-            name='when',
-            field=models.DateTimeField(db_index=True, default=datetime.datetime(2024, 1, 1, 0, 0, tzinfo=datetime.timezone.utc)),
-
+            model_name="electricityprice",
+            name="when",
+            field=models.DateTimeField(
+                db_index=True,
+                default=datetime.datetime(
+                    2024, 1, 1, 0, 0, tzinfo=datetime.timezone.utc
+                ),
+            ),
         ),
     ]

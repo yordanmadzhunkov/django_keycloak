@@ -7,20 +7,34 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('vei_platform', '0007_remove_bankaccount_owner_name'),
+        ("vei_platform", "0007_remove_bankaccount_owner_name"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='legalentity',
-            name='legal_form',
+            model_name="legalentity",
+            name="legal_form",
             field=models.CharField(max_length=48, null=True),
         ),
         migrations.CreateModel(
-            name='PlatformLegalEntity',
+            name="PlatformLegalEntity",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('entity', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='vei_platform.legalentity')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "entity",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="vei_platform.legalentity",
+                    ),
+                ),
             ],
         ),
     ]

@@ -7,13 +7,18 @@ import vei_platform.models.factory
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('vei_platform', '0019_electricityfactorycomponents'),
+        ("vei_platform", "0019_electricityfactorycomponents"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='electricityfactorycomponents',
-            name='docfile',
-            field=models.FileField(blank=True, default=None, null=True, upload_to=vei_platform.models.factory.factory_component_file_upload_directory_path),
+            model_name="electricityfactorycomponents",
+            name="docfile",
+            field=models.FileField(
+                blank=True,
+                default=None,
+                null=True,
+                upload_to=vei_platform.models.factory.factory_component_file_upload_directory_path,
+            ),
         ),
     ]

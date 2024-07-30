@@ -6,17 +6,25 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('vei_platform', '0032_remove_electricityprice_month'),
+        ("vei_platform", "0032_remove_electricityprice_month"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ElectricityBillingZone',
+            name="ElectricityBillingZone",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(max_length=128)),
-                ('name', models.CharField(max_length=1024)),
-                ('description', models.TextField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("code", models.CharField(max_length=128)),
+                ("name", models.CharField(max_length=1024)),
+                ("description", models.TextField()),
             ],
         ),
     ]

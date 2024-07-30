@@ -6,12 +6,15 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('vei_platform', '0006_remove_electricityfactory_fraction_on_platform_and_more'),
+        (
+            "vei_platform",
+            "0006_remove_electricityfactory_fraction_on_platform_and_more",
+        ),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='bankaccount',
-            name='owner_name',
+            model_name="bankaccount",
+            name="owner_name",
         ),
     ]

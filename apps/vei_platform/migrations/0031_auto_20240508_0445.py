@@ -5,11 +5,19 @@ from datetime import datetime, timezone
 
 
 def set_my_defaults(apps, schema_editor):
-    ElectricityPrice = apps.get_model('vei_platform', 'electricityprice')
+    ElectricityPrice = apps.get_model("vei_platform", "electricityprice")
     count = 0
     for pr in ElectricityPrice.objects.all():
         old = pr.month
-        old_date = datetime(year=old.year, month=old.month, day=old.day, hour=0, minute=0, second=0, tzinfo=timezone.utc)
+        old_date = datetime(
+            year=old.year,
+            month=old.month,
+            day=old.day,
+            hour=0,
+            minute=0,
+            second=0,
+            tzinfo=timezone.utc,
+        )
         pr.when = old_date
         pr.save()
         count = count + 1
@@ -18,7 +26,7 @@ def set_my_defaults(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('vei_platform', '0030_electricityprice_when'),
+        ("vei_platform", "0030_electricityprice_when"),
     ]
 
     operations = [

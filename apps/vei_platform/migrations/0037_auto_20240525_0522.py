@@ -6,17 +6,20 @@ import uuid
 
 
 def generate_electricity_plan_slugs(apps, schema_editor):
-    ElectricityPricePlan = apps.get_model('vei_platform', 'ElectricityPricePlan')
+    ElectricityPricePlan = apps.get_model("vei_platform", "ElectricityPricePlan")
     for row in ElectricityPricePlan.objects.all():
         row.slug = str(uuid.uuid4())
         row.save()
 
+
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('vei_platform', '0036_electricitypriceplan_slug_and_more'),
+        ("vei_platform", "0036_electricitypriceplan_slug_and_more"),
     ]
 
     operations = [
-        migrations.RunPython(generate_electricity_plan_slugs, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(
+            generate_electricity_plan_slugs, reverse_code=migrations.RunPython.noop
+        ),
     ]

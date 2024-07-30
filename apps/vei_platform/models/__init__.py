@@ -1,6 +1,6 @@
-
 from django.db import models
 from django.utils import timezone
+
 
 class TimeStampMixin(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)

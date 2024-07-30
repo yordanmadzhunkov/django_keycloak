@@ -15,5 +15,3 @@ admin.site.register(UserProfile)
 admin.site.register(InvestementInCampaign)
 admin.site.register(TeamMember)
 admin.site.register(ElectricityBillingZone)
-
-

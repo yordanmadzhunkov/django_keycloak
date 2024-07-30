@@ -9,13 +9,19 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('vei_platform', '0039_rename_when_electricityprice_start_interval_and_more'),
+        ("vei_platform", "0039_rename_when_electricityprice_start_interval_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='electricitypriceplan',
-            name='owner',
-            field=models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
+            model_name="electricitypriceplan",
+            name="owner",
+            field=models.ForeignKey(
+                blank=True,
+                default=None,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

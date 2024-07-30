@@ -5,7 +5,7 @@ from decimal import Decimal
 
 class PapagalScriperTest(TestCase):
     def test_parse_ceo_and_owners_1(self):
-        dd = '''<dd class="col-sm-9">
+        dd = """<dd class="col-sm-9">
  Управител:
  <a class="underlined" href="/person/088846C589308B44CB79FC3E1C28B39DC89BE51513CEA5DC93E4B6D0E4F20FB4">
   Димитър Иванов Николов
@@ -50,48 +50,58 @@ class PapagalScriperTest(TestCase):
  (свързан с 4
 фирми)
  <br/>
-</dd>'''
-        soup = BeautifulSoup(dd, 'html.parser')
+</dd>"""
+        soup = BeautifulSoup(dd, "html.parser")
         info = parse_ceo_and_owners(soup)
-        self.assertTrue('people' in info.keys())
-        self.assertEqual(len(info['people']), 4)
-        self.assertEqual(info['people'][0]['name'], 'Димитър Иванов Николов')
-        self.assertEqual(info['people'][0]['person'], True)
-        self.assertEqual(info['people'][0]['role'], 'ceo')
-        self.assertEqual(info['people'][0]['href'],
-                         '/person/088846C589308B44CB79FC3E1C28B39DC89BE51513CEA5DC93E4B6D0E4F20FB4')
+        self.assertTrue("people" in info.keys())
+        self.assertEqual(len(info["people"]), 4)
+        self.assertEqual(info["people"][0]["name"], "Димитър Иванов Николов")
+        self.assertEqual(info["people"][0]["person"], True)
+        self.assertEqual(info["people"][0]["role"], "ceo")
+        self.assertEqual(
+            info["people"][0]["href"],
+            "/person/088846C589308B44CB79FC3E1C28B39DC89BE51513CEA5DC93E4B6D0E4F20FB4",
+        )
 
-        self.assertEqual(info['people'][1]['name'], 'Стойчо Захариев Иванов')
-        self.assertEqual(info['people'][1]['person'], True)
-        self.assertEqual(info['people'][1]['role'], 'ceo')
-        self.assertEqual(info['people'][1]['href'],
-                         '/person/BE9D62707BF400C839AE879A7FD6DC754F791D7B94C6EB21B2BD270098C62242')
+        self.assertEqual(info["people"][1]["name"], "Стойчо Захариев Иванов")
+        self.assertEqual(info["people"][1]["person"], True)
+        self.assertEqual(info["people"][1]["role"], "ceo")
+        self.assertEqual(
+            info["people"][1]["href"],
+            "/person/BE9D62707BF400C839AE879A7FD6DC754F791D7B94C6EB21B2BD270098C62242",
+        )
 
-        self.assertEqual(info['people'][2]['name'], 'Димитър Иванов Николов')
-        self.assertEqual(info['people'][2]['person'], True)
-        self.assertEqual(info['people'][2]['role'], 'owner')
-        self.assertEqual(info['people'][2]['href'],
-                         '/person/088846C589308B44CB79FC3E1C28B39DC89BE51513CEA5DC93E4B6D0E4F20FB4')
-        self.assertEqual(info['people'][2]['share'],
-                         {
-            'percent': Decimal('50.0'),
-            'capital': Decimal('2500.0'),
-            'currency': 'лв',
-        })
+        self.assertEqual(info["people"][2]["name"], "Димитър Иванов Николов")
+        self.assertEqual(info["people"][2]["person"], True)
+        self.assertEqual(info["people"][2]["role"], "owner")
+        self.assertEqual(
+            info["people"][2]["href"],
+            "/person/088846C589308B44CB79FC3E1C28B39DC89BE51513CEA5DC93E4B6D0E4F20FB4",
+        )
+        self.assertEqual(
+            info["people"][2]["share"],
+            {
+                "percent": Decimal("50.0"),
+                "capital": Decimal("2500.0"),
+                "currency": "лв",
+            },
+        )
 
-        self.assertEqual(info['people'][3]['name'], '"СЕЙКОН - БГ" ООД')
-        self.assertEqual(info['people'][3]['person'], False)
-        self.assertEqual(info['people'][3]['role'], 'owner')
-        self.assertEqual(info['people'][3]['href'], '/person/201060956')
-        self.assertEqual(info['people'][3]['share'],
-                         {
-            'percent': Decimal('50.0'),
-            'capital': Decimal('2500.0'),
-            'currency': 'лв',
-        })
+        self.assertEqual(info["people"][3]["name"], '"СЕЙКОН - БГ" ООД')
+        self.assertEqual(info["people"][3]["person"], False)
+        self.assertEqual(info["people"][3]["role"], "owner")
+        self.assertEqual(info["people"][3]["href"], "/person/201060956")
+        self.assertEqual(
+            info["people"][3]["share"],
+            {
+                "percent": Decimal("50.0"),
+                "capital": Decimal("2500.0"),
+                "currency": "лв",
+            },
+        )
 
     def test_parse_ceo_and_owners_2(self):
-        dd = '''<dd class="col-sm-9">
+        dd = """<dd class="col-sm-9">
                                         Управител: <a class="underlined" href="/person/088846C589308B44CB79FC3E1C28B39DC89BE51513CEA5DC93E4B6D0E4F20FB4">Димитър Иванов Николов</a> (свързан с 7
 фирми)<br/>
                                             Управител: <a class="underlined" href="/person/BE9D62707BF400C839AE879A7FD6DC754F791D7B94C6EB21B2BD270098C62242">Стойчо Захариев Иванов</a> (свързан с 14
@@ -116,48 +126,58 @@ class PapagalScriperTest(TestCase):
         (свързан с 4
 фирми)<br/>
 </dd>
-'''
-        soup = BeautifulSoup(dd, 'html.parser')
+"""
+        soup = BeautifulSoup(dd, "html.parser")
         info = parse_ceo_and_owners(soup)
-        self.assertTrue('people' in info.keys())
-        self.assertEqual(len(info['people']), 4)
-        self.assertEqual(info['people'][0]['name'], 'Димитър Иванов Николов')
-        self.assertEqual(info['people'][0]['person'], True)
-        self.assertEqual(info['people'][0]['role'], 'ceo')
-        self.assertEqual(info['people'][0]['href'],
-                         '/person/088846C589308B44CB79FC3E1C28B39DC89BE51513CEA5DC93E4B6D0E4F20FB4')
+        self.assertTrue("people" in info.keys())
+        self.assertEqual(len(info["people"]), 4)
+        self.assertEqual(info["people"][0]["name"], "Димитър Иванов Николов")
+        self.assertEqual(info["people"][0]["person"], True)
+        self.assertEqual(info["people"][0]["role"], "ceo")
+        self.assertEqual(
+            info["people"][0]["href"],
+            "/person/088846C589308B44CB79FC3E1C28B39DC89BE51513CEA5DC93E4B6D0E4F20FB4",
+        )
 
-        self.assertEqual(info['people'][1]['name'], 'Стойчо Захариев Иванов')
-        self.assertEqual(info['people'][1]['person'], True)
-        self.assertEqual(info['people'][1]['role'], 'ceo')
-        self.assertEqual(info['people'][1]['href'],
-                         '/person/BE9D62707BF400C839AE879A7FD6DC754F791D7B94C6EB21B2BD270098C62242')
+        self.assertEqual(info["people"][1]["name"], "Стойчо Захариев Иванов")
+        self.assertEqual(info["people"][1]["person"], True)
+        self.assertEqual(info["people"][1]["role"], "ceo")
+        self.assertEqual(
+            info["people"][1]["href"],
+            "/person/BE9D62707BF400C839AE879A7FD6DC754F791D7B94C6EB21B2BD270098C62242",
+        )
 
-        self.assertEqual(info['people'][2]['name'], 'Димитър Иванов Николов')
-        self.assertEqual(info['people'][2]['person'], True)
-        self.assertEqual(info['people'][2]['role'], 'owner')
-        self.assertEqual(info['people'][2]['href'],
-                         '/person/088846C589308B44CB79FC3E1C28B39DC89BE51513CEA5DC93E4B6D0E4F20FB4')
-        self.assertEqual(info['people'][2]['share'],
-                         {
-            'percent': Decimal('50.0'),
-            'capital': Decimal('24.0'),
-            'currency': 'лв',
-        })
+        self.assertEqual(info["people"][2]["name"], "Димитър Иванов Николов")
+        self.assertEqual(info["people"][2]["person"], True)
+        self.assertEqual(info["people"][2]["role"], "owner")
+        self.assertEqual(
+            info["people"][2]["href"],
+            "/person/088846C589308B44CB79FC3E1C28B39DC89BE51513CEA5DC93E4B6D0E4F20FB4",
+        )
+        self.assertEqual(
+            info["people"][2]["share"],
+            {
+                "percent": Decimal("50.0"),
+                "capital": Decimal("24.0"),
+                "currency": "лв",
+            },
+        )
 
-        self.assertEqual(info['people'][3]['name'], '"СЕЙКОН - БГ" ООД')
-        self.assertEqual(info['people'][3]['person'], False)
-        self.assertEqual(info['people'][3]['role'], 'owner')
-        self.assertEqual(info['people'][3]['href'], '/person/201060956')
-        self.assertEqual(info['people'][3]['share'],
-                         {
-            'percent': Decimal('50.0'),
-            'capital': Decimal('24.0'),
-            'currency': 'лв',
-        })
+        self.assertEqual(info["people"][3]["name"], '"СЕЙКОН - БГ" ООД')
+        self.assertEqual(info["people"][3]["person"], False)
+        self.assertEqual(info["people"][3]["role"], "owner")
+        self.assertEqual(info["people"][3]["href"], "/person/201060956")
+        self.assertEqual(
+            info["people"][3]["share"],
+            {
+                "percent": Decimal("50.0"),
+                "capital": Decimal("24.0"),
+                "currency": "лв",
+            },
+        )
 
     def test_parse_ceo_and_owners_3(self):
-        dd = '''<dd class="col-sm-9">
+        dd = """<dd class="col-sm-9">
                                         Управител: <a class="underlined" href="/person/a0dec8c8f3e1a5b00b56cb92c9395419ca625ae2d1ff987320f5d0de6fcb7ae0">ВЕСЕЛА ЦОЧЕВА НЕСТОРОВА</a> (свързан с 6
 фирми)<br/>
 <div class="w-100 pt-3">
@@ -185,69 +205,96 @@ class PapagalScriperTest(TestCase):
         (свързан с 10
 фирми)<br/>
 </dd>
-'''
-        soup = BeautifulSoup(dd, 'html.parser')
+"""
+        soup = BeautifulSoup(dd, "html.parser")
         info = parse_ceo_and_owners(soup)
-        self.assertTrue('people' in info.keys())
-        self.assertEqual(len(info['people']), 4)
-        self.assertEqual(info['people'][0]['name'], 'ВЕСЕЛА ЦОЧЕВА НЕСТОРОВА')
-        self.assertEqual(info['people'][0]['person'], True)
-        self.assertEqual(info['people'][0]['role'], 'ceo')
-        self.assertEqual(info['people'][0]['href'],
-                         '/person/a0dec8c8f3e1a5b00b56cb92c9395419ca625ae2d1ff987320f5d0de6fcb7ae0')
+        self.assertTrue("people" in info.keys())
+        self.assertEqual(len(info["people"]), 4)
+        self.assertEqual(info["people"][0]["name"], "ВЕСЕЛА ЦОЧЕВА НЕСТОРОВА")
+        self.assertEqual(info["people"][0]["person"], True)
+        self.assertEqual(info["people"][0]["role"], "ceo")
+        self.assertEqual(
+            info["people"][0]["href"],
+            "/person/a0dec8c8f3e1a5b00b56cb92c9395419ca625ae2d1ff987320f5d0de6fcb7ae0",
+        )
 
-        self.assertEqual(info['people'][1]['name'], '"ВЕЛЕСТОВО" ЕООД')
-        self.assertEqual(info['people'][1]['person'], False)
-        self.assertEqual(info['people'][1]['role'], 'owner')
-        self.assertEqual(info['people'][1]['href'], '/person/175277813')
-        self.assertEqual(info['people'][1]['share'],
-                         {
-            'percent': Decimal('33.33'),
-            'capital': Decimal('16.0'),
-            'currency': 'лв',
-        })
+        self.assertEqual(info["people"][1]["name"], '"ВЕЛЕСТОВО" ЕООД')
+        self.assertEqual(info["people"][1]["person"], False)
+        self.assertEqual(info["people"][1]["role"], "owner")
+        self.assertEqual(info["people"][1]["href"], "/person/175277813")
+        self.assertEqual(
+            info["people"][1]["share"],
+            {
+                "percent": Decimal("33.33"),
+                "capital": Decimal("16.0"),
+                "currency": "лв",
+            },
+        )
 
-        self.assertEqual(info['people'][2]['name'], 'Весела Цочева Несторова')
-        self.assertEqual(info['people'][2]['person'], True)
-        self.assertEqual(info['people'][2]['role'], 'owner')
-        self.assertEqual(info['people'][2]['href'],
-                         '/person/a0dec8c8f3e1a5b00b56cb92c9395419ca625ae2d1ff987320f5d0de6fcb7ae0')
-        self.assertEqual(info['people'][2]['share'],
-                         {
-            'percent': Decimal('33.33'),
-            'capital': Decimal('16.0'),
-            'currency': 'лв',
-        })
+        self.assertEqual(info["people"][2]["name"], "Весела Цочева Несторова")
+        self.assertEqual(info["people"][2]["person"], True)
+        self.assertEqual(info["people"][2]["role"], "owner")
+        self.assertEqual(
+            info["people"][2]["href"],
+            "/person/a0dec8c8f3e1a5b00b56cb92c9395419ca625ae2d1ff987320f5d0de6fcb7ae0",
+        )
+        self.assertEqual(
+            info["people"][2]["share"],
+            {
+                "percent": Decimal("33.33"),
+                "capital": Decimal("16.0"),
+                "currency": "лв",
+            },
+        )
 
-        self.assertEqual(info['people'][3]['name'], 'СТОЯН НЕДЯЛКОВ БРАДИНОВ')
-        self.assertEqual(info['people'][3]['person'], True)
-        self.assertEqual(info['people'][3]['role'], 'owner')
-        self.assertEqual(info['people'][3]['href'],
-                         '/person/b1046d07ccb7b206da7e9c6b3eadaf8f14002e871d28356d88272846fa32b1d4')
-        self.assertEqual(info['people'][3]['share'],
-                         {
-            'percent': Decimal('33.33'),
-            'capital': Decimal('16.0'),
-            'currency': 'лв',
-        })
+        self.assertEqual(info["people"][3]["name"], "СТОЯН НЕДЯЛКОВ БРАДИНОВ")
+        self.assertEqual(info["people"][3]["person"], True)
+        self.assertEqual(info["people"][3]["role"], "owner")
+        self.assertEqual(
+            info["people"][3]["href"],
+            "/person/b1046d07ccb7b206da7e9c6b3eadaf8f14002e871d28356d88272846fa32b1d4",
+        )
+        self.assertEqual(
+            info["people"][3]["share"],
+            {
+                "percent": Decimal("33.33"),
+                "capital": Decimal("16.0"),
+                "currency": "лв",
+            },
+        )
 
     def test_is_person(self):
-        self.assertFalse(is_person(name="\"Гардения Холдинг\" ГмбХ",
-                                   href=u'/person/DF78B1993EAEE1F9356585D7B0DBEE2E1875DACAB002821903508F01D81EF426/%22%D0%93%D0%B0%D1%80%D0%B4%D0%B5%D0%BD%D0%B8%D1%8F%20%D0%A5%D0%BE%D0%BB%D0%B4%D0%B8%D0%BD%D0%B3%22%20%D0%93%D0%BC%D0%B1%D0%A5'
-                                   ))
-        self.assertFalse(is_person(name="\"Гардения Холдинг\" ГмбХ",
-                                   href=u'/person/DF78B1993EAEE1F9356585D7B0DBEE2E1875DACAB002821903508F01D81EF426'))
+        self.assertFalse(
+            is_person(
+                name='"Гардения Холдинг" ГмбХ',
+                href="/person/DF78B1993EAEE1F9356585D7B0DBEE2E1875DACAB002821903508F01D81EF426/%22%D0%93%D0%B0%D1%80%D0%B4%D0%B5%D0%BD%D0%B8%D1%8F%20%D0%A5%D0%BE%D0%BB%D0%B4%D0%B8%D0%BD%D0%B3%22%20%D0%93%D0%BC%D0%B1%D0%A5",
+            )
+        )
+        self.assertFalse(
+            is_person(
+                name='"Гардения Холдинг" ГмбХ',
+                href="/person/DF78B1993EAEE1F9356585D7B0DBEE2E1875DACAB002821903508F01D81EF426",
+            )
+        )
 
     def test_strip_person_href(self):
 
-        self.assertEqual(strip_person_href('/person/DF78B1993EAEE1F9356585D7B0DBEE2E1875DACAB002821903508F01D81EF426'),
-                         '/person/DF78B1993EAEE1F9356585D7B0DBEE2E1875DACAB002821903508F01D81EF426')
+        self.assertEqual(
+            strip_person_href(
+                "/person/DF78B1993EAEE1F9356585D7B0DBEE2E1875DACAB002821903508F01D81EF426"
+            ),
+            "/person/DF78B1993EAEE1F9356585D7B0DBEE2E1875DACAB002821903508F01D81EF426",
+        )
 
-        self.assertEqual(strip_person_href(href=u'/person/DF78B1993EAEE1F9356585D7B0DBEE2E1875DACAB002821903508F01D81EF426/%22%D0%93%D0%B0%D1%80%D0%B4%D0%B5%D0%BD%D0%B8%D1%8F%20%D0%A5%D0%BE%D0%BB%D0%B4%D0%B8%D0%BD%D0%B3%22%20%D0%93%D0%BC%D0%B1%D0%A5'),
-                         '/person/DF78B1993EAEE1F9356585D7B0DBEE2E1875DACAB002821903508F01D81EF426')
+        self.assertEqual(
+            strip_person_href(
+                href="/person/DF78B1993EAEE1F9356585D7B0DBEE2E1875DACAB002821903508F01D81EF426/%22%D0%93%D0%B0%D1%80%D0%B4%D0%B5%D0%BD%D0%B8%D1%8F%20%D0%A5%D0%BE%D0%BB%D0%B4%D0%B8%D0%BD%D0%B3%22%20%D0%93%D0%BC%D0%B1%D0%A5"
+            ),
+            "/person/DF78B1993EAEE1F9356585D7B0DBEE2E1875DACAB002821903508F01D81EF426",
+        )
 
     def test_weird_page(self):
-        content = '''<!doctype html>
+        content = """<!doctype html>
 <html>
     <head>
         <!-- Global site tag (gtag.js) - Google Analytics -->
@@ -1025,54 +1072,61 @@ class PapagalScriperTest(TestCase):
     </script>
     <script src="/build/company.976e3f88.js"></script>
     </body>
-</html>'''
+</html>"""
 
-        soup = BeautifulSoup(content, 'html.parser')
+        soup = BeautifulSoup(content, "html.parser")
         scriper = PapagalScriper()
         info = scriper.parse_soup(soup, info={})
-        self.assertEqual(info['active'], True)
-        self.assertEqual(info['founded'], date(2004, 1, 1))
-        self.assertEqual(info['name'], 'ВТК')
-        self.assertEqual(info['latin_name'], 'VTK')
-        self.assertEqual(info['legal_form'], 'ЕООД')
+        self.assertEqual(info["active"], True)
+        self.assertEqual(info["founded"], date(2004, 1, 1))
+        self.assertEqual(info["name"], "ВТК")
+        self.assertEqual(info["latin_name"], "VTK")
+        self.assertEqual(info["legal_form"], "ЕООД")
 
-        self.assertTrue('people' in info.keys())
-        self.assertEqual(len(info['people']), 4)
-        self.assertEqual(info['people'][0]['name'],
-                         'ГАБРИЕЛА ЛЮДМИЛОВА НАЙДЕНОВА')
-        self.assertEqual(info['people'][0]['person'], True)
-        self.assertEqual(info['people'][0]['role'], 'ceo')
-        self.assertEqual(info['people'][0]['href'],
-                         '/person/D1ADF7CB5CFFC55B57D1F1A53F44FC26E6D51638570A2ABAED9439BCC7AB83C5')
+        self.assertTrue("people" in info.keys())
+        self.assertEqual(len(info["people"]), 4)
+        self.assertEqual(info["people"][0]["name"], "ГАБРИЕЛА ЛЮДМИЛОВА НАЙДЕНОВА")
+        self.assertEqual(info["people"][0]["person"], True)
+        self.assertEqual(info["people"][0]["role"], "ceo")
+        self.assertEqual(
+            info["people"][0]["href"],
+            "/person/D1ADF7CB5CFFC55B57D1F1A53F44FC26E6D51638570A2ABAED9439BCC7AB83C5",
+        )
 
-        self.assertEqual(info['people'][1]['name'],
-                         'ВАЛЕНТИН НЕДЕЛЧЕВ ГРОЗДЕВ')
-        self.assertEqual(info['people'][1]['person'], True)
-        self.assertEqual(info['people'][1]['role'], 'ex-owner')
-        self.assertEqual(info['people'][1]['href'],
-                         '/person/1DA9E12A55225D41FD4623321123D40694D5AADD786F3C3542C0F11EA8BD18B4')
-        self.assertEqual(info['people'][1]['share'],
-                         {
-            'percent': Decimal('90'),
-            'capital': Decimal('108000'),
-            'currency': 'лв',
-        })
+        self.assertEqual(info["people"][1]["name"], "ВАЛЕНТИН НЕДЕЛЧЕВ ГРОЗДЕВ")
+        self.assertEqual(info["people"][1]["person"], True)
+        self.assertEqual(info["people"][1]["role"], "ex-owner")
+        self.assertEqual(
+            info["people"][1]["href"],
+            "/person/1DA9E12A55225D41FD4623321123D40694D5AADD786F3C3542C0F11EA8BD18B4",
+        )
+        self.assertEqual(
+            info["people"][1]["share"],
+            {
+                "percent": Decimal("90"),
+                "capital": Decimal("108000"),
+                "currency": "лв",
+            },
+        )
 
-        self.assertEqual(info['people'][2]['name'],
-                         'ТЕОДОРА НИКОЛОВА ГРОЗДЕВА')
-        self.assertEqual(info['people'][2]['person'], True)
-        self.assertEqual(info['people'][2]['role'], 'ex-owner')
-        self.assertEqual(info['people'][2]['href'],
-                         '/person/81A4A2054299C945EF87DC560A3542568BE655AD26A6A0B38CCB5D82318D7CA2')
+        self.assertEqual(info["people"][2]["name"], "ТЕОДОРА НИКОЛОВА ГРОЗДЕВА")
+        self.assertEqual(info["people"][2]["person"], True)
+        self.assertEqual(info["people"][2]["role"], "ex-owner")
+        self.assertEqual(
+            info["people"][2]["href"],
+            "/person/81A4A2054299C945EF87DC560A3542568BE655AD26A6A0B38CCB5D82318D7CA2",
+        )
 
-        self.assertEqual(info['people'][2]['share'],
-                         {
-            'percent': Decimal('10'),
-            'capital': Decimal('12000'),
-            'currency': 'лв',
-        })
+        self.assertEqual(
+            info["people"][2]["share"],
+            {
+                "percent": Decimal("10"),
+                "capital": Decimal("12000"),
+                "currency": "лв",
+            },
+        )
 
-        self.assertEqual(info['people'][3]['name'], '"КАПТИВА ХИДРО" ЕООД')
-        self.assertEqual(info['people'][3]['person'], False)
-        self.assertEqual(info['people'][3]['role'], 'Capital owner')
-        self.assertEqual(info['people'][3]['href'], '/person/200621030')
+        self.assertEqual(info["people"][3]["name"], '"КАПТИВА ХИДРО" ЕООД')
+        self.assertEqual(info["people"][3]["person"], False)
+        self.assertEqual(info["people"][3]["role"], "Capital owner")
+        self.assertEqual(info["people"][3]["href"], "/person/200621030")
