@@ -5,16 +5,7 @@ from requests_html import HTMLSession, HtmlElement
 from datetime import datetime, timedelta
 from pytz import timezone, utc
 from decimal import Decimal
-
-
-def energy_price_entry(start_interval, price):
-    end_interval = start_interval + timedelta(hours=1)
-    return {
-        #'plan': 'day-ahead-bulgaria-2',
-        "price": str((Decimal(price) / Decimal("1.95583")).quantize(Decimal("0.01"))),
-        "start_interval": start_interval,  # .strftime("%Y-%m-%dT%H:%M:%S%z"),
-        "end_interval": end_interval,  # .strftime("%Y-%m-%dT%H:%M:%S%z"),
-    }
+from utils import timestamp_to_datetime
 
 
 def parse_ibex(soup):
@@ -68,19 +59,6 @@ def prepare_entries_for_post(entries):
     return res
 
 
-def render_entries_to_pretty_table(entries):
-    prices_pretty_table = PrettyTable(["Date & time", "price", "unit"])
-    for p in entries:
-        prices_pretty_table.add_row(
-            [
-                p["start_interval"],
-                p["price"],
-                p["unit"],
-            ]
-        )
-    return prices_pretty_table
-
-
 class IBexScriper:
     base_url = "https://ibex.bg/"
     #'https://ibex.bg/%D0%B4%D0%B0%D0%BD%D0%BD%D0%B8-%D0%B7%D0%B0-%D0%BF%D0%B0%D0%B7%D0%B0%D1%80%D0%B0/%D0%BF%D0%B0%D0%B7%D0%B0%D1%80%D0%B5%D0%BD-%D1%81%D0%B5%D0%B3%D0%BC%D0%B5%D0%BD%D1%82-%D0%B4%D0%B5%D0%BD-%D0%BD%D0%B0%D0%BF%D1%80%D0%B5%D0%B4/day-ahead-prices-and-volumes-v2-0/'
@@ -92,7 +70,9 @@ class IBexScriper:
         "BG": "Bulgaria",
     }
 
-    def fetch_prices_day_ahead(self):
+    def fetch_prices_day_ahead(self, billing_zone="BG"):
+        if billing_zone != "BG":
+            return
         session = HTMLSession()
         prices = session.get(self.base_url + self.prices_path, headers=self.headers)
         prices.html.render()  # this call executes the js in the page
@@ -105,15 +85,32 @@ class IBexScriper:
         entries = parse_ibex(soup)
         print(entries)
 
+    def get_currency_and_unit(self, prices):
+        return prices["unit"].split("/")
+
+    def get_plan_name(self, zone_name):
+        plan_name = "BG Day ahead"
+        return plan_name
+
+
+def energy_price_entry(start_interval, price):
+    end_interval = start_interval + timedelta(hours=1)
+    return {
+        #'plan': 'day-ahead-bulgaria-2',
+        "price": str((Decimal(price) / Decimal("1.95583")).quantize(Decimal("0.01"))),
+        "start_interval": start_interval,  # .strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "end_interval": end_interval,  # .strftime("%Y-%m-%dT%H:%M:%S%z"),
+    }
+
 
 # print ("name = " + __name__)
-if __name__ == "__main__":
-    # energy_prices_api = IBexPrices()
-    # prices = energy_prices_api.fetch_prices_day_ahead()
+# if __name__ == "__main__":
+# energy_prices_api = IBexPrices()
+# prices = energy_prices_api.fetch_prices_day_ahead()
 
-    with open("ibex_table.html", "r") as file:
-        content = file.read()
-        soup = BeautifulSoup(content, "html.parser")
-        res = parse_ibex(soup)
-        print(render_entries_to_pretty_table(res))
-        print(prepare_entries_for_post(res))
+#    with open("ibex_table.html", "r") as file:
+#        content = file.read()
+#        soup = BeautifulSoup(content, "html.parser")
+#        res = parse_ibex(soup)
+#        print(render_entries_to_pretty_table(res))
+#        print(prepare_entries_for_post(res))

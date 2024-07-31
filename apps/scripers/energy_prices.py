@@ -6,8 +6,7 @@ from datetime import datetime, timedelta, timezone as dt_timezone
 from tzlocal import get_localzone  # $ pip install tzlocal
 import json
 
-# from scripers.ibex import IBexScriper
-# from .ibex import IBexScriper
+from ibex import IBexScriper
 
 
 from decouple import config
@@ -24,67 +23,6 @@ def timestamp_to_datetime(timestamp):
     return datetime.fromtimestamp(timestamp, tz=dt_timezone.utc)
 
 
-def energy_price_entry(start_interval, price):
-    end_interval = start_interval + timedelta(hours=1)
-    return {
-        #'plan': 'day-ahead-bulgaria-2',
-        "price": str((Decimal(price) / Decimal("1.95583")).quantize(Decimal("0.01"))),
-        "start_interval": start_interval,  # .strftime("%Y-%m-%dT%H:%M:%S%z"),
-        "end_interval": end_interval,  # .strftime("%Y-%m-%dT%H:%M:%S%z"),
-    }
-
-
-def parse_ibex(soup):
-    table1 = soup.find("table", {"id": "wpdtSimpleTable-33"})
-    table_rows = table1.find_all("tr")
-    first = True
-    localtimezone = timezone("Europe/Sofia")
-    entries = []
-    for tr in table_rows:
-        tag = "th" if first else "td"
-        td = tr.find_all(tag)
-        row = [i.text.replace("\n", "").strip() for i in td]
-        if first:
-            row[0] = "Hour"
-            row[1] = "Unit"
-            head = row
-            prices_pretty_table = PrettyTable(row)
-        else:
-            if len(head) == len(row):
-                prices_pretty_table.add_row(row)
-                for i in range(len(row) - 2):
-                    price = row[i + 2]
-                    date = head[i + 2].split(",")[1]
-                    month = int(date.split("/")[0])
-                    day = int(date.split("/")[1])
-                    hour = int(row[0].split("-")[0])
-                    year = datetime.now().year
-                    d = datetime(
-                        year=year, month=month, day=day, hour=hour, minute=0, second=0
-                    )
-                    d = localtimezone.localize(d)
-                    d = d.astimezone(utc)
-                    entry = energy_price_entry(d, price)
-                    entry["unit"] = row[1]
-                    entries.append(entry)
-        first = False
-    return sorted(entries, key=lambda k: k["start_interval"])
-
-
-def prepare_entries_for_post(entries):
-    res = {}
-    price = []
-    unix_seconds = []
-    for p in entries:
-        res["unit"] = p["unit"]
-        unix_seconds.append(int(p["start_interval"].timestamp()))
-        price.append(p["price"])
-    res["unit"] = entries[0]["unit"]
-    res["price"] = price
-    res["unix_seconds"] = unix_seconds
-    return res
-
-
 def render_entries_to_pretty_table(entries):
     prices_pretty_table = PrettyTable(["Date & time", "price", "unit"])
     for p in entries:
@@ -96,92 +34,6 @@ def render_entries_to_pretty_table(entries):
             ]
         )
     return prices_pretty_table
-
-
-class IBexScriper:
-    base_url = "https://ibex.bg/"
-    #'https://ibex.bg/%D0%B4%D0%B0%D0%BD%D0%BD%D0%B8-%D0%B7%D0%B0-%D0%BF%D0%B0%D0%B7%D0%B0%D1%80%D0%B0/%D0%BF%D0%B0%D0%B7%D0%B0%D1%80%D0%B5%D0%BD-%D1%81%D0%B5%D0%B3%D0%BC%D0%B5%D0%BD%D1%82-%D0%B4%D0%B5%D0%BD-%D0%BD%D0%B0%D0%BF%D1%80%D0%B5%D0%B4/day-ahead-prices-and-volumes-v2-0/'
-    prices_path = "%d0%b4%d0%b0%d0%bd%d0%bd%d0%b8-%d0%b7%d0%b0-%d0%bf%d0%b0%d0%b7%d0%b0%d1%80%d0%b0/%d0%bf%d0%b0%d0%b7%d0%b0%d1%80%d0%b5%d0%bd-%d1%81%d0%b5%d0%b3%d0%bc%d0%b5%d0%bd%d1%82-%d0%b4%d0%b5%d0%bd-%d0%bd%d0%b0%d0%bf%d1%80%d0%b5%d0%b4/day-ahead-prices-and-volumes-v2-0/"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36"
-    }
-    billing_zones = {
-        "BG": "Bulgaria",
-    }
-
-    def fetch_prices_day_ahead(self, billing_zone="BG"):
-        if billing_zone != "BG":
-            return
-        session = HTMLSession()
-        prices = session.get(self.base_url + self.prices_path, headers=self.headers)
-        prices.html.render()  # this call executes the js in the page
-        table1 = prices.html.find("#wpdtSimpleTable-33")[0]
-        soup = BeautifulSoup(table1.html, "html.parser")
-        ibex_data = parse_ibex(soup)
-        return prepare_entries_for_post(ibex_data)
-
-    def parse_soup(self, soup):
-        entries = parse_ibex(soup)
-        print(entries)
-
-    def get_currency_and_unit(self, prices):
-        return prices["unit"].split("/")
-
-    def print_prices(self, prices, billing_zone):
-        unit = prices["unit"]
-        price = prices["price"]
-        time_slot_in_unix = prices["unix_seconds"]
-
-        prices_table = PrettyTable(
-            ["UTC Date", "UTC Time", "Price " + unit, "Local Time", "Local Date"]
-        )
-        prices_table.title = "Billing zone = " + self.billing_zones[billing_zone]
-        for i in range(len(price)):
-            d = timestamp_to_datetime(time_slot_in_unix[i])
-            p = Decimal(price[i]).quantize(Decimal("0.01"))
-            # print(d + ' '  + str(price[i]) + ' ' + unit)
-            ld = d.astimezone(get_localzone())
-            prices_table.add_row(
-                [
-                    d.strftime("%Y-%m-%d"),
-                    d.strftime("%H:%M:%S %Z"),
-                    p,
-                    ld.strftime("%H:%M:%S %Z"),
-                    ld.strftime("%Y-%m-%d"),
-                ]
-            )
-        print(prices_table)
-
-    def get_plan_name(self, zone_name):
-        plan_name = "BG Day ahead"
-        return plan_name
-
-
-# Send a GET request to a website
-# res = requests.get(
-#    "https://www.example.com/", # The URL of the API you want to access
-#    params={"key1": "value1", "key2": "value2"}, # The parameters you want to pass to the API (like "?key=value" at the end of the URL)
-#    data={"key1": "value1", "key2": "value2"}, # The data you want to send to the API
-#    headers={"header1": "value1", "header2": "value2"}, # The headers you want to send to the API
-#    cookies={"cookie1": "value1", "cookie2": "value2"}, # The cookies you want to send to the API
-#    auth=("username", "password"), # The authentication credentials you want to send to the API (some websites require this)
-#    timeout=5, # The maximum site response time (in seconds)
-#    allow_redirects=True, # Whether or not to follow redirects
-# )
-
-# Send a POST request to a website
-# res = requests.post(...)
-
-# Send a PUT request to a website
-# res = requests.put(...)
-
-# Send a DELETE request to a website
-# res = requests.delete(...)
-
-
-# if res.status_code == 200:
-#    output = res.json()
-#    print(output)
 
 
 class EnergyChartsAPI:
@@ -267,31 +119,6 @@ class EnergyChartsAPI:
         if prices.status_code == 200:
             return prices.json()
         return None
-
-    def print_prices(self, prices, billing_zone):
-        unit = prices["unit"]
-        price = prices["price"]
-        time_slot_in_unix = prices["unix_seconds"]
-
-        prices_table = PrettyTable(
-            ["UTC Date", "UTC Time", "Price " + unit, "Local Time", "Local Date"]
-        )
-        prices_table.title = "Billing zone = " + self.billing_zones[billing_zone]
-        for i in range(len(price)):
-            d = timestamp_to_datetime(time_slot_in_unix[i])
-            p = Decimal(price[i]).quantize(Decimal("0.01"))
-            # print(d + ' '  + str(price[i]) + ' ' + unit)
-            ld = d.astimezone(get_localzone())
-            prices_table.add_row(
-                [
-                    d.strftime("%Y-%m-%d"),
-                    d.strftime("%H:%M:%S %Z"),
-                    p,
-                    ld.strftime("%H:%M:%S %Z"),
-                    ld.strftime("%Y-%m-%d"),
-                ]
-            )
-        print(prices_table)
 
     def get_plan_name(self, zone_name):
         plan_name = "Day ahead %s" % zone_name
@@ -537,12 +364,38 @@ def report_result(res, showInfo=True):
         print(res)
 
 
+def print_prices(prices, billing_zone):
+    unit = prices["unit"]
+    price = prices["price"]
+    time_slot_in_unix = prices["unix_seconds"]
+
+    prices_table = PrettyTable(
+        ["UTC Date", "UTC Time", "Price " + unit, "Local Time", "Local Date"]
+    )
+    prices_table.title = "Billing zone = " + billing_zone
+    for i in range(len(price)):
+        d = timestamp_to_datetime(time_slot_in_unix[i])
+        p = Decimal(price[i]).quantize(Decimal("0.01"))
+        # print(d + ' '  + str(price[i]) + ' ' + unit)
+        ld = d.astimezone(get_localzone())
+        prices_table.add_row(
+            [
+                d.strftime("%Y-%m-%d"),
+                d.strftime("%H:%M:%S %Z"),
+                p,
+                ld.strftime("%H:%M:%S %Z"),
+                ld.strftime("%Y-%m-%d"),
+            ]
+        )
+    print(prices_table)
+
+
 def process_scriper(energy_prices_api, target_list):
     for zone in energy_prices_api.billing_zones.keys():
         prices = energy_prices_api.fetch_prices_day_ahead(zone)
         if prices:
             currency, energy_unit = energy_prices_api.get_currency_and_unit(prices)
-            energy_prices_api.print_prices(prices, zone)
+            print_prices(prices, zone)
             for target in target_list:
                 try:
                     vei_platform = VeiPlatformAPI(target["url"], token=target["token"])
@@ -587,6 +440,6 @@ if __name__ == "__main__":
         print("Target %s token=%.4s.." % (target["url"], target["token"]))
 
     process_scriper(IBexScriper(), target_list)
-    process_scriper(EnergyChartsAPI(), target_list)
+    # process_scriper(EnergyChartsAPI(), target_list)
 
     # energy_prices_api.fetch_and_print_openapi_specs()
