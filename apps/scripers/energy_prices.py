@@ -2,25 +2,21 @@
 import requests
 from prettytable import PrettyTable
 from decimal import Decimal
-from datetime import datetime, timedelta, timezone as dt_timezone
+from datetime import datetime, timedelta
 from tzlocal import get_localzone  # $ pip install tzlocal
 import json
 
 from ibex import IBexScriper
+from energy_charts_api import EnergyChartsAPI
 
 
 from decouple import config
 import requests
 from prettytable import PrettyTable
-from bs4 import BeautifulSoup
-from requests_html import HTMLSession, HtmlElement
 from datetime import datetime, timedelta
-from pytz import timezone, utc
 from decimal import Decimal
-
-
-def timestamp_to_datetime(timestamp):
-    return datetime.fromtimestamp(timestamp, tz=dt_timezone.utc)
+from utils import timestamp_to_datetime, str_to_datetime, datetime_to_str
+from utils import print_green, print_yellow, print_blue, print_red, green, yellow
 
 
 def render_entries_to_pretty_table(entries):
@@ -34,98 +30,6 @@ def render_entries_to_pretty_table(entries):
             ]
         )
     return prices_pretty_table
-
-
-class EnergyChartsAPI:
-    base_url = "https://api.energy-charts.info"
-    billing_zones = {
-        "AT": "Austria",
-        "BE": "Belgium",
-        "BG": "Bulgaria",
-        "CH": "Switzerland",
-        "CZ": "Czech Republic",
-        "DE-LU": "Germany, Luxembourg",
-        "DE-AT-LU": "Germany, Austria, Luxembourg",
-        "DK1": "Denmark 1",
-        "DK2": "Denmark 2",
-        "EE": "Estionia",
-        "ES": "Spain",
-        "FI": "Finland",
-        "FR": "France",
-        "GR": "Greece",
-        "HR": "Croatia",
-        "HU": "Hungary",
-        "IT-Calabria": "Italy Calabria",
-        "IT-Centre-North": "Italy Centre North",
-        "IT-Centre-South": "Italy Centre South",
-        "IT-North": "Italy North",
-        "IT-SACOAC": "Italy Sardinia Corsica AC",
-        "IT-SACODC": "Italy Sardinia Corsica DC",
-        "IT-Sardinia": "Italy Sardinia",
-        "IT-Sicily": "Italy Sicily",
-        "IT-South": "Italy South",
-        "LT": "Lithuania",
-        "LV": "Latvia",
-        "ME": "Montenegro",
-        "NL": "Netherlands",
-        "NO1": "Norway 1",
-        "NO2": "Norway 2",
-        "NO2NSL": "Norway North Sea Link",
-        "NO3": "Norway 3",
-        "NO4": "Norway 4",
-        "NO5": "Norway 5",
-        "PL": "Poland",
-        "PT": "Portugal",
-        "RO": "Romania",
-        "RS": "Serbia",
-        "SE1": "Sweden 1",
-        "SE2": "Sweden 2",
-        "SE3": "Sweden 3",
-        "SE4": "Sweden 4",
-        "SI": "Slovenia",
-        "SK": "Slovakia",
-    }
-
-    def fetch_and_print_openapi_specs(self):
-        openapi_spec = requests.get(self.base_url + "/openapi.json")
-        if openapi_spec.status_code == 200:
-            openapi_spec = openapi_spec.json()
-
-            openapi = openapi_spec["openapi"]
-            info = openapi_spec["info"]
-            paths = openapi_spec["paths"]
-            components = openapi_spec["components"]
-            tags = openapi_spec["tags"]
-
-            print("OpenAPI version: " + openapi)
-            print(info.keys())
-            print(info["title"] + ": v" + info["version"])
-            print(info["description"])
-            print("-------------------------------------------------")
-            table = PrettyTable(["Path", "Summary"])
-            table.align["Path"] = "l"
-            table.align["Summary"] = "c"
-            for p in paths.keys():
-                table.add_row([p, paths[p]["get"]["summary"]])
-            print(table)
-
-    def fetch_prices_day_ahead(self, billing_zone="BG"):
-        prices = requests.get(
-            self.base_url + "/price",  # The URL of the API you want to access
-            params={
-                "bzn": billing_zone,
-            },  # The parameters you want to pass to the API (like "?key=value" at the end of the URL)
-        )
-        if prices.status_code == 200:
-            return prices.json()
-        return None
-
-    def get_plan_name(self, zone_name):
-        plan_name = "Day ahead %s" % zone_name
-        return plan_name
-
-    def get_currency_and_unit(self, prices):
-        return prices["unit"].split("/")
 
 
 class VeiPlatformAPI:
@@ -186,7 +90,7 @@ class VeiPlatformAPI:
                         target_plan = plan
                         break
                     else:
-                        print("skipping %s" % str(plan))
+                        print_yellow("skipping %s" % str(plan))
 
             return {"plan": target_plan}
         else:
@@ -218,7 +122,7 @@ class VeiPlatformAPI:
         self, billing_zone, plan_name=None, currency="EUR", energy_unit="MWh"
     ):
         res = self.get_plan(billing_zone=billing_zone, name=plan_name)
-        print(res)
+        print_green(res)
         if not "error" in res.keys() and "plan" in res.keys():
             if res["plan"] is None:
                 new_plan = self.create_plan(
@@ -233,8 +137,8 @@ class VeiPlatformAPI:
 
     def time_params(self, start_interval, end_interval):
         res = {
-            "start_interval": start_interval.strftime("%Y-%m-%dT%H:%M:%S%z"),
-            "end_interval": end_interval.strftime("%Y-%m-%dT%H:%M:%S%z"),
+            "start_interval": datetime_to_str(start_interval),
+            "end_interval": datetime_to_str(end_interval),
         }
         return res
 
@@ -266,6 +170,8 @@ class VeiPlatformAPI:
         matched_prices = []
         wrong_price = []
         # print(params)
+
+        # print('compute_ovelaping_prices')
         if response.status_code == 200:
             server_prices = response.json()
             server_prices.sort(key=lambda x: x["start_interval"])
@@ -283,18 +189,14 @@ class VeiPlatformAPI:
                 data.update(self.time_params(start_interval, end_interval))
 
                 while j < len(server_prices):
-                    s = datetime.strptime(
-                        server_prices[j]["start_interval"], "%Y-%m-%dT%H:%M:%S%z"
-                    )
+                    s = str_to_datetime(server_prices[j]["start_interval"])
                     if s < start_interval:
                         j = j + 1
                     else:
                         break
 
                 if j < len(server_prices):
-                    s = datetime.strptime(
-                        server_prices[j]["start_interval"], "%Y-%m-%dT%H:%M:%S%z"
-                    )
+                    s = str_to_datetime(server_prices[j]["start_interval"])
                     if s == start_interval:
                         if data["price"] == server_prices[j]["price"]:
                             matched_prices.append(data)
@@ -314,8 +216,25 @@ class VeiPlatformAPI:
             prices_table.add_row([val["start_interval"], val["price"], status])
         return prices_table
 
+    def render_request_table(self, plan_info, new, match, different):
+        currency = plan_info["currency"]
+        electricity_unit = plan_info["electricity_unit"]
+        table = PrettyTable(
+            ["UTC Date & Time", "Price " + currency + "/" + electricity_unit, "Status"]
+        )
+        for val in match:
+            table.add_row([val["start_interval"], val["price"], green("Match")])
+
+        for val in new:
+            table.add_row([val["start_interval"], val["price"], green("New")])
+
+        for val in different:
+            table.add_row([val["start_interval"], val["price"], yellow("for update")])
+
+        return table
+
     def post_prices(self, plan_info, prices):
-        print(plan_info)
+        # print(plan_info)
         unit = prices["unit"]
         price = prices["price"]
         time_slot_in_unix = prices["unix_seconds"]
@@ -324,8 +243,14 @@ class VeiPlatformAPI:
         new_prices_to_post, matched_prices, wrong_price = self.compute_ovelaping_prices(
             plan_slug, time_slot_in_unix, price
         )
+        # print("HOHOHO")
+        # print(wrong_price)
+        # print("HEHEHE")
+        table = self.render_request_table(
+            plan_info, new_prices_to_post, matched_prices, wrong_price
+        )
+        print(table)
         if len(new_prices_to_post) == 0:
-
             res["info"] = (
                 "Skiping update on %s because there is not new prices, Matched prices count = %d"
                 % (plan_slug, len(matched_prices))
@@ -351,12 +276,12 @@ class VeiPlatformAPI:
 def report_result(res, showInfo=True):
     if isinstance(res, dict):
         if "error" in res.keys():
-            print(
+            print_red(
                 'Error "%s" when processing Target %s token=%.4s..'
                 % (res["error"], target["url"], target["token"])
             )
         if showInfo and "info" in res.keys():
-            print(
+            print_blue(
                 'Info "%s" when processing Target %s token=%.4s..'
                 % (res["info"], target["url"], target["token"])
             )
@@ -414,7 +339,7 @@ def process_scriper(energy_prices_api, target_list):
                         report_result(
                             vei_platform.post_prices(plan_info["plan"], prices)
                         )
-                    break
+                    # break
                 except Exception as e:
                     message = getattr(e, "message", repr(e))
                     print(
