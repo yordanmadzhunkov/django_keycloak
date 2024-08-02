@@ -254,9 +254,7 @@ class VeiPlatformAPI:
         new_prices_to_post, matched_prices, wrong_price = self.compute_ovelaping_prices(
             plan_slug, time_slot_in_unix, price
         )
-        # print("HOHOHO")
-        # print(wrong_price)
-        # print("HEHEHE")
+
         table = self.render_request_table(
             plan_info, new_prices_to_post, matched_prices, wrong_price
         )
@@ -376,6 +374,6 @@ if __name__ == "__main__":
         print("Target %s token=%.4s.." % (target["url"], target["token"]))
 
     process_scriper(IBexScriper(), target_list)
-    # process_scriper(EnergyChartsAPI(), target_list)
+    process_scriper(EnergyChartsAPI(), target_list)
 
     # energy_prices_api.fetch_and_print_openapi_specs()
