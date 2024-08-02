@@ -8,6 +8,19 @@ from decimal import Decimal
 from utils import timestamp_to_datetime
 
 
+def conver_bgn_to_eur(price):
+    return str((Decimal(price) / Decimal("1.95583")).quantize(Decimal("1.00")))
+
+
+def energy_price_entry(start_interval, price):
+    end_interval = start_interval + timedelta(hours=1)
+    return {
+        "price": conver_bgn_to_eur(price),
+        "start_interval": start_interval,
+        "end_interval": end_interval,
+    }
+
+
 def parse_ibex(soup):
     table1 = soup.find("table", {"id": "wpdtSimpleTable-33"})
     table_rows = table1.find_all("tr")
@@ -102,22 +115,11 @@ class IBexScriper:
         return prepare_entries_for_post(ibex_data)
 
     def get_currency_and_unit(self, prices):
-        return prices["unit"].split("/")
+        currency, energy_unit = prices["unit"].split("/")
+        if currency == "BGN":
+            currency = "EUR"
+        return currency, energy_unit
 
     def get_plan_name(self, zone_name):
-        plan_name = "BG Day ahead"
+        plan_name = "BG Day ahead 2"
         return plan_name
-
-
-def conver_bgn_to_eur(price):
-    # return str((Decimal(price) / Decimal("1.95583")).quantize(Decimal("0.01")))
-    return str((Decimal(price) / Decimal("1.95583")).quantize(Decimal("1.00")))
-
-
-def energy_price_entry(start_interval, price):
-    end_interval = start_interval + timedelta(hours=1)
-    return {
-        "price": conver_bgn_to_eur(price),
-        "start_interval": start_interval,
-        "end_interval": end_interval,
-    }

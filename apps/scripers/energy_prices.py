@@ -175,10 +175,7 @@ class VeiPlatformAPI:
         if response.status_code == 200:
             server_prices = response.json()
             server_prices.sort(key=lambda x: x["start_interval"])
-            # timestamps.sort()
-
             j = 0
-
             for i in range(len(timestamps)):
                 start_interval = timestamp_to_datetime(timestamps[i])
                 end_interval = start_interval + timedelta(hours=1)
@@ -216,21 +213,35 @@ class VeiPlatformAPI:
             prices_table.add_row([val["start_interval"], val["price"], status])
         return prices_table
 
+    def render_row(self, val, status):
+        return [
+            str_to_datetime(val["start_interval"]).strftime("%Y-%m-%d"),
+            str_to_datetime(val["start_interval"]).strftime("%H")
+            + " - "
+            + str_to_datetime(val["end_interval"]).strftime("%H"),
+            val["price"],
+            status,
+        ]
+
     def render_request_table(self, plan_info, new, match, different):
         currency = plan_info["currency"]
         electricity_unit = plan_info["electricity_unit"]
         table = PrettyTable(
-            ["UTC Date & Time", "Price " + currency + "/" + electricity_unit, "Status"]
+            [
+                "Date UTC",
+                "Time window UTC",
+                "Price " + currency + "/" + electricity_unit,
+                "Status",
+            ]
         )
-        for val in match:
-            table.add_row([val["start_interval"], val["price"], green("Match")])
-
-        for val in new:
-            table.add_row([val["start_interval"], val["price"], green("New")])
-
-        for val in different:
-            table.add_row([val["start_interval"], val["price"], yellow("for update")])
-
+        table.title = plan_info["name"] + "Billing zone = " + plan_info["billing_zone"]
+        rows = (
+            [self.render_row(val, green("Match")) for val in match]
+            + [self.render_row(val, green("New")) for val in new]
+            + [self.render_row(val, yellow("For update")) for val in different]
+        )
+        rows = sorted(rows, key=lambda x: (x[0], x[1]))
+        table.add_rows(rows)
         return table
 
     def post_prices(self, plan_info, prices):
@@ -320,7 +331,7 @@ def process_scriper(energy_prices_api, target_list):
         prices = energy_prices_api.fetch_prices_day_ahead(zone)
         if prices:
             currency, energy_unit = energy_prices_api.get_currency_and_unit(prices)
-            print_prices(prices, zone)
+            # print_prices(prices, zone)
             for target in target_list:
                 try:
                     vei_platform = VeiPlatformAPI(target["url"], token=target["token"])
