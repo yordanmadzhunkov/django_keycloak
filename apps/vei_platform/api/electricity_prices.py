@@ -8,7 +8,7 @@ from vei_platform.models.electricity_price import (
 from django.db.models import Q
 
 # from rest_framework.validators import UniqueForYearValidator
-
+from djmoney.money import Money
 
 class ElectricityBillingZoneSerializer(serializers.ModelSerializer):
     class Meta:
@@ -121,6 +121,7 @@ class ElectricityPriceSerializer(serializers.ModelSerializer):
             .exists()
         ):
             raise serializers.ValidationError("Price plan time window overlap")
+        data['price'] = Money(amount=data['price'], currency=data['plan'].currency)
         return super().validate(data)
 
 

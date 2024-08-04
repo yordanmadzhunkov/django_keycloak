@@ -24,7 +24,8 @@ from vei_platform.api.electricity_prices import ElectricityPriceSerializer
 from vei_platform.models.electricity_price import ElectricityPrice
 
 from datetime import datetime, timezone
-
+from decimal import Decimal
+from djmoney.money import Currency
 
 class ElectricityPriceAPIWithUserTestCases(APITestCase):
     def setUp(self):
@@ -294,6 +295,12 @@ class ElectricityPricePriceSeriesAPITestCases(APITestCase):
         self.assertEqual(response.data["price"], "10.19")
         self.checkTime(2024, 5, 19, 9, 0, response.data["start_interval"])
         self.checkTime(2024, 5, 19, 10, 0, response.data["end_interval"])
+        self.assertEqual(ElectricityPrice.objects.all().count(), 1)
+        p = ElectricityPrice.objects.all().first()
+        self.assertEqual(datetime(2024, 5, 19, 9, 0, 0, tzinfo=timezone.utc), p.start_interval)
+        self.assertEqual(datetime(2024, 5, 19, 10, 0, 0, tzinfo=timezone.utc), p.end_interval)
+        self.assertEqual(Decimal('10.19'), p.price.amount)
+        self.assertEqual(Currency('EUR'), p.price.currency)
 
     def test_get_price_day_1_hour(self):
         """
