@@ -35,3 +35,4 @@ prettytable==3.9.0
 tzlocal==5.2
 requests_html==0.10.0
 lxml[html_clean]
+colorama
