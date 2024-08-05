@@ -121,10 +121,10 @@ class ElectricityPriceSerializer(serializers.ModelSerializer):
             .exists()
         ):
             raise serializers.ValidationError("Price plan time window overlap")
-        print('\n')
-        print(data['plan'].name + ' -> ' + data['plan'].currency)
-        print(data)
-        data['price'] = Money(amount=data['price'], currency=data['plan'].currency)
+        amount = data['price']
+        if isinstance(amount, Money):
+            amount = data['price'].amount
+        data['price'] = Money(amount=amount, currency=data['plan'].currency)
         return super().validate(data)
 
 
