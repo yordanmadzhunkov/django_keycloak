@@ -1,14 +1,13 @@
-version: '3.7'
-services: # the different images that will be running as containers
+services:
 
   vei_platform:
-    build: . 
+    build: .
     image: dataintensive/vei_platform:${DJANGO_GIT_TAG}
     env_file:
       - .env
 
   vei_platform_test:
-    build: . 
+    build: .
     image: dataintensive/vei_platform:${DJANGO_GIT_TAG}
     entrypoint: /entrypoint/entrypoint_tests.sh
     env_file:
