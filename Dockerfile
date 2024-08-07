@@ -23,11 +23,7 @@ RUN apk add --no-cache python3 gcc libc-dev linux-headers postgresql-dev \
     && pip3 install --upgrade pip gunicorn    
 
 RUN apk add chromium
-
-#ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD 1
-#ENV PUPPETEER_EXECUTABLE_PATH /usr/bin/chromium-browser
-
-RUN mkdir /root/.local/share/pyppeteer/local-chromium/1181205/chrome-linux
+RUN mkdir -p /root/.local/share/pyppeteer/local-chromium/1181205/chrome-linux
 RUN ln -s /usr/bin/chromium-browser /root/.local/share/pyppeteer/local-chromium/1181205/chrome-linux/chrome
 
 COPY ./apps/requirements_django_oidc.txt $APP_PATH/requirements_django_oidc.txt
