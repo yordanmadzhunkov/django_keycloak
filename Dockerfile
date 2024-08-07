@@ -1,5 +1,5 @@
 # Fetching official base image for python
-FROM python:3.10.13-alpine3.18 as web
+FROM python:3.10.13-alpine3.18
 
 # Setting up the work directory
 WORKDIR /home/app/
@@ -21,6 +21,10 @@ RUN apk add --no-cache python3 gcc libc-dev linux-headers postgresql-dev \
     && apk add gettext \
     && python3 -m ensurepip \
     && pip3 install --upgrade pip gunicorn    
+
+RUN apk add chromium
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD 1
+ENV PUPPETEER_EXECUTABLE_PATH /usr/bin/chromium-browser
 
 COPY ./apps/requirements_django_oidc.txt $APP_PATH/requirements_django_oidc.txt
 
