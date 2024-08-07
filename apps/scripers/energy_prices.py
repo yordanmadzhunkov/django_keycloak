@@ -373,7 +373,7 @@ if __name__ == "__main__":
     for target in target_list:
         print("Target %s token=%.4s.." % (target["url"], target["token"]))
 
-    #process_scriper(IBexScriper(), target_list)
+    process_scriper(IBexScriper(), target_list)
     process_scriper(EnergyChartsAPI(), target_list)
 
     # energy_prices_api.fetch_and_print_openapi_specs()

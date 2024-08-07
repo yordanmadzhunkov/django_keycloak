@@ -121,5 +121,5 @@ class IBexScriper:
         return currency, energy_unit
 
     def get_plan_name(self, zone_name):
-        plan_name = "BG Day ahead 2"
+        plan_name = "BG Day ahead"
         return plan_name
