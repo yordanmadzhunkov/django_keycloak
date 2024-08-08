@@ -27,10 +27,14 @@ class ElectricityPlanView(View):
         initial_timezone = (
             get_user_profile(self.request.user).timezone
             if self.request.user.is_authenticated
-            else "UTC"
+            else "Europe/Sofia"
         )
-
-        form = ElectricityPlanForm(plans, initial_timezone=initial_timezone)
+        p = None
+        for p in plans:
+            if p.name == 'BG Day ahead':
+                plan_slug = p.slug
+                
+        form = ElectricityPlanForm(plans, initial_timezone=initial_timezone, initial_plan=plan_slug)
         context["form"] = form
         return render(request, "electricity_plan.html", context)
 
