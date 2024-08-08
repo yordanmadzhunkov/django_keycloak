@@ -668,7 +668,7 @@ class ElectricityPlanForm(forms.Form):
             choices=CURRENCY_CHOICES, label=_("Currency"), coerce=str
         )
         self.fields["currency"] = currency
-        initial_timezone = kwargs.get("initial_timezone", "UTC")
+        initial_timezone = kwargs.get("initial_timezone", "Europe/Sofia")
         timezone = forms.TypedChoiceField(
             choices=TIMEZONE_CHOICES,
             label=_("Timezone"),
@@ -676,7 +676,7 @@ class ElectricityPlanForm(forms.Form):
             coerce=str,
         )
         self.fields["timezone"] = timezone
-        days = forms.IntegerField(max_value=30, min_value=1, required=True, initial=1)
+        days = forms.IntegerField(max_value=30, min_value=1, required=True, initial=3)
         self.fields["days"] = days
 
         show = Submit("show", _("Show"), css_class="btn btn-primary")

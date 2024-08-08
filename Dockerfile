@@ -22,6 +22,8 @@ RUN apk add --no-cache python3 gcc libc-dev linux-headers postgresql-dev \
     && python3 -m ensurepip \
     && pip3 install --upgrade pip gunicorn    
 
+
+# https://github.com/miyakogi/pyppeteer/issues/250
 RUN apk add chromium
 RUN mkdir -p /root/.local/share/pyppeteer/local-chromium/1181205/chrome-linux
 RUN ln -s /usr/bin/chromium-browser /root/.local/share/pyppeteer/local-chromium/1181205/chrome-linux/chrome
