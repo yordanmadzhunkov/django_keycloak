@@ -16,7 +16,6 @@ from django.views import View
 
 from django.shortcuts import get_object_or_404
 
-
 class Profile(View):
     def get(self, request, pk=None, *args, **kwargs):
         context = common_context(request)
@@ -36,6 +35,7 @@ class MyProfileUpdate(View):
             initial={
                 "last_name": request.user.last_name,
                 "first_name": request.user.first_name,
+                "timezone": context['profile'].timezone,
             },
         )
         context["avatar_form"] = user_profile_form
@@ -56,6 +56,12 @@ class MyProfileUpdate(View):
                 avatar = user_profile_form.cleaned_data.get("avatar")
                 first_name = user_profile_form.cleaned_data.get("first_name")
                 last_name = user_profile_form.cleaned_data.get("last_name")
+                timezone = user_profile_form.cleaned_data.get("timezone")
+
+                if profile.timezone != timezone:
+                    profile.timezone = timezone
+                    profile.save()
+                    messages.success(request, _("%s saved as default display timezone") % timezone)
 
                 if avatar is not None:
                     profile.avatar = avatar

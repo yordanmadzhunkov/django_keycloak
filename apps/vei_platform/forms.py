@@ -671,7 +671,7 @@ class ElectricityPlanForm(forms.Form):
             choices=CURRENCY_CHOICES, label=_("Currency"), coerce=str
         )
         self.fields["currency"] = currency
-        #initial_timezone = kwargs.get("initial_timezone", "Europe/Sofia")
+
         timezone = forms.TypedChoiceField(
             choices=TIMEZONE_CHOICES,
             label=_("Timezone"),
