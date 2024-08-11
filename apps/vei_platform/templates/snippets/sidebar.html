@@ -80,7 +80,10 @@
                 <!-- <h6 class="collapse-header">Custom Utilities:</h6> -->
                 <a class="collapse-item" href="{% url 'my_profile'    %}">{% trans "My profile" %}</a>
                 <a class="collapse-item" href="{% url 'my_entity'     %}">{% trans "KYC" %}</a>
-                <a class="collapse-item" href="{% url 'oidc_logout'   %}">{% trans "Logout" %} </a>
+                <a class="collapse-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                    {% trans "Logout" %}
+                </a>
             </div>
         </div>
     </li>
