@@ -14,12 +14,12 @@ ALLOWED_HOSTS = config(
 CSRF_TRUSTED_ORIGINS = config(
     "CSRF_TRUSTED_ORIGINS",
     cast=lambda v: [s.strip() for s in v.split(",")],
-    default="*",
+    default="http://*,https://*",
 )
 CORS_ORIGIN_WHITELIST = config(
     "CORS_ORIGIN_WHITELIST",
     cast=lambda v: [s.strip() for s in v.split(",")],
-    default="*",
+    default="http://*,https://*",
 )
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
