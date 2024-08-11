@@ -28,9 +28,9 @@ CSRF_TRUSTED_ORIGINS = config(
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 
-SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+#SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 
-#SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 
 #SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 #SESSION_COOKIE_HTTPONLY = True
