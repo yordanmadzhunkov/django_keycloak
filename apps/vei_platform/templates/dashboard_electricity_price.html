@@ -1,0 +1,90 @@
+<script>
+    $(function () {
+        var $my_chart = $("#energy-price-chart");
+        $.ajax({
+            url: $my_chart.data("url"),
+            success: function (data) {
+                var ctx = $my_chart[0].getContext("2d");
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: data.plan_name,
+                            data: data.data,
+                            fill: false,
+                            stepped: true,
+                            step: 'after',
+                            //step: 'middle',
+                            tension: 0.1,
+                            borderColor: 'rgb(0, 99, 132)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        }],
+                    },
+                    options: {
+                        responsive: true,
+                        legend: {
+                            position: 'bottom',
+                        },
+                        title: {
+                            display: true,
+                            text: data.title
+                        },
+                        layout: {
+                            padding: {
+                                left: 10,
+                                right: 25,
+                                top: 25,
+                                bottom: 0
+                            }
+                        },
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'hour'
+                                },
+                                min: data.x_min,
+                                max: data.x_max,
+                                display: true,
+                                title: {
+                                    display: true,
+                                    text: data.x_scale,
+                                },
+                                ticks: {
+                                    autoSkip: false,
+                                    maxRotation: 0,
+                                    major: {
+                                        enabled: true
+                                    },
+                                    // color: function(context) {
+                                    //   return context.tick && context.tick.major ? '#FF0000' : 'rgba(0,0,0,0.1)';
+                                    // },
+                                    font: function (context) {
+                                        if (context.tick && context.tick.major) {
+                                            return {
+                                                weight: 'bold',
+                                            };
+                                        }
+                                    }
+                                }
+                            },
+                            y: {
+                                display: true,
+                                title: {
+                                    display: true,
+                                    text: data.y_scale,
+                                },
+                                //min: 0,
+                                //max: 500
+                            }
+                        },
+                    }
+                });
+
+            }
+        });
+
+    });
+
+</script>

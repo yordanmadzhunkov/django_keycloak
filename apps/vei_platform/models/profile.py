@@ -42,11 +42,7 @@ class UserProfile(models.Model):
     def get_href(self):
         return "/profile/%d" % (self.pk)
 
-    def last_login(self):
-        return self.user.last_login
 
-    def date_joined(self):
-        return self.user.date_joined
 
 
 def get_user_profile(user):

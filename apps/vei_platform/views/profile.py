@@ -15,6 +15,7 @@ from django.utils.translation import gettext as _
 from django.views import View
 
 from django.shortcuts import get_object_or_404
+import pytz
 
 class Profile(View):
     def get(self, request, pk=None, *args, **kwargs):
@@ -40,6 +41,7 @@ class MyProfileUpdate(View):
         )
         context["avatar_form"] = user_profile_form
         self.add_token_info(request, context)
+        self.add_last_login_and_date_joined(request, context)
         return render(self.request, "my_profile.html", context)
 
     def post(self, request):
@@ -92,6 +94,7 @@ class MyProfileUpdate(View):
                 token = Token.objects.create(user=user)
 
         self.add_token_info(request, context)
+        self.add_last_login_and_date_joined(request, context)
         context["avatar_form"] = user_profile_form
         context["profile"] = get_user_profile(request.user)
         return render(request, "my_profile.html", context)
@@ -99,3 +102,15 @@ class MyProfileUpdate(View):
     def add_token_info(self, request, context):
         tokens = Token.objects.filter(user=request.user)
         context["user_token"] = tokens.first().key if len(tokens) > 0 else "None"
+
+    def add_last_login_and_date_joined(self, request, context):
+        requested_timezone = context['profile'].timezone 
+        if requested_timezone is None:
+            requested_timezone = "UTC"
+        tz = pytz.timezone(requested_timezone)
+        dt_join = request.user.date_joined.astimezone(tz)
+        dt_last = request.user.last_login.astimezone(tz)
+        context['date_joined'] = dt_join.strftime("%Y-%m-%d %H:%M:%S ") + requested_timezone
+        context['last_login'] = dt_last.strftime("%Y-%m-%d %H:%M:%S ") + requested_timezone
+
+
