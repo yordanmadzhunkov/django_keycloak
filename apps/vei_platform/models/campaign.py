@@ -4,7 +4,7 @@ from django.conf import settings
 # Create your models here.
 from decimal import Decimal
 from datetime import date, datetime
-from .factory import ElectricityFactory, FactoryProductionPlan
+from .factory import ElectricityFactory
 from .profile import UserProfile
 
 from django.utils.translation import gettext_lazy as _

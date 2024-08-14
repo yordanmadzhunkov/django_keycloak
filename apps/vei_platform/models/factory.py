@@ -12,6 +12,9 @@ from .restricted_file_field import RestrictedFileField
 from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
 
+import os
+from django.db import models
+
 from . import TimeStampMixin
 
 
@@ -161,9 +164,6 @@ class ElectricityFactoryComponents(models.Model):
         return "%s %s kW x %d" % (self.name, self.power_in_kw, self.count)
 
 
-import os
-from django.db import models
-
 
 def _delete_file(path):
     """Deletes file from filesystem."""
@@ -203,49 +203,9 @@ def auto_delete_file_on_change(sender, instance, update_fields, **kwargs):
         return False
 
 
-def parse_energy(x):
-    map = {
-        "ВЕЦ": ElectricityFactory.HYDROPOWER,
-        "МВЕЦ": ElectricityFactory.HYDROPOWER,
-        "ПАВЕЦ": ElectricityFactory.HYDROPOWER,
-        "Каскада": ElectricityFactory.HYDROPOWER,
-        "БиоЕЦ": ElectricityFactory.BIOMASS,
-        "БиоГЕЦ": ElectricityFactory.REN_GAS,
-        "ФЕЦ": ElectricityFactory.PHOTOVOLTAIC,
-        "ФтЦ": ElectricityFactory.PHOTOVOLTAIC,
-        "ВтЕЦ": ElectricityFactory.WIND_TURBINE,
-    }
-    return map[x.replace('"', "")]
 
 
-def add_factory(task):
-    result = task.result
-    factories = ElectricityFactory.objects.filter(name=result["name"])
-    factory_type = parse_energy(result["energy"])
-    if len(factories) == 0:
-        factory = ElectricityFactory(
-            name=result["name"],
-            factory_type=factory_type,
-            manager=None,
-            location=result["location"],
-            opened=result["opened"],
-            capacity_in_mw=result["capacity"],
-            primary_owner=None,
-            tax_id=result["eik"],
-            owner_name=result["owner"],
-        )
-        factory.save()
-    else:
-        factory = factories[0]
-        if factory.manager is None:
-            # trigger scriping of legal entity
-            factory.save()
-        print(
-            "Factory found name='%s' type='%s'" % (factory.name, factory.factory_type)
-        )
-
-
-# FINANCIAL PLANNING
+# FACTORY WORKING PLANNING
 class FactoryProductionPlan(models.Model):
     name = models.CharField(max_length=128)
     factory = models.ForeignKey(
@@ -259,7 +219,7 @@ class FactoryProductionPlan(models.Model):
     )
 
     def get_working_hours(self, month):
-        objects = ElectricityWorkingHoursPerMonth.objects.filter(plan=self)
+        objects = ElectricityFactoryProduction.objects.filter(plan=self)
         s = objects.filter(month__month=month.month)
         y = s.filter(month__year=month.year)
         if len(y) > 0:
@@ -283,7 +243,7 @@ class FactoryProductionPlan(models.Model):
         return res + "/production/%s" % self.pk
 
 
-class ElectricityWorkingHoursPerMonth(models.Model):
+class ElectricityFactoryProduction(models.Model):
     month = models.DateField()
     number = models.DecimalField(max_digits=6, decimal_places=2)
     plan = models.ForeignKey(

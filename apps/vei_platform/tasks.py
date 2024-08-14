@@ -7,10 +7,53 @@ from decimal import Decimal
 
 from django_q.tasks import async_task
 
-from .models.factory import add_factory, ElectricityFactory
+from .models.factory import ElectricityFactory
 
 from scripers.veiregistar import VEIEegistarScriper
 from scripers.papagal import PapagalScriper
+
+
+def parse_energy_type(energy_type_in_bg):
+    map = {
+        "ВЕЦ": ElectricityFactory.HYDROPOWER,
+        "МВЕЦ": ElectricityFactory.HYDROPOWER,
+        "ПАВЕЦ": ElectricityFactory.HYDROPOWER,
+        "Каскада": ElectricityFactory.HYDROPOWER,
+        "БиоЕЦ": ElectricityFactory.BIOMASS,
+        "БиоГЕЦ": ElectricityFactory.REN_GAS,
+        "ФЕЦ": ElectricityFactory.PHOTOVOLTAIC,
+        "ФтЦ": ElectricityFactory.PHOTOVOLTAIC,
+        "ВтЕЦ": ElectricityFactory.WIND_TURBINE,
+    }
+    return map[energy_type_in_bg.replace('"', "")]
+
+
+def add_factory(task):
+    result = task.result
+    factories = ElectricityFactory.objects.filter(name=result["name"])
+    factory_type = parse_energy_type(result["energy"])
+    if len(factories) == 0:
+        factory = ElectricityFactory(
+            name=result["name"],
+            factory_type=factory_type,
+            manager=None,
+            location=result["location"],
+            opened=result["opened"],
+            capacity_in_mw=result["capacity"],
+            primary_owner=None,
+            tax_id=result["eik"],
+            owner_name=result["owner"],
+        )
+        factory.save()
+    else:
+        factory = factories[0]
+        if factory.manager is None:
+            # trigger scriping of legal entity
+            factory.save()
+        print(
+            "Factory found name='%s' type='%s'" % (factory.name, factory.factory_type)
+        )
+
 
 
 def scripe_factories_list(page_number, limit=-1):

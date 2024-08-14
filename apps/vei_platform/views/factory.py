@@ -4,7 +4,7 @@ from . import common_context
 from vei_platform.models.factory import (
     ElectricityFactory,
     FactoryProductionPlan,
-    ElectricityWorkingHoursPerMonth,
+    ElectricityFactoryProduction,
     ElectricityFactoryComponents,
 )
 from vei_platform.models.campaign import Campaign
@@ -271,7 +271,7 @@ def view_factory_production(request, pk=None):
     factory = plan.factory
     context["factory"] = factory
     context["plan"] = plan
-    objects = ElectricityWorkingHoursPerMonth.objects.filter(plan=plan)
+    objects = ElectricityFactoryProduction.objects.filter(plan=plan)
 
     # creating a formset
     NumberPerMonthFormSet = formset_factory(NumberPerMonthForm, extra=0)
@@ -303,7 +303,7 @@ def view_factory_production(request, pk=None):
                         month__month=month.month
                     )
                     if len(s) == 0:
-                        obj = ElectricityWorkingHoursPerMonth(
+                        obj = ElectricityFactoryProduction(
                             plan=plan, month=month, number=val
                         )
                         obj.save()

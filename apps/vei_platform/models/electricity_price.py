@@ -1,17 +1,17 @@
 from django.db import models
+from django.db.models import Q
 
 from djmoney.models.fields import Decimal, CurrencyField, MoneyField
 from djmoney.money import Money
-from decimal import Decimal
 from django.core.validators import MaxValueValidator, MinValueValidator
-from datetime import datetime, timezone, timedelta
 from django.utils.text import slugify
-import uuid
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 
-from django.db.models import Q
+from datetime import datetime, timezone
+from decimal import Decimal
+import uuid
 
 
 class ElectricityBillingZone(models.Model):
@@ -92,6 +92,7 @@ def unique_slug_generator(instance, new_slug=None):
 
 
 class ElectricityPrice(models.Model):
+    plan = models.ForeignKey(ElectricityPricePlan, on_delete=models.CASCADE)
 
     start_interval = models.DateTimeField(
         blank=False,
@@ -114,7 +115,6 @@ class ElectricityPrice(models.Model):
         max_digits=14, decimal_places=2, default_currency="BGN", default=Decimal(0)
     )
 
-    plan = models.ForeignKey(ElectricityPricePlan, on_delete=models.CASCADE)
 
     def month(self):
         return self.start_interval.date()
