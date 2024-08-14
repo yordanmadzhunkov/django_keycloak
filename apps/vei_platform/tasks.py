@@ -55,7 +55,6 @@ def add_factory(task):
         )
 
 
-
 def scripe_factories_list(page_number, limit=-1):
     scriper = VEIEegistarScriper()
     factories = scriper.scripe_factories_list(page_number)

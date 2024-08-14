@@ -31,10 +31,12 @@ class ElectricityPlanView(View):
         )
         p = None
         for p in plans:
-            if p.name == 'BG Day ahead':
+            if p.name == "BG Day ahead":
                 plan_slug = p.slug
-                
-        form = ElectricityPlanForm(plans, initial_timezone=initial_timezone, initial_plan=plan_slug)
+
+        form = ElectricityPlanForm(
+            plans, initial_timezone=initial_timezone, initial_plan=plan_slug
+        )
         context["form"] = form
         return render(request, "electricity_plan.html", context)
 

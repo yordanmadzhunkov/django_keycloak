@@ -10,6 +10,7 @@ from django.db.models import Q
 # from rest_framework.validators import UniqueForYearValidator
 from djmoney.money import Money
 
+
 class ElectricityBillingZoneSerializer(serializers.ModelSerializer):
     class Meta:
         model = ElectricityBillingZone
@@ -121,10 +122,10 @@ class ElectricityPriceSerializer(serializers.ModelSerializer):
             .exists()
         ):
             raise serializers.ValidationError("Price plan time window overlap")
-        amount = data['price']
+        amount = data["price"]
         if isinstance(amount, Money):
-            amount = data['price'].amount
-        data['price'] = Money(amount=amount, currency=data['plan'].currency)
+            amount = data["price"].amount
+        data["price"] = Money(amount=amount, currency=data["plan"].currency)
         return super().validate(data)
 
 

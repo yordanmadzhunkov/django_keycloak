@@ -43,8 +43,6 @@ class UserProfile(models.Model):
         return "/profile/%d" % (self.pk)
 
 
-
-
 def get_user_profile(user):
     if user is None:
         profile = None

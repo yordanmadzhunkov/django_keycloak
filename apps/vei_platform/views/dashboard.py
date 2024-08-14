@@ -21,11 +21,10 @@ class Dashboard(View):
             return render(request, "dashboard.html", context)
         return redirect("home")
 
-
     def add_my_legal_entity(self, request, context):
         if request.user and request.user.is_authenticated:
             context["my_legal_entity"] = find_legal_entity(user=request.user)
-            
+
     def add_my_investments(self, request, context):
         if request.user and request.user.is_authenticated:
             profile = get_user_profile(request.user)
@@ -33,7 +32,7 @@ class Dashboard(View):
                 investor_profile=profile
             )
             context["my_investments"] = my_investments
-            
+
     def add_my_campaigns(self, request, context):
         if request.user and request.user.is_authenticated:
             factories_list = ElectricityFactory.objects.filter(

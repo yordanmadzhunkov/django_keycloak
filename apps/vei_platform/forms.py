@@ -654,14 +654,16 @@ class FactoryModelForm(forms.ModelForm):
 
 class ElectricityPlanForm(forms.Form):
 
-    def __init__(self, plans, initial_timezone=None, initial_plan=None, *args, **kwargs):
+    def __init__(
+        self, plans, initial_timezone=None, initial_plan=None, *args, **kwargs
+    ):
         super(ElectricityPlanForm, self).__init__(*args, **kwargs)
         choices = []
         for plan in plans:
             choices.append((plan.slug, plan.name))
         plan_field = forms.TypedChoiceField(
-            choices=choices, 
-            label=_("Plan"), 
+            choices=choices,
+            label=_("Plan"),
             coerce=str,
             initial=initial_plan,
         )

@@ -27,6 +27,7 @@ from datetime import datetime, timezone
 from decimal import Decimal
 from djmoney.money import Currency
 
+
 class ElectricityPriceAPIWithUserTestCases(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="123")
@@ -297,10 +298,14 @@ class ElectricityPricePriceSeriesAPITestCases(APITestCase):
         self.checkTime(2024, 5, 19, 10, 0, response.data["end_interval"])
         self.assertEqual(ElectricityPrice.objects.all().count(), 1)
         p = ElectricityPrice.objects.all().first()
-        self.assertEqual(datetime(2024, 5, 19, 9, 0, 0, tzinfo=timezone.utc), p.start_interval)
-        self.assertEqual(datetime(2024, 5, 19, 10, 0, 0, tzinfo=timezone.utc), p.end_interval)
-        self.assertEqual(Decimal('10.19'), p.price.amount)
-        self.assertEqual(Currency('EUR'), p.price.currency)
+        self.assertEqual(
+            datetime(2024, 5, 19, 9, 0, 0, tzinfo=timezone.utc), p.start_interval
+        )
+        self.assertEqual(
+            datetime(2024, 5, 19, 10, 0, 0, tzinfo=timezone.utc), p.end_interval
+        )
+        self.assertEqual(Decimal("10.19"), p.price.amount)
+        self.assertEqual(Currency("EUR"), p.price.currency)
 
     def test_get_price_day_1_hour(self):
         """

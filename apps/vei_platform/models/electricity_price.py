@@ -115,7 +115,6 @@ class ElectricityPrice(models.Model):
         max_digits=14, decimal_places=2, default_currency="BGN", default=Decimal(0)
     )
 
-
     def month(self):
         return self.start_interval.date()
 

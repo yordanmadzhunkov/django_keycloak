@@ -17,6 +17,7 @@ from django.views import View
 from django.shortcuts import get_object_or_404
 import pytz
 
+
 class Profile(View):
     def get(self, request, pk=None, *args, **kwargs):
         context = common_context(request)
@@ -36,7 +37,7 @@ class MyProfileUpdate(View):
             initial={
                 "last_name": request.user.last_name,
                 "first_name": request.user.first_name,
-                "timezone": context['profile'].timezone,
+                "timezone": context["profile"].timezone,
             },
         )
         context["avatar_form"] = user_profile_form
@@ -63,7 +64,9 @@ class MyProfileUpdate(View):
                 if profile.timezone != timezone:
                     profile.timezone = timezone
                     profile.save()
-                    messages.success(request, _("%s saved as default display timezone") % timezone)
+                    messages.success(
+                        request, _("%s saved as default display timezone") % timezone
+                    )
 
                 if avatar is not None:
                     profile.avatar = avatar
@@ -104,13 +107,15 @@ class MyProfileUpdate(View):
         context["user_token"] = tokens.first().key if len(tokens) > 0 else "None"
 
     def add_last_login_and_date_joined(self, request, context):
-        requested_timezone = context['profile'].timezone 
+        requested_timezone = context["profile"].timezone
         if requested_timezone is None:
             requested_timezone = "UTC"
         tz = pytz.timezone(requested_timezone)
         dt_join = request.user.date_joined.astimezone(tz)
         dt_last = request.user.last_login.astimezone(tz)
-        context['date_joined'] = dt_join.strftime("%Y-%m-%d %H:%M:%S ") + requested_timezone
-        context['last_login'] = dt_last.strftime("%Y-%m-%d %H:%M:%S ") + requested_timezone
-
-
+        context["date_joined"] = (
+            dt_join.strftime("%Y-%m-%d %H:%M:%S ") + requested_timezone
+        )
+        context["last_login"] = (
+            dt_last.strftime("%Y-%m-%d %H:%M:%S ") + requested_timezone
+        )

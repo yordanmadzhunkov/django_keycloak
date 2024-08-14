@@ -164,7 +164,6 @@ class ElectricityFactoryComponents(models.Model):
         return "%s %s kW x %d" % (self.name, self.power_in_kw, self.count)
 
 
-
 def _delete_file(path):
     """Deletes file from filesystem."""
     if os.path.isfile(path):
@@ -201,8 +200,6 @@ def auto_delete_file_on_change(sender, instance, update_fields, **kwargs):
             _delete_file(old_file.path)
     except ElectricityFactoryComponents.DoesNotExist:
         return False
-
-
 
 
 # FACTORY WORKING PLANNING

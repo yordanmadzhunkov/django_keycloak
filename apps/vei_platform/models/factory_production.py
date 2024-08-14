@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from decimal import Decimal
 from .factory import ElectricityFactory
 
+
 class ElectricityFactoryProduction(models.Model):
     factory = models.ForeignKey(
         ElectricityFactory, null=True, blank=True, on_delete=models.DO_NOTHING
@@ -16,7 +17,7 @@ class ElectricityFactoryProduction(models.Model):
             year=2024, month=1, day=1, hour=0, minute=0, tzinfo=timezone.utc
         ),
     )
-    
+
     end_interval = models.DateTimeField(
         blank=False,
         null=False,
@@ -31,8 +32,10 @@ class ElectricityFactoryProduction(models.Model):
     )
 
     def __str__(self) -> str:
-        return "%s %s" % (self.start_interval.strftime("%y-%m-%d %h:%m"), self.energy_in_kwh)
-    
+        return "%s %s" % (
+            self.start_interval.strftime("%y-%m-%d %h:%m"),
+            self.energy_in_kwh,
+        )
 
 
 # FACTORY WORKING PLANNING
