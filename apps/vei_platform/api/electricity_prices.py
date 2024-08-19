@@ -172,7 +172,7 @@ class ElectricityPricesAPIView(generics.ListCreateAPIView):
 
 class ElectricityProductionSerializer(serializers.ModelSerializer):
     factory = serializers.SlugRelatedField(
-        slug_field="pk", queryset=ElectricityFactoryProduction.objects.all()
+        slug_field="slug", queryset=ElectricityFactory.objects.all()
     )
     start_interval = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S%z")
     end_interval = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S%z")
@@ -183,9 +183,10 @@ class ElectricityProductionSerializer(serializers.ModelSerializer):
         fields = ("start_interval", "end_interval", "energy_in_kwh", "factory")
         read_only_fields = ("factory",)
 
-    def validate(self, data):
-        print(data)
-        return super().validate(data)
+    # def validate(self, data):
+    #     print("VALIDATE Energy production serializer")
+    #     print(data)
+    #     return super().validate(data)
 
 
 class ElectricityProductionAPIView(generics.ListCreateAPIView):

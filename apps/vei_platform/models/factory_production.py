@@ -6,7 +6,7 @@ from .factory import ElectricityFactory
 
 class ElectricityFactoryProduction(models.Model):
     factory = models.ForeignKey(
-        ElectricityFactory, null=True, blank=True, on_delete=models.DO_NOTHING
+        ElectricityFactory, null=True, blank=True, on_delete=models.CASCADE
     )
 
     start_interval = models.DateTimeField(

@@ -4,7 +4,8 @@ from rest_framework.test import APITestCase
 from django.contrib.auth.models import User
 from vei_platform.models.factory import ElectricityFactory
 from vei_platform.models.legal import LegalEntity
-from datetime import date
+from vei_platform.models.factory_production import ElectricityFactoryProduction
+from datetime import date, datetime, timezone
 from decimal import Decimal
 
 
@@ -38,6 +39,12 @@ class ElectricityProductionAPIWithUserTestCases(APITestCase):
         self.user.delete()
         self.factory.delete()
 
+    def checkTime(self, year, month, day, hour, minute, resp):
+        self.assertEqual(
+            datetime(year, month, day, hour, minute, 00, tzinfo=timezone.utc),
+            datetime.strptime(resp, "%Y-%m-%dT%H:%M:%S%z"),
+        )
+
     def test_factories_list_has_my_factory(self):
         """
         Get list of factories and check if my factory is there
@@ -49,26 +56,25 @@ class ElectricityProductionAPIWithUserTestCases(APITestCase):
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["name"], "Малката кофа за фотони")
         self.assertEqual(response.data[0]["slug"], "малката-кофа-за-фотони")
-        print(response.data[0])
+        #print(response.data[0])
 
-    # def test_something(self):
-    #     """
-    #     Ensure that we can submit a electricity produced in time window
-    #     """
-    #     data = {
-    #         "factory": self.factory.pk,
-    #         "volume_in_kwh": "10.19",
-    #         "start_interval": "2024-05-19T11:00+02:00",
-    #         "end_interval": "2024-05-19T12:00+02:00",
-    #     }
-    #     url = self.url
-    #     response = self.client.post(url, data, format="json")
-    #     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-    #     self.assertEqual(response.data["name"], "Test plan 1")
-    #     self.assertEqual(response.data["billing_zone"], "BG")
-    #     self.assertEqual(response.data["description"], "Most basic test plan")
-    #     self.assertEqual(response.data["currency"], "EUR")
-    #     self.assertEqual(response.data["electricity_unit"], "MWh")
-    #     self.assertEqual(response.data["slug"], "test-plan-1")
-    #     self.assertEqual(response.data["owner"], "testuser")
-    #     self.assertAlmostEqual(self.factory.pk, 1)
+    def test_post_production_to_factory(self):
+        """
+        Ensure that we can submit a electricity produced in time window
+        """
+        data = {
+            "factory": "малката-кофа-за-фотони",
+            "energy_in_kwh": "10.19",
+            "start_interval": "2024-05-19T11:00+02:00",
+            "end_interval": "2024-05-19T12:00+02:00",
+        }
+        url = self.url
+        self.assertEqual(ElectricityFactoryProduction.objects.count(), 0)
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(ElectricityFactoryProduction.objects.count(), 1)
+        self.assertEqual(response.data["factory"], "малката-кофа-за-фотони")
+        self.assertEqual(Decimal(response.data["energy_in_kwh"]), Decimal("10.19"))
+        self.checkTime(2024, 5, 19, 9, 0, response.data["start_interval"])
+        self.checkTime(2024, 5, 19, 10, 0, response.data["end_interval"])
+
