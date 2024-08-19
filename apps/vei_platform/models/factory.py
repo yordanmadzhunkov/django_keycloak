@@ -115,11 +115,12 @@ class ElectricityFactory(TimeStampMixin):
             return get_user_profile(self.manager)
         else:
             return None
-        
+
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = unique_slug_generator(self)  # Handle Unicode characters
         super().save(*args, **kwargs)
+
 
 def docfile_content_types():
     return "application/pdf"

@@ -36,4 +36,3 @@ class ElectricityFactoryProduction(models.Model):
             self.start_interval.strftime("%y-%m-%d %h:%m"),
             self.energy_in_kwh,
         )
-

@@ -186,7 +186,7 @@ class FactoryDetail(View):
         if factory.manager is None:
             context["manager"] = None
         else:
-            #profile = get_user_profile(factory.manager)
+            # profile = get_user_profile(factory.manager)
             context["manager_profile"] = get_user_profile(factory.manager)
         return render(request, "factory.html", context)
 

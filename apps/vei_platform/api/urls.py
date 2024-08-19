@@ -20,5 +20,4 @@ urlpatterns = [
     path("prices", ElectricityPricesAPIView.as_view(), name="prices"),
     path("production", ElectricityProductionAPIView.as_view(), name="production_api"),
     path("factories", ElectricityFactoryAPIView.as_view(), name="my_factories_api"),
-
 ]

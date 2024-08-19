@@ -2,12 +2,12 @@
 
 from django.db import migrations
 
+
 def generate_electricity_factory_slugs(apps, schema_editor):
     ElectricityFactory = apps.get_model("vei_platform", "ElectricityFactory")
     for row in ElectricityFactory.objects.all():
-        #row.slug = str(uuid.uuid4())
+        # row.slug = str(uuid.uuid4())
         row.save()
-
 
 
 class Migration(migrations.Migration):

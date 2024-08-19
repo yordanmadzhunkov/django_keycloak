@@ -79,8 +79,6 @@ class BootstrapDatePicker(forms.DateInput):
         return re.sub(self.format_re, lambda x: format_map[x.group()], format)
 
 
-
-
 class PricePlanForm(forms.ModelForm):
     class Meta:
         model = ElectricityPricePlan

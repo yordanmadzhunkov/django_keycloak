@@ -7,17 +7,18 @@ from vei_platform.models.legal import LegalEntity
 from datetime import date
 from decimal import Decimal
 
+
 class ElectricityProductionAPIWithUserTestCases(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="123")
         self.client.force_authenticate(self.user)
         self.legal_entity = LegalEntity.objects.create(
-            native_name = "Нашата малка фирма ЕООД",
-            latin_name = 'Nashta malka firma EOOD',
-            legal_form = '',
-            tax_id = 'BG389294392',
-            founded = date(2022,2,2),
-            person = False,
+            native_name="Нашата малка фирма ЕООД",
+            latin_name="Nashta malka firma EOOD",
+            legal_form="",
+            tax_id="BG389294392",
+            founded=date(2022, 2, 2),
+            person=False,
         )
         self.legal_entity.save()
         self.factory = ElectricityFactory.objects.create(
@@ -26,14 +27,12 @@ class ElectricityProductionAPIWithUserTestCases(APITestCase):
             manager=self.user,
             primary_owner=self.legal_entity,
             owner_name=self.legal_entity.native_name,
-            location = "България, голямо село",
-            opened = date(2023, 7, 1),
-            capacity_in_mw = Decimal('0.2'),
+            location="България, голямо село",
+            opened=date(2023, 7, 1),
+            capacity_in_mw=Decimal("0.2"),
         )
         self.factory.save()
         self.url = reverse("production_api")
-
-
 
     def tearDown(self):
         self.user.delete()
@@ -52,8 +51,6 @@ class ElectricityProductionAPIWithUserTestCases(APITestCase):
         self.assertEqual(response.data[0]["slug"], "малката-кофа-за-фотони")
         print(response.data[0])
 
-
-    
     # def test_something(self):
     #     """
     #     Ensure that we can submit a electricity produced in time window

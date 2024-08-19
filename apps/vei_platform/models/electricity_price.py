@@ -72,9 +72,6 @@ class ElectricityPricePlan(models.Model):
         super().save(*args, **kwargs)
 
 
-
-
-
 class ElectricityPrice(models.Model):
     plan = models.ForeignKey(ElectricityPricePlan, on_delete=models.CASCADE)
 

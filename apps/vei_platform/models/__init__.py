@@ -4,7 +4,6 @@ from django.utils.text import slugify
 import uuid
 
 
-
 class TimeStampMixin(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
