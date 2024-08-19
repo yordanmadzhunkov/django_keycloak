@@ -16,6 +16,7 @@ import os
 from django.db import models
 
 from . import TimeStampMixin
+from . import unique_slug_generator
 
 
 def user_image_upload_directory_path(instance, filename):
@@ -29,6 +30,7 @@ def factory_component_file_upload_directory_path(instance, filename):
 
 class ElectricityFactory(TimeStampMixin):
     name = models.CharField(max_length=128)
+    slug = models.SlugField(unique=True, null=True, blank=False)  # Ensure unique slugs
 
     # Factory type
     PHOTOVOLTAIC = "FEV"
@@ -113,7 +115,11 @@ class ElectricityFactory(TimeStampMixin):
             return get_user_profile(self.manager)
         else:
             return None
-
+        
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = unique_slug_generator(self)  # Handle Unicode characters
+        super().save(*args, **kwargs)
 
 def docfile_content_types():
     return "application/pdf"
@@ -203,49 +209,38 @@ def auto_delete_file_on_change(sender, instance, update_fields, **kwargs):
 
 
 # FACTORY WORKING PLANNING
-class FactoryProductionPlan(models.Model):
-    name = models.CharField(max_length=128)
-    factory = models.ForeignKey(
-        ElectricityFactory, null=True, blank=True, on_delete=models.DO_NOTHING
-    )
-    start_year = models.IntegerField(
-        default=2022, validators=[MaxValueValidator(2050), MinValueValidator(1990)]
-    )
-    end_year = models.IntegerField(
-        default=2025, validators=[MaxValueValidator(2050), MinValueValidator(1990)]
-    )
+# class FactoryProductionPlan(models.Model):
+#     name = models.CharField(max_length=128)
+#     factory = models.ForeignKey(
+#         ElectricityFactory, null=True, blank=True, on_delete=models.DO_NOTHING
+#     )
+#     start_year = models.IntegerField(
+#         default=2022, validators=[MaxValueValidator(2050), MinValueValidator(1990)]
+#     )
+#     end_year = models.IntegerField(
+#         default=2025, validators=[MaxValueValidator(2050), MinValueValidator(1990)]
+#     )
 
-    def get_working_hours(self, month):
-        objects = ElectricityFactoryProduction.objects.filter(plan=self)
-        s = objects.filter(month__month=month.month)
-        y = s.filter(month__year=month.year)
-        if len(y) > 0:
-            return s[0].number
+#     def get_working_hours(self, month):
+#         objects = ElectricityFactoryProduction.objects.filter(plan=self)
+#         s = objects.filter(month__month=month.month)
+#         y = s.filter(month__year=month.year)
+#         if len(y) > 0:
+#             return s[0].number
 
-        count = len(s)
-        sum = Decimal(0)
-        for k in s:
-            sum = sum + k.number
+#         count = len(s)
+#         sum = Decimal(0)
+#         for k in s:
+#             sum = sum + k.number
 
-        if len(s) > 0:
-            return sum / count
+#         if len(s) > 0:
+#             return sum / count
 
-        return Decimal(100)
+#         return Decimal(100)
 
-    def __str__(self) -> str:
-        return self.name
+#     def __str__(self) -> str:
+#         return self.name
 
-    def get_absolute_url(self):
-        res = self.factory.get_absolute_url()
-        return res + "/production/%s" % self.pk
-
-
-class ElectricityFactoryProduction(models.Model):
-    month = models.DateField()
-    number = models.DecimalField(max_digits=6, decimal_places=2)
-    plan = models.ForeignKey(
-        FactoryProductionPlan, null=True, blank=True, on_delete=models.DO_NOTHING
-    )
-
-    def __str__(self) -> str:
-        return "%s %s" % (self.month.strftime("%b %y"), self.number)
+#     def get_absolute_url(self):
+#         res = self.factory.get_absolute_url()
+#         return res + "/production/%s" % self.pk

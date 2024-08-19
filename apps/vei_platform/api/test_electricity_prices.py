@@ -4,9 +4,9 @@ from rest_framework.test import APITestCase
 
 # from rest_framework.test import APIRequestFactory
 # from myproject.apps.core.models import Account
-import json
+# import json
 from rest_framework.exceptions import ErrorDetail
-from api.electricity_prices import ElectricityPricesSerializer
+# from api.electricity_prices import ElectricityPricesSerializer
 
 from django.contrib.auth.models import User
 

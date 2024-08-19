@@ -4,14 +4,14 @@ from django.db.models import Q
 from djmoney.models.fields import Decimal, CurrencyField, MoneyField
 from djmoney.money import Money
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.utils.text import slugify
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 
 from datetime import datetime, timezone
 from decimal import Decimal
-import uuid
+
+from . import unique_slug_generator
 
 
 class ElectricityBillingZone(models.Model):
@@ -72,23 +72,7 @@ class ElectricityPricePlan(models.Model):
         super().save(*args, **kwargs)
 
 
-def unique_slug_generator(instance, new_slug=None):
-    if new_slug is not None:
-        slug = new_slug
-    else:
-        slug = slugify(instance.name, allow_unicode=True)
-    Klass = instance.__class__
-    max_length = Klass._meta.get_field("slug").max_length
-    slug = slug[:max_length]
-    qs_exists = Klass.objects.filter(slug=slug).exists()
 
-    if qs_exists:
-        new_slug = "{slug}-{randstr}".format(
-            slug=slug[: max_length - 5], randstr=str(uuid.uuid1())[:4]
-        )
-
-        return unique_slug_generator(instance, new_slug=new_slug)
-    return slug
 
 
 class ElectricityPrice(models.Model):

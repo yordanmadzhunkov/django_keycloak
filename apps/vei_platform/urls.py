@@ -4,7 +4,6 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.generic.base import TemplateView
 
-from .views.factory import view_factory_production
 from .views.factory import (
     FactoriesList,
     FactoryDetail,
@@ -63,9 +62,6 @@ urlpatterns = [
     path("factory/<int:pk>/edit", FactoryEdit.as_view(), name="factory_edit"),
     path("price_chart/", ElectricityChart.as_view(), name="energy_price_chart"),
     path("electricity", ElectricityPlanView.as_view(), name="view_electricity_plan"),
-    path(
-        "production/<int:pk>", view_factory_production, name="view_factory_production"
-    ),
     path("entity/<int:pk>", view_entity_detail, name="entity"),
     path("entity/my_entity", view_my_entity_detail, name="my_entity"),
     path("entity/platform", view_entity_platform, name="platform_legal"),

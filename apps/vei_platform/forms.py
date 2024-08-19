@@ -1,7 +1,6 @@
 from django import forms
 from datetime import date, datetime
 from .models.factory import (
-    FactoryProductionPlan,
     ElectricityFactory,
     ElectricityFactoryComponents,
     docfile_content_types,
@@ -80,46 +79,6 @@ class BootstrapDatePicker(forms.DateInput):
         return re.sub(self.format_re, lambda x: format_map[x.group()], format)
 
 
-class FactoryFinancialPlaningForm(forms.Form):
-    capitalization = forms.DecimalField(
-        label=_("Capitalization"),
-        initial=53000,
-        widget=forms.widgets.NumberInput(
-            attrs={
-                "class": "input",
-                "inputmode": "decimal",
-            }
-        ),
-    )
-    start_date = forms.DateField(initial=date(2023, 6, 1))
-
-    production_plan = forms.ChoiceField(choices=(), required=False)
-
-    electricity_prices = forms.ChoiceField(choices=())
-
-    start_year = forms.IntegerField(
-        initial=2021, max_value=2050, min_value=1990, required=True
-    )
-    end_year = forms.IntegerField(
-        initial=2025, max_value=2050, min_value=1990, required=True
-    )
-
-    def __init__(self, factory, *args, **kwargs):
-        super(FactoryFinancialPlaningForm, self).__init__(*args, **kwargs)
-        production_plan_choise = [
-            (t.pk, t.name)
-            for t in FactoryProductionPlan.objects.filter(factory=factory)
-        ]
-        self.fields["production_plan"] = forms.ChoiceField(
-            label=_("Working hours"), choices=production_plan_choise
-        )
-
-        electricity_prices = [
-            (t.pk, t.name) for t in ElectricityPricePlan.objects.all()
-        ]
-        self.fields["electricity_prices"] = forms.ChoiceField(
-            label=_("Electricity price"), choices=electricity_prices
-        )
 
 
 class PricePlanForm(forms.ModelForm):

@@ -1,12 +1,9 @@
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework import generics, serializers
-from vei_platform.models.electricity_price import (
-    ElectricityPrice,
-    ElectricityPricePlan,
-    ElectricityBillingZone,
-)
-from django.db.models import Q
+from vei_platform.models.electricity_price import ElectricityPrice, ElectricityPricePlan,  ElectricityBillingZone
+from vei_platform.models.factory_production import ElectricityFactory, ElectricityFactoryProduction
 
+from django.db.models import Q
 # from rest_framework.validators import UniqueForYearValidator
 from djmoney.money import Money
 
@@ -160,3 +157,54 @@ class ElectricityPricesAPIView(generics.ListCreateAPIView):
         if isinstance(kwargs.get("data", {}), list):
             kwargs["many"] = True
         return super().get_serializer(*args, **kwargs)
+
+### PRODUCTION ###
+
+
+class ElectricityProductionSerializer(serializers.ModelSerializer):
+    factory = serializers.SlugRelatedField(
+        slug_field="pk", queryset=ElectricityFactoryProduction.objects.all()
+    )
+    start_interval = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S%z")
+    end_interval = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S%z")
+    energy_in_kwh = serializers.DecimalField(decimal_places=4, max_digits=14)
+
+    class Meta:
+        model = ElectricityFactoryProduction
+        fields = ("start_interval", "end_interval", "energy_in_kwh", "factory")
+        read_only_fields = ("factory",)
+
+    
+
+    def validate(self, data):
+        print(data)
+        return super().validate(data)
+
+
+class ElectricityProductionAPIView(generics.ListCreateAPIView):
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    serializer_class = ElectricityProductionSerializer
+    
+
+
+class ElectricityFactorySerializer(serializers.ModelSerializer):
+    # billing_zone = serializers.SlugRelatedField(slug_field='code', queryset=ElectricityBillingZone.objects.all())
+    #plan = serializers.SlugRelatedField(
+    #    slug_field="slug", queryset=ElectricityPricePlan.objects.all()
+    #)
+    #start_interval = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S%z")
+    #end_interval = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S%z")
+
+    class Meta:
+        model = ElectricityFactory
+        fields = ("name", "slug", "factory_type")
+        read_only_fields = ("name", "slug", "factory_type")
+
+
+class ElectricityFactoryAPIView(generics.ListCreateAPIView):
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    #queryset = ElectricityFactory.objects.all()
+    serializer_class = ElectricityFactorySerializer
+
+    def get_queryset(self):
+        return ElectricityFactory.objects.filter(manager=self.request.user)
