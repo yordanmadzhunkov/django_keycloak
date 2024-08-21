@@ -45,7 +45,7 @@ class ElectricityProductionAPIWithUserTestCases(APITestCase):
             datetime.strptime(resp, "%Y-%m-%dT%H:%M:%S%z"),
         )
 
-    def test_factories_list_has_my_factory(self):
+    def test_get_factories_list_of_user(self):
         """
         Get list of factories and check if my factory is there
         """
@@ -56,9 +56,9 @@ class ElectricityProductionAPIWithUserTestCases(APITestCase):
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["name"], "Малката кофа за фотони")
         self.assertEqual(response.data[0]["slug"], "малката-кофа-за-фотони")
-        #print(response.data[0])
+        # print(response.data[0])
 
-    def test_post_production_to_factory(self):
+    def test_create_electricity_production_with_user(self):
         """
         Ensure that we can submit a electricity produced in time window
         """
@@ -77,4 +77,3 @@ class ElectricityProductionAPIWithUserTestCases(APITestCase):
         self.assertEqual(Decimal(response.data["energy_in_kwh"]), Decimal("10.19"))
         self.checkTime(2024, 5, 19, 9, 0, response.data["start_interval"])
         self.checkTime(2024, 5, 19, 10, 0, response.data["end_interval"])
-

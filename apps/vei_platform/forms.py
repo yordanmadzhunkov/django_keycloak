@@ -532,7 +532,7 @@ class FactoryModelForm(forms.ModelForm):
     class Meta:
         model = ElectricityFactory
         fields = "__all__"
-        exclude = ["manager", "primary_owner"]
+        exclude = ["manager", "primary_owner", "slug"]
         labels = {
             "name": _("Factory name"),
             "location": _("Location"),
@@ -542,6 +542,9 @@ class FactoryModelForm(forms.ModelForm):
             "owner_name": _("Legal entity owning the factory"),
             "factory_type": _("Energy source type"),
             "image": _("Image"),
+            "factory_code": _("Factory code"),
+            "email": _("Email"),
+            "phone": _("Phone"),
         }
 
         widgets = {
@@ -593,6 +596,11 @@ class FactoryModelForm(forms.ModelForm):
                 Column("capacity_in_mw", css_class="form-group col-md-2 mb-0"),
                 Column("location", css_class="form-group col-md-8 mb-0"),
                 css_class="form-row",
+            ),
+            Row(
+                Column("factory_code", css_class="form-group col-md-4 mb-0"),
+                Column("email", css_class="form-group col-md-4 mb-0"),
+                Column("phone", css_class="form-group col-md-4 mb-0"),
             ),
             Row(
                 Column("owner_name", css_class="form-group col-md-8 mb-0"),

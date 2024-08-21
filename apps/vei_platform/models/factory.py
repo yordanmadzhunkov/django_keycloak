@@ -83,6 +83,21 @@ class ElectricityFactory(TimeStampMixin):
     )
     owner_name = models.CharField(max_length=128, default="Unknown")
 
+    factory_code = models.CharField(
+        max_length=128,
+        null=True,
+        blank=True,
+        default=None,
+    )
+
+    email = models.EmailField(null=True, blank=True, default=None)
+    phone = models.CharField(
+        max_length=128,
+        null=True,
+        blank=True,
+        default=None,
+    )
+
     def __str__(self):
         return self.name
 

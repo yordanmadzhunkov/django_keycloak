@@ -1,4 +1,5 @@
 from django.core.paginator import Paginator
+from django.http import HttpResponse
 
 from . import common_context
 from vei_platform.models.factory import (
@@ -25,7 +26,7 @@ from django.views import View
 from decimal import Decimal, DecimalException
 from datetime import date
 from django import template
-from django.forms import formset_factory
+from django.forms import BaseModelForm, formset_factory
 from django.forms.models import model_to_dict
 
 from django.urls import reverse_lazy, reverse
@@ -256,6 +257,11 @@ class FactoryEdit(UpdateView):
 
     def form_valid(self, form):
         context = self.get_context_data()
+        if context["form"].save(commit=True):
+            messages.info(self.request, _("Updated factory information"))
+        else:
+            messages.error(self.request, _("Failed to save factory form"))
+
         formset = context["formset"]
         for component_form in formset:
             if component_form.is_valid():
@@ -271,6 +277,9 @@ class FactoryEdit(UpdateView):
 
         extract_error_messages_from(self.request, formset)
         return super(FactoryEdit, self).form_valid(form)
+
+    # def form_invalid(self, form: BaseModelForm) -> HttpResponse:
+    #    return super().form_invalid(form)
 
     def get_success_url(self):
         return reverse_lazy("view_factory", kwargs={"pk": self.object.pk})
