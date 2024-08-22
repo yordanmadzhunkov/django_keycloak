@@ -183,15 +183,32 @@ class ElectricityProductionSerializer(serializers.ModelSerializer):
         fields = ("start_interval", "end_interval", "energy_in_kwh", "factory")
         read_only_fields = ("factory",)
 
-    # def validate(self, data):
-    #     print("VALIDATE Energy production serializer")
-    #     print(data)
-    #     return super().validate(data)
+    def validate(self, data):
+        query_overlapping_intervals = create_query_for_finding_overlapping_intervals(
+            "start_interval",
+            "end_interval",
+            data["start_interval"],
+            data["end_interval"],
+            closed_interval=False,
+        )
+        if (
+            ElectricityFactoryProduction.objects.filter(factory=data["factory"])
+            .filter(query_overlapping_intervals)
+            .exists()
+        ):
+            raise serializers.ValidationError("Factory production time window overlap")
+        return super().validate(data)
 
 
 class ElectricityProductionAPIView(generics.ListCreateAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     serializer_class = ElectricityProductionSerializer
+
+    def get_serializer(self, *args, **kwargs):
+        # https://medium.com/swlh/efficient-bulk-create-with-django-rest-framework-f73da6af7ddc
+        if isinstance(kwargs.get("data", {}), list):
+            kwargs["many"] = True
+        return super().get_serializer(*args, **kwargs)
 
 
 class ElectricityFactorySerializer(serializers.ModelSerializer):

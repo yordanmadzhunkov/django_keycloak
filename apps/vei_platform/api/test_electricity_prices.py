@@ -373,6 +373,10 @@ class ElectricityPricePriceSeriesAPITestCases(APITestCase):
         # Second post
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["non_field_errors"][0].code, "invalid")
+        self.assertEqual(
+            str(response.data["non_field_errors"][0]), "Price plan time window overlap"
+        )
 
     def test_create_price_non_overlaping_time_windows(self):
         """
@@ -385,8 +389,7 @@ class ElectricityPricePriceSeriesAPITestCases(APITestCase):
         self.assertGreaterEqual(len(response.data), 4)
         self.assertEqual(response.data["plan"], self.plan.slug)
         self.assertEqual(response.data["price"], "10.19")
-        d = datetime.strptime(response.data["start_interval"], "%Y-%m-%dT%H:%M:%S%z")
-        self.assertEqual(datetime(2024, 5, 19, 11, 00, 00, tzinfo=timezone.utc), d)
+        self.checkTime(2024, 5, 19, 11, 00, response.data["start_interval"])
         data = {
             "plan": self.plan.slug,
             "price": "12.12",
@@ -495,10 +498,8 @@ class ElectricityPricePriceSeriesAPITestCases(APITestCase):
         self.assertGreaterEqual(len(response.data), 4)
         self.assertEqual(response.data["plan"], self.plan.slug)
         self.assertEqual(response.data["price"], "10.19")
-        d = datetime.strptime(response.data["start_interval"], "%Y-%m-%dT%H:%M:%S%z")
-        self.assertEqual(datetime(2024, 5, 19, 11, 00, 00, tzinfo=timezone.utc), d)
-        d = datetime.strptime(response.data["end_interval"], "%Y-%m-%dT%H:%M:%S%z")
-        self.assertEqual(datetime(2024, 5, 19, 12, 00, 00, tzinfo=timezone.utc), d)
+        self.checkTime(2024, 5, 19, 11, 00, response.data["start_interval"])
+        self.checkTime(2024, 5, 19, 12, 00, response.data["end_interval"])
 
         data = {
             "plan": self.plan.slug,

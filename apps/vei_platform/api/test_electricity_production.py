@@ -56,7 +56,6 @@ class ElectricityProductionAPIWithUserTestCases(APITestCase):
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["name"], "Малката кофа за фотони")
         self.assertEqual(response.data[0]["slug"], "малката-кофа-за-фотони")
-        # print(response.data[0])
 
     def test_create_electricity_production_with_user(self):
         """
@@ -77,3 +76,79 @@ class ElectricityProductionAPIWithUserTestCases(APITestCase):
         self.assertEqual(Decimal(response.data["energy_in_kwh"]), Decimal("10.19"))
         self.checkTime(2024, 5, 19, 9, 0, response.data["start_interval"])
         self.checkTime(2024, 5, 19, 10, 0, response.data["end_interval"])
+        # ElectricityFactoryProduction.objects.all().delete()
+
+    def test_create_electricity_production_bulk(self):
+        """
+        Get create a list of production for same factory
+        """
+        url = self.url
+        data = [
+            {
+                "factory": "малката-кофа-за-фотони",
+                "energy_in_kwh": "44.19",
+                "start_interval": "2024-06-19T11:00+00:00",
+                "end_interval": "2024-06-19T12:00+00:00",
+            },
+            {
+                "factory": "малката-кофа-за-фотони",
+                "energy_in_kwh": "11.21",
+                "start_interval": "2024-06-19T12:00+00:00",
+                "end_interval": "2024-06-19T13:00+00:00",
+            },
+            {
+                "factory": "малката-кофа-за-фотони",
+                "energy_in_kwh": "12.10",
+                "start_interval": "2024-06-19T13:00+00:00",
+                "end_interval": "2024-06-19T14:00+00:00",
+            },
+        ]
+
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertGreaterEqual(len(response.data), 3)
+        self.assertEqual(response.data[0]["factory"], "малката-кофа-за-фотони")
+        self.assertEqual(response.data[1]["factory"], "малката-кофа-за-фотони")
+        self.assertEqual(response.data[2]["factory"], "малката-кофа-за-фотони")
+
+        self.assertEqual(Decimal(response.data[0]["energy_in_kwh"]), Decimal("44.19"))
+        self.assertEqual(Decimal(response.data[1]["energy_in_kwh"]), Decimal("11.21"))
+        self.assertEqual(Decimal(response.data[2]["energy_in_kwh"]), Decimal("12.10"))
+
+        self.checkTime(2024, 6, 19, 11, 00, response.data[0]["start_interval"])
+        self.checkTime(2024, 6, 19, 12, 00, response.data[1]["start_interval"])
+        self.checkTime(2024, 6, 19, 13, 00, response.data[2]["start_interval"])
+
+        self.checkTime(2024, 6, 19, 12, 00, response.data[0]["end_interval"])
+        self.checkTime(2024, 6, 19, 13, 00, response.data[1]["end_interval"])
+        self.checkTime(2024, 6, 19, 14, 00, response.data[2]["end_interval"])
+
+    def test_create_factory_production_duplicate(self):
+        """
+        Tests if creating a production that overlaps within previously
+        created production timewindow leads to error
+        """
+        data = {
+            "factory": "малката-кофа-за-фотони",
+            "energy_in_kwh": "12.29",
+            "start_interval": "2024-05-19T11:00+02:00",
+            "end_interval": "2024-05-19T12:00+02:00",
+        }
+        url = self.url
+
+        response = self.client.post(self.url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        # self.assertGreaterEqual(len(response.data), 1)
+        self.assertEqual(response.data["factory"], "малката-кофа-за-фотони")
+        self.assertEqual(Decimal(response.data["energy_in_kwh"]), Decimal("12.29"))
+        self.checkTime(2024, 5, 19, 9, 0, response.data["start_interval"])
+        self.checkTime(2024, 5, 19, 10, 0, response.data["end_interval"])
+
+        # Second post
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["non_field_errors"][0].code, "invalid")
+        self.assertEqual(
+            str(response.data["non_field_errors"][0]),
+            "Factory production time window overlap",
+        )
