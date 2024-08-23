@@ -1,5 +1,6 @@
 import requests
 from prettytable import PrettyTable
+from vei_platform_api import VeiPlatformAPI
 
 
 class EnergyChartsAPI:
@@ -92,3 +93,24 @@ class EnergyChartsAPI:
 
     def get_currency_and_unit(self, prices):
         return prices["unit"].split("/")
+
+    def process(self, target_list):
+        for zone in self.billing_zones.keys():
+            prices = self.fetch_prices_day_ahead(zone)
+            if prices:
+                for target in target_list:
+                    try:
+                        vei_platform = VeiPlatformAPI(
+                            target["url"], token=target["token"]
+                        )
+                        vei_platform.prepare_and_post_prices(self, zone, prices)
+                        # break
+                    except Exception as e:
+                        message = getattr(e, "message", repr(e))
+                        print(
+                            "Exception %s when processing Target %s token=%.4s.."
+                            % (message, target["url"], target["token"])
+                        )
+                        raise e
+            else:
+                print("Fail to fetch zone = " + zone)

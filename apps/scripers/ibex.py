@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from pytz import timezone, utc
 from decimal import Decimal
 from utils import timestamp_to_datetime
+from vei_platform_api import VeiPlatformAPI
 
 
 def conver_bgn_to_eur(price):
@@ -67,7 +68,9 @@ def parse_ibex(soup):
                     d = d.astimezone(utc)
                     for i in range(len(entries)):
                         if entries[i]["start_interval"] == d:
-                            entries[i].update({"volume": volume})
+                            entries[i].update(
+                                {"volume_in_kwh": Decimal(volume) * Decimal(1000)}
+                            )
 
         first = False
     return sorted(entries, key=lambda k: k["start_interval"])
@@ -82,11 +85,12 @@ def prepare_entries_for_post(entries):
         res["unit"] = p["unit"]
         unix_seconds.append(int(p["start_interval"].timestamp()))
         price.append(p["price"])
-        volume.append(p["volume"])
+        volume.append(p["volume_in_kwh"])
     res["unit"] = entries[0]["unit"]
     res["price"] = price
     res["unix_seconds"] = unix_seconds
-    res["volume"] = volume
+    res["volume_in_kwh"] = volume
+    print(res)
     return res
 
 
@@ -123,3 +127,25 @@ class IBexScriper:
     def get_plan_name(self, zone_name):
         plan_name = "BG Day ahead"
         return plan_name
+
+    def process(self, target_list):
+        for zone in self.billing_zones.keys():
+            prices = self.fetch_prices_day_ahead(zone)
+            if prices:
+                for target in target_list:
+                    try:
+                        vei_platform = VeiPlatformAPI(
+                            target["url"], token=target["token"]
+                        )
+                        vei_platform.prepare_and_post_prices(self, zone, prices)
+                        # vei_platform.prepare_and_post_volume(self, zone, prices)
+                        # break
+                    except Exception as e:
+                        message = getattr(e, "message", repr(e))
+                        print(
+                            "Exception %s when processing Target %s token=%.4s.."
+                            % (message, target["url"], target["token"])
+                        )
+                        raise e
+            else:
+                print("Fail to fetch zone = " + zone)
