@@ -6,50 +6,9 @@ from utils import timestamp_to_datetime, str_to_datetime, datetime_to_str
 from utils import print_green, print_yellow, print_blue, print_red, green, yellow
 
 # pip install requests
-from prettytable import PrettyTable
 from decimal import Decimal
-from datetime import datetime, timedelta
 from tzlocal import get_localzone  # $ pip install tzlocal
 import json
-
-
-def render_entries_to_pretty_table(entries):
-    prices_pretty_table = PrettyTable(["Date & time", "price", "unit"])
-    for p in entries:
-        prices_pretty_table.add_row(
-            [
-                p["start_interval"],
-                p["price"],
-                p["unit"],
-            ]
-        )
-    return prices_pretty_table
-
-
-def print_prices(prices, billing_zone):
-    unit = prices["unit"]
-    price = prices["price"]
-    time_slot_in_unix = prices["unix_seconds"]
-
-    prices_table = PrettyTable(
-        ["UTC Date", "UTC Time", "Price " + unit, "Local Time", "Local Date"]
-    )
-    prices_table.title = "Billing zone = " + billing_zone
-    for i in range(len(price)):
-        d = timestamp_to_datetime(time_slot_in_unix[i])
-        p = Decimal(price[i]).quantize(Decimal("0.01"))
-        # print(d + ' '  + str(price[i]) + ' ' + unit)
-        ld = d.astimezone(get_localzone())
-        prices_table.add_row(
-            [
-                d.strftime("%Y-%m-%d"),
-                d.strftime("%H:%M:%S %Z"),
-                p,
-                ld.strftime("%H:%M:%S %Z"),
-                ld.strftime("%Y-%m-%d"),
-            ]
-        )
-    print(prices_table)
 
 
 class VeiPlatformAPI:
@@ -178,54 +137,54 @@ class VeiPlatformAPI:
         end_interval = end_interval + window_size
         return start_interval, end_interval
 
-    def compute_ovelaping_prices(self, plan, timestamps, price):
+    def get_server_values_in_timewindow(self, url, timestamps, params):
         start_interval, end_interval = self.compute_time_windows(timestamps)
-        params = self.time_params(start_interval, end_interval)
-        # print("PARAMS = " + str(params))
-        params["plan"] = plan
-
+        params.update(self.time_params(start_interval, end_interval))
         response = requests.get(
-            self.endpoint_base_url + self.prices_url,
+            self.endpoint_base_url + url,
             params=params,
             headers=self.headers,
         )
+        return response.json() if response.status_code == 200 else None
+
+    def compute_ovelaping_prices(
+        self, initial_data, value_key, timestamps, values, server_values
+    ):
         new_prices_to_post = []
         matched_prices = []
         wrong_price = []
-        # print(params)
-
-        # print('compute_ovelaping_prices')
-        if response.status_code == 200:
-            server_prices = response.json()
-            server_prices.sort(key=lambda x: x["start_interval"])
-            j = 0
-            for i in range(len(timestamps)):
-                start_interval = timestamp_to_datetime(timestamps[i])
-                end_interval = start_interval + timedelta(hours=1)
-                data = {
-                    "plan": plan,
-                    "price": str(Decimal(price[i]).quantize(Decimal("0.01"))),
+        server_values.sort(key=lambda x: x["start_interval"])
+        j = 0
+        for i in range(len(timestamps)):
+            start_interval = timestamp_to_datetime(timestamps[i])
+            end_interval = start_interval + timedelta(hours=1)
+            data = initial_data.copy()
+            data.update(
+                {
+                    # slug_key: slug,
+                    value_key: str(Decimal(values[i]).quantize(Decimal("0.01"))),
                 }
-                data.update(self.time_params(start_interval, end_interval))
+            )
+            data.update(self.time_params(start_interval, end_interval))
 
-                while j < len(server_prices):
-                    s = str_to_datetime(server_prices[j]["start_interval"])
-                    if s < start_interval:
-                        j = j + 1
+            while j < len(server_values):
+                s = str_to_datetime(server_values[j]["start_interval"])
+                if s < start_interval:
+                    j = j + 1
+                else:
+                    break
+
+            if j < len(server_values):
+                s = str_to_datetime(server_values[j]["start_interval"])
+                if s == start_interval:
+                    if data[value_key] == server_values[j][value_key]:
+                        matched_prices.append(data)
                     else:
-                        break
+                        wrong_price.append(data)
+                    j = j + 1
+                    continue
 
-                if j < len(server_prices):
-                    s = str_to_datetime(server_prices[j]["start_interval"])
-                    if s == start_interval:
-                        if data["price"] == server_prices[j]["price"]:
-                            matched_prices.append(data)
-                        else:
-                            wrong_price.append(data)
-                        j = j + 1
-                        continue
-
-                new_prices_to_post.append(data)
+            new_prices_to_post.append(data)
 
         return new_prices_to_post, matched_prices, wrong_price
 
@@ -257,7 +216,7 @@ class VeiPlatformAPI:
                 "Status",
             ]
         )
-        table.title = plan_info["name"] + "Billing zone = " + plan_info["billing_zone"]
+        table.title = plan_info["name"] + " Billing zone = " + plan_info["billing_zone"]
         rows = (
             [self.render_row(val, green("Match")) for val in match]
             + [self.render_row(val, green("New")) for val in new]
@@ -270,12 +229,23 @@ class VeiPlatformAPI:
     def post_prices(self, plan_info, prices):
         # print(plan_info)
         unit = prices["unit"]
-        price = prices["price"]
+        scriper_prices = prices["price"]
         time_slot_in_unix = prices["unix_seconds"]
         plan_slug = plan_info["slug"]
         res = {}
+        server_prices = self.get_server_values_in_timewindow(
+            self.prices_url, time_slot_in_unix, params={"plan": plan_info["slug"]}
+        )
+        if server_prices is None:
+            res["error"] = "failed to get server prices for comparisons"
+            return res
+
         new_prices_to_post, matched_prices, wrong_price = self.compute_ovelaping_prices(
-            plan_slug, time_slot_in_unix, price
+            {"plan": plan_slug},
+            "price",
+            time_slot_in_unix,
+            scriper_prices,
+            server_prices,
         )
 
         table = self.render_request_table(
@@ -316,6 +286,57 @@ class VeiPlatformAPI:
         self.report_result(plan_info)
         if "plan" in plan_info.keys():
             self.report_result(self.post_prices(plan_info["plan"], prices))
+
+    def get_my_factories(self):
+        data = {}
+        response = requests.get(
+            self.endpoint_base_url + self.factories_url,
+            data=json.dumps(data),
+            headers=self.headers,
+        )
+        if response.status_code == 200:
+            factories = response.json()
+            # print("created " + str(plan))
+            return {"factories": factories}
+        else:
+            return {
+                "error": "response Status is not OK, probably missing authentication token"
+            }
+
+    def prepare_and_post_production(self, scriper, factory_name, production):
+        factories = self.get_my_factories()
+        for f in factories["factories"]:
+            if f["name"] == factory_name:
+                factory_slug = f["slug"]
+                timestamps = production["unix_seconds"]
+                volume_in_kwh = production["volume_in_kwh"]
+                server_values = self.get_server_values_in_timewindow(
+                    self.production_url, timestamps, params={"factory": factory_slug}
+                )
+                new, matched, different = self.compute_ovelaping_prices(
+                    {"factory": factory_slug},
+                    "energy_in_kwh",
+                    timestamps,
+                    volume_in_kwh,
+                    server_values,
+                )
+                if len(new) == 0:
+                    return {
+                        "info": "Skiping update on %s because there is not new production, Matched production count = %d"
+                        % (factory_slug, len(matched))
+                    }
+                else:
+                    response = requests.post(
+                        self.endpoint_base_url + self.production_url,
+                        data=json.dumps(new),
+                        headers=self.headers,
+                    )
+                    if response.status_code == 201:
+                        self.report_result({"info": response.json()})
+                    else:
+                        self.report_result(
+                            {"error": "failed to create bulk production data"}
+                        )
 
     def report_result(self, res, showInfo=True):
         url = self.endpoint_base_url

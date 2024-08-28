@@ -152,3 +152,41 @@ class ElectricityProductionAPIWithUserTestCases(APITestCase):
             str(response.data["non_field_errors"][0]),
             "Factory production time window overlap",
         )
+
+    def test_get_factory_production(self):
+        """
+        Tests if creating a production that overlaps within previously
+        created production timewindow leads to error
+        """
+        data = {
+            "factory": "малката-кофа-за-фотони",
+            "energy_in_kwh": "12.29",
+            "start_interval": "2024-05-19T11:00+02:00",
+            "end_interval": "2024-05-19T12:00+02:00",
+        }
+        url = self.url
+
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        # self.assertGreaterEqual(len(response.data), 1)
+        self.assertEqual(response.data["factory"], "малката-кофа-за-фотони")
+        self.assertEqual(Decimal(response.data["energy_in_kwh"]), Decimal("12.29"))
+        self.checkTime(2024, 5, 19, 9, 0, response.data["start_interval"])
+        self.checkTime(2024, 5, 19, 10, 0, response.data["end_interval"])
+
+        data = {
+            "factory": "малката-кофа-за-фотони",
+            "start_interval": "2024-05-19T00:00+00:00",
+            "end_interval": "2024-05-19T23:30:00+00:00",
+        }
+
+        # Second post
+        response = self.client.get(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertGreaterEqual(len(response.data), 1)
+
+        # self.assertEqual(response.data["non_field_errors"][0].code, "invalid")
+        # self.assertEqual(
+        #    str(response.data["non_field_errors"][0]),
+        #    "Factory production time window overlap",
+        # )

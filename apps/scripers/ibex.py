@@ -5,7 +5,6 @@ from requests_html import HTMLSession
 from datetime import datetime, timedelta
 from pytz import timezone, utc
 from decimal import Decimal
-from utils import timestamp_to_datetime
 from vei_platform_api import VeiPlatformAPI
 
 
@@ -138,7 +137,10 @@ class IBexScriper:
                             target["url"], token=target["token"]
                         )
                         vei_platform.prepare_and_post_prices(self, zone, prices)
-                        # vei_platform.prepare_and_post_volume(self, zone, prices)
+                        vei_platform.prepare_and_post_production(
+                            self, factory_name="Гигамрежата 33", production=prices
+                        )
+
                         # break
                     except Exception as e:
                         message = getattr(e, "message", repr(e))

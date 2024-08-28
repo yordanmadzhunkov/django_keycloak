@@ -204,6 +204,27 @@ class ElectricityProductionAPIView(generics.ListCreateAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     serializer_class = ElectricityProductionSerializer
 
+    def get_queryset(self):
+        factory_slug = self.request.query_params.get("factory")
+        if factory_slug:
+            factory = ElectricityFactory.objects.get(slug=factory_slug)
+            start_interval = self.request.query_params.get("start_interval")
+            end_interval = self.request.query_params.get("end_interval")
+            obj = ElectricityFactoryProduction.objects.filter(factory=factory)
+            if start_interval and end_interval:
+                query_overlapping_intervals = (
+                    create_query_for_finding_overlapping_intervals(
+                        "start_interval",
+                        "end_interval",
+                        start_interval,
+                        end_interval,
+                        closed_interval=False,
+                    )
+                )
+                obj = obj.filter(query_overlapping_intervals)
+            return obj
+        return ElectricityFactoryProduction.objects.none()
+
     def get_serializer(self, *args, **kwargs):
         # https://medium.com/swlh/efficient-bulk-create-with-django-rest-framework-f73da6af7ddc
         if isinstance(kwargs.get("data", {}), list):
