@@ -103,7 +103,8 @@ class EnergyChartsAPI:
                         vei_platform = VeiPlatformAPI(
                             target["url"], token=target["token"]
                         )
-                        vei_platform.prepare_and_post_prices(self, zone, prices)
+                        res = vei_platform.prepare_and_post_prices(self, zone, prices)
+                        vei_platform.report_result(res)
                         # break
                     except Exception as e:
                         message = getattr(e, "message", repr(e))

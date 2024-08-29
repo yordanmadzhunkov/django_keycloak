@@ -44,13 +44,13 @@ class VeiPlatformAPI:
                     found = zone
         else:
             return {
-                "error": "response check_billing_zone Status is not OK",
+                'error': "response check_billing_zone Status is not OK",
                 "status": response.status_code,
                 "reason": response.reason,
             }
 
         if not found:
-            return {"error": "Billing zone " + billing_zone + "is NOT supported"}
+            return {'error': "Billing zone " + billing_zone + "is NOT supported"}
 
         return {
             "check_billing_zone": "OK",
@@ -76,7 +76,7 @@ class VeiPlatformAPI:
 
             return {"plan": target_plan}
         else:
-            return {"error": "response Status is not OK"}
+            return {'error': "response Status is not OK"}
 
     def create_plan(
         self, billing_zone, name, currency="EUR", electricity_unit="MWh"
@@ -98,14 +98,14 @@ class VeiPlatformAPI:
             print("created " + str(plan))
             return {"plan": plan}
         else:
-            return {"error": "response Status is not CREATED"}
+            return {'error': "response Status is not CREATED"}
 
     def get_or_create_plan(
         self, billing_zone, plan_name=None, currency="EUR", energy_unit="MWh"
     ):
         res = self.get_plan(billing_zone=billing_zone, name=plan_name)
         print_green(res)
-        if not "error" in res.keys() and "plan" in res.keys():
+        if not 'error' in res.keys() and "plan" in res.keys():
             if res["plan"] is None:
                 new_plan = self.create_plan(
                     billing_zone=billing_zone,
@@ -237,7 +237,7 @@ class VeiPlatformAPI:
             self.prices_url, time_slot_in_unix, params={"plan": plan_info["slug"]}
         )
         if server_prices is None:
-            res["error"] = "failed to get server prices for comparisons"
+            res['error'] = "failed to get server prices for comparisons"
             return res
 
         new_prices_to_post, matched_prices, wrong_price = self.compute_ovelaping_prices(
@@ -271,21 +271,22 @@ class VeiPlatformAPI:
                     response.json(), plan_slug, unit, "Created"
                 )
             else:
-                res["error"] = "failed to create bulk data"
+                res['error'] = "failed to create bulk data"
         return res
 
     def prepare_and_post_prices(self, scriper, zone, prices):
         billing_zone_info = self.check_billing_zone(zone)
-        if "error" in billing_zone_info.keys():
-            self.report_result(billing_zone_info)
-            return
+        if 'error' in billing_zone_info.keys():
+            return billing_zone_info
+
         plan_name = scriper.get_plan_name(billing_zone_info["name"])
         currency, energy_unit = scriper.get_currency_and_unit(prices)
 
         plan_info = self.get_or_create_plan(zone, plan_name, currency, energy_unit)
-        self.report_result(plan_info)
         if "plan" in plan_info.keys():
-            self.report_result(self.post_prices(plan_info["plan"], prices))
+            return self.post_prices(plan_info["plan"], prices)
+        else:
+            return plan_info
 
     def get_my_factories(self):
         data = {}
@@ -300,7 +301,7 @@ class VeiPlatformAPI:
             return {"factories": factories}
         else:
             return {
-                "error": "response Status is not OK, probably missing authentication token"
+                'error': "response Status is not OK, probably missing authentication token"
             }
 
     def prepare_and_post_production(self, scriper, factory_name, production):
@@ -332,21 +333,19 @@ class VeiPlatformAPI:
                         headers=self.headers,
                     )
                     if response.status_code == 201:
-                        self.report_result({"info": response.json()})
+                        return {"info": response.json()}
                     else:
-                        self.report_result(
-                            {"error": "failed to create bulk production data"}
-                        )
+                        return {'error': "failed to create bulk production data"}
 
     def report_result(self, res, showInfo=True):
         url = self.endpoint_base_url
         token = self.token
 
         if isinstance(res, dict):
-            if "error" in res.keys():
+            if 'error' in res.keys():
                 print_red(
                     'Error "%s" when processing Target %s token=%.4s..'
-                    % (res["error"], url, token)
+                    % (res['error'], url, token)
                 )
             if showInfo and "info" in res.keys():
                 print_blue(

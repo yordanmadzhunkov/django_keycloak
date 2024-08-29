@@ -1,4 +1,3 @@
-from prettytable import PrettyTable
 from bs4 import BeautifulSoup
 from requests_html import HTMLSession
 
@@ -136,10 +135,13 @@ class IBexScriper:
                         vei_platform = VeiPlatformAPI(
                             target["url"], token=target["token"]
                         )
-                        vei_platform.prepare_and_post_prices(self, zone, prices)
-                        vei_platform.prepare_and_post_production(
+                        res = vei_platform.prepare_and_post_prices(self, zone, prices)
+                        vei_platform.report_result(res)
+
+                        res = vei_platform.prepare_and_post_production(
                             self, factory_name="Гигамрежата 33", production=prices
                         )
+                        vei_platform.report_result(res)
 
                         # break
                     except Exception as e:
