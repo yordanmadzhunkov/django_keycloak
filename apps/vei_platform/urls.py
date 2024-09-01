@@ -9,8 +9,9 @@ from .views.factory import (
     FactoryDetail,
     FactoriesOfUserList,
     FactoriesForReview,
+    FactoryCreate, FactoryEdit, CampaignCreate, FactoryProduction, FactoryProductionChart,
 )
-from .views.factory import FactoryCreate, FactoryEdit, CampaignCreate
+
 from .views.dashboard import Dashboard
 from .views.home import Home
 from .views.profile import Profile, MyProfileUpdate
@@ -19,7 +20,7 @@ from .views.legal_entity import (
     view_my_entity_detail,
     view_entity_platform,
 )
-from .views.electricity_prices import ElectricityChart, ElectricityPlanView
+from .views.electricity_prices import ElectricityPriceChart, ElectricityPlanView
 from .views.scriping_tools import view_scriping_tools
 from .views.invest import Campaign
 from .views.team import Team
@@ -60,8 +61,13 @@ urlpatterns = [
     path("factory/<int:pk>", FactoryDetail.as_view(), name="view_factory"),
     path("factory/<int:pk>/campaign", CampaignCreate.as_view(), name="campaign_create"),
     path("factory/<int:pk>/edit", FactoryEdit.as_view(), name="factory_edit"),
-    path("price_chart/", ElectricityChart.as_view(), name="energy_price_chart"),
-    path("electricity", ElectricityPlanView.as_view(), name="view_electricity_plan"),
+
+    path("factory/<int:pk>/production", FactoryProduction.as_view(), name="factory_production"),
+    path("factory/production/chart", FactoryProductionChart.as_view(), name="factory_production_chart"),
+
+    path("price/chart", ElectricityPriceChart.as_view(), name="energy_price_chart"),
+    path("price", ElectricityPlanView.as_view(), name="view_electricity_plan"),
+
     path("entity/<int:pk>", view_entity_detail, name="entity"),
     path("entity/my_entity", view_my_entity_detail, name="my_entity"),
     path("entity/platform", view_entity_platform, name="platform_legal"),

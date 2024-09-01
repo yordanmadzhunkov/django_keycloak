@@ -65,7 +65,7 @@ from djmoney.money import Money
 from djmoney.contrib.exchange.models import convert_money
 
 
-class ElectricityChart(View):
+class ElectricityPriceChart(View):
     def get(self, request, *args, **kwargs):
         plan_slug = request.GET.get("plan")
         plan = get_object_or_404(ElectricityPricePlan, slug=plan_slug)

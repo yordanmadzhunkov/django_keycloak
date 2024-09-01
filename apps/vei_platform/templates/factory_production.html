@@ -1,38 +1,25 @@
 {% extends 'base.html' %}
+{% load static %}
 {% load i18n %}
+{% load crispy_forms_tags %}
 
-{% block head_title%}
-{{ platform_name}}
+{% block head_title %}
+{% trans "Electricity price" %}
 {% endblock%}
 {% block content %}
 <section style="background-color: #eee;">
   <div class="container py-5">
-    {% include "factory_header.html" %}
-    <form method="post">
-      {% csrf_token %}
-      {{ formset.management_form }}
-      {{ plan_formset.management_form }}
-      {{ plan_formset }}
-      <table class="table-striped table-bordered table-sm">
-        <thead>
-          {% for label in table.labels %}
-          <th>{{ label }}</th>
-          {% endfor %}
-        </thead>
-        <tbody>
-          {% for row in table.rows %}
-          <tr>
-            {% for data in row %}
-            {% autoescape off %}
-            <td> {{data}} </td>
-            {% endautoescape %}
-            {% endfor %}
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      <input type="submit" value="Save" />
-    </form>
+    {% include "snippets/factory_card.html"%}
   </div>
 </section>
+<section>
+  <div class="row justify-content-center mb-3">
+    <div id="container" style="width: 90%;">
+      <canvas id="energy-production-chart"
+        data-url="{% url 'factory_production_chart' %}?factory={{ factory.slug | urlencode}}">
+      </canvas>
+    </div>
+  </div>
+</section>
+{% include "snippets/energy_production_chart.html" %}
 {% endblock content %}

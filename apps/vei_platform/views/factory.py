@@ -351,3 +351,70 @@ class FactoryCreate(CreateView):
 
     def get_success_url(self):
         return reverse_lazy("view_factory", kwargs={"pk": self.object.pk})
+
+
+class FactoryProduction(View):
+    def get(self, request, pk=None, *args, **kwargs):
+        context = common_context(request)
+        factory = ElectricityFactory.objects.get(pk=pk)
+        context["factory"] = factory
+
+
+        components = ElectricityFactoryComponents.objects.filter(factory=factory)
+        context["components"] = components
+        context["price_plans"] = ElectricityPricePlan.objects.all()
+        if factory.manager is None:
+            context["manager"] = None
+        else:
+            # profile = get_user_profile(factory.manager)
+            context["manager_profile"] = get_user_profile(factory.manager)
+        return render(request, "factory_production.html", context)
+
+
+def datetime_to_chartjs_format(dt, tz):
+    return str(dt.astimezone(tz).strftime("%Y-%m-%d %H:%M:%S"))
+
+import pytz
+from django.http import JsonResponse
+
+
+class FactoryProductionChart(View):
+  def get(self, request, *args, **kwargs):
+        factory_slug = request.GET.get("factory")
+        factory = get_object_or_404(ElectricityFactory, slug=factory_slug)
+        num_days = 3
+        production = ElectricityFactoryProduction.objects.filter(factory=factory).order_by("-start_interval")[
+            : 24 * num_days
+        ]
+        x = []
+        y = []
+        requested_timezone = request.GET.get("timezone")
+        if requested_timezone is None:
+            requested_timezone = "UTC"
+        tz = pytz.timezone(requested_timezone)
+        # pytz.tzinfo.StaticTzInfo
+        # offset_str = datetime.datetime.now().astimezone(pytz_tz).strftime("%z")
+        x_scale = requested_timezone + " timezone"
+        x_min = None
+        x_max = datetime_to_chartjs_format(production[0].end_interval, tz)
+        for p in production:
+            x.append(datetime_to_chartjs_format(p.start_interval, tz))
+            y.append(p.energy_in_kwh)
+        x_min = datetime_to_chartjs_format(p.start_interval, tz=tz)
+        y = y[::-1]
+        x = x[::-1]
+        y.append(y[-1])
+        x.append(x_max)
+        y_scale = "kWh"
+        return JsonResponse(
+            data={
+                "x_values": x,
+                "y1_values": y,
+                "y2_values": y,
+                "label": factory.name + " Production in " + y_scale,
+                "y_scale": y_scale,
+                "x_scale": x_scale,
+                "x_min": x_min,
+                "x_max": x_max,
+            }
+        )
