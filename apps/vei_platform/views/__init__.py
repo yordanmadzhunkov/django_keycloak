@@ -3,7 +3,6 @@ from vei_platform.models.profile import UserProfile, get_user_profile
 from vei_platform.models.legal import find_legal_entity
 from vei_platform.models.factory import ElectricityFactory
 from decimal import Decimal
-from vei_platform.templatetags.vei_platform_utils import balance_from_transactions
 from vei_platform.settings.base import VEI_PLATFORM_IMAGE, LANGUAGES
 
 

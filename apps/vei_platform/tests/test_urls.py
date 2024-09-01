@@ -9,8 +9,6 @@ from vei_platform.views.factory import (
     FactoryEdit,
     FactoriesList,
     FactoryDetail,
-    FactoriesForReview,
-    CampaignCreate,
 )
 
 
@@ -59,16 +57,4 @@ class UrlTest(TestCase):
         url = reverse("view_factory", kwargs={"pk": 2})
         self.assertEquals(
             resolve(url).func.view_class, FactoryDetail.as_view().view_class
-        )
-
-    def test_factories_for_review_page_url(self):
-        url = reverse("factories_for_review")
-        self.assertEquals(
-            resolve(url).func.view_class, FactoriesForReview.as_view().view_class
-        )
-
-    def test_factory_campaign_create_page_url(self):
-        url = reverse("campaign_create", kwargs={"pk": 2})
-        self.assertEquals(
-            resolve(url).func.view_class, CampaignCreate.as_view().view_class
         )

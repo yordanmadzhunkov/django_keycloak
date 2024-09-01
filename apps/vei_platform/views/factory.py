@@ -8,11 +8,9 @@ from vei_platform.models.factory import (
 )
 from vei_platform.models.factory_production import ElectricityFactoryProduction
 
-from vei_platform.models.campaign import Campaign
 from vei_platform.models.electricity_price import ElectricityPricePlan
 from vei_platform.models.profile import get_user_profile
 from vei_platform.forms import (
-    CampaignCreateForm,
     FactoryModelForm,
     ElectricityFactoryComponentsForm,
 )
@@ -46,8 +44,7 @@ class FactoriesList(ListView):
     paginate_by = 5
 
     def get_queryset(self):
-        listed = self.view_offered_factories()
-        factories_list = ElectricityFactory.objects.filter(pk__in=listed).order_by("pk")
+        factories_list = ElectricityFactory.objects.all().order_by("pk")
         return factories_list
 
     def get_context_data(self, **kwargs):
@@ -55,34 +52,6 @@ class FactoriesList(ListView):
         context.update(common_context(self.request))
         context["head_title"] = self.title
         return context
-
-    def view_offered_factories(self):
-        campaigns = Campaign.objects.filter(status=Campaign.Status.ACTIVE).order_by(
-            "factory"
-        )
-        prev = None
-        listed = []
-        for l in campaigns:
-            if prev != l.factory.pk:
-                # print(l.factory.name)
-                listed.append(l.factory.pk)
-            prev = l.factory.pk
-        return listed
-
-
-class FactoriesForReview(FactoriesList):
-    def view_offered_factories(self):
-        campaigns = Campaign.objects.filter(
-            status=Campaign.Status.INITIALIZED
-        ).order_by("factory")
-        prev = None
-        listed = []
-        for l in campaigns:
-            if l.get_last_campaign(l.factory):
-                if prev != l.factory.pk:
-                    listed.append(l.factory.pk)
-                prev = l.factory.pk
-        return listed
 
 
 class FactoriesOfUserList(LoginRequiredMixin, FactoriesList):
@@ -101,85 +70,12 @@ class FactoriesOfUserList(LoginRequiredMixin, FactoriesList):
         return context
 
 
-class CampaignCreate(CreateView):
-    def get(self, request, pk=None, *args, **kwargs):
-        context = common_context(request)
-        factory = get_object_or_404(ElectricityFactory, pk=pk)
-        # factory = ElectricityFactory.objects.get(pk=pk)
-        context["factory"] = factory
-        context["manager_profile"] = get_user_profile(factory.manager)
-        # Check if user is manager
-        if context["profile"].pk == context["manager_profile"].pk:
-            capacity = factory.get_capacity_in_kw()
-            fraction = Decimal(0.5)
-            form = CampaignCreateForm(
-                initial={
-                    "amount_offered": Money(
-                        Decimal(1500) * capacity * fraction, currency="BGN"
-                    ),
-                    "persent_from_profit": fraction * Decimal(100),
-                    "start_date": date(2024, 12, 1),
-                    "duration": Decimal(15 * 12),
-                    "commision": Decimal(1.5),
-                }
-            )
-            context["new_campaign_form"] = form
-            context["hide_link_buttons"] = True
-        else:
-            messages.error(request, _("Only factory manager can initiate campaign"))
-            return redirect(factory.get_absolute_url())
-        return render(request, "campaign_create.html", context)
-
-    def post(self, request, pk=None, *args, **kwargs):
-        context = common_context(request)
-        factory = get_object_or_404(ElectricityFactory, pk=pk)
-        form = CampaignCreateForm(data=request.POST)
-        if form.is_valid():
-            context["form_data"] = form.cleaned_data
-            amount = form.cleaned_data["amount_offered"]
-            persent_from_profit = form.cleaned_data["persent_from_profit"]
-            start_date = form.cleaned_data["start_date"]
-            duration = form.cleaned_data["duration"]
-            commision = form.cleaned_data["commision"]
-            campaign = Campaign(
-                start_date=start_date,
-                amount=amount,
-                persent_from_profit=Decimal(persent_from_profit).quantize(
-                    Decimal("99.99")
-                ),
-                duration=Decimal(duration).quantize(Decimal("1.")),
-                commision=Decimal(commision).quantize(Decimal("99.99")),
-                factory=factory,
-            )
-            campaign.save()
-            messages.success(
-                request,
-                _(
-                    "You have successfully started a campaign to collect investors until %s"
-                )
-                % (start_date),
-            )
-            return redirect(campaign.get_absolute_url())
-        else:
-            messages.error(request, _("Invalid data, please try again"))
-
-        context["factory"] = factory
-        context["new_campaign_form"] = form
-        context["hide_link_buttons"] = True
-        return render(request, "campaign_create.html", context)
-
-
 # @login_required(login_url='/oidc/authenticate/')
 class FactoryDetail(View):
     def get(self, request, pk=None, *args, **kwargs):
         context = common_context(request)
         factory = ElectricityFactory.objects.get(pk=pk)
         context["factory"] = factory
-
-        campaigns = Campaign.objects.filter(
-            factory=factory
-        )  # .exclude(status=Campaign.Status.CANCELED)
-        context["campaigns"] = campaigns
 
         components = ElectricityFactoryComponents.objects.filter(factory=factory)
         context["components"] = components
@@ -359,7 +255,6 @@ class FactoryProduction(View):
         factory = ElectricityFactory.objects.get(pk=pk)
         context["factory"] = factory
 
-
         components = ElectricityFactoryComponents.objects.filter(factory=factory)
         context["components"] = components
         context["price_plans"] = ElectricityPricePlan.objects.all()
@@ -374,18 +269,19 @@ class FactoryProduction(View):
 def datetime_to_chartjs_format(dt, tz):
     return str(dt.astimezone(tz).strftime("%Y-%m-%d %H:%M:%S"))
 
+
 import pytz
 from django.http import JsonResponse
 
 
 class FactoryProductionChart(View):
-  def get(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         factory_slug = request.GET.get("factory")
         factory = get_object_or_404(ElectricityFactory, slug=factory_slug)
         num_days = 3
-        production = ElectricityFactoryProduction.objects.filter(factory=factory).order_by("-start_interval")[
-            : 24 * num_days
-        ]
+        production = ElectricityFactoryProduction.objects.filter(
+            factory=factory
+        ).order_by("-start_interval")[: 24 * num_days]
         x = []
         y = []
         requested_timezone = request.GET.get("timezone")

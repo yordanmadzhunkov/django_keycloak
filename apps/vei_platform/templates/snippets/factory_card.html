@@ -48,7 +48,7 @@
           </div>
           <div class="col-md-6 col-lg-3 col-xl-3 border-sm-start-none border-start">
             {%if not hide_link_buttons %}
-            {% for l in factory|campaign_links:request.user %}
+            {% for l in factory|factory_actions:request.user %}
             <div class="d-flex flex-column mt-4">
               <a href="{{l.href}}" class="{{l.css_class}}">
                 {{ l.title }}
@@ -56,7 +56,6 @@
             </div>
             {% endfor %}
             {% endif %}
-            {% include "snippets/factory_card_progress.html" %}
 
             {% if card_form %}
             {% crispy card_form %}

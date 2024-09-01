@@ -20,6 +20,6 @@ class ProjectTests(TestCase):
     def test_render_electricity_prices_0(self):
         self.render_and_compare(
             context={"some_key": "some_value"},
-            template_name=BASE_DIR / "templates/electricity_prices.html",
-            ref_file_name=BASE_DIR / "static_to_collect/electricity_prices_0.html",
+            template_name=BASE_DIR / "templates/home.html",
+            ref_file_name=BASE_DIR / "static_to_collect/home_0.html",
         )

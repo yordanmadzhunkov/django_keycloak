@@ -8,8 +8,10 @@ from .views.factory import (
     FactoriesList,
     FactoryDetail,
     FactoriesOfUserList,
-    FactoriesForReview,
-    FactoryCreate, FactoryEdit, CampaignCreate, FactoryProduction, FactoryProductionChart,
+    FactoryCreate,
+    FactoryEdit,
+    FactoryProduction,
+    FactoryProductionChart,
 )
 
 from .views.dashboard import Dashboard
@@ -22,7 +24,6 @@ from .views.legal_entity import (
 )
 from .views.electricity_prices import ElectricityPriceChart, ElectricityPlanView
 from .views.scriping_tools import view_scriping_tools
-from .views.invest import Campaign
 from .views.team import Team
 from django.contrib.sitemaps.views import sitemap
 from .sitemaps import ElectricityFactorySitemap
@@ -54,20 +55,22 @@ urlpatterns = [
     path("profile", MyProfileUpdate.as_view(), name="my_profile"),
     path("profile/<int:pk>", Profile.as_view(), name="user_profile"),
     path("campaign/", FactoriesList.as_view(), name="campaigns"),
-    path("campaign/<int:pk>", Campaign.as_view(), name="campaign"),
     path("factory/", FactoriesOfUserList.as_view(), name="my_factories"),
-    path("factory/review", FactoriesForReview.as_view(), name="factories_for_review"),
     path("factory/add", FactoryCreate.as_view(), name="factory_create"),
     path("factory/<int:pk>", FactoryDetail.as_view(), name="view_factory"),
-    path("factory/<int:pk>/campaign", CampaignCreate.as_view(), name="campaign_create"),
     path("factory/<int:pk>/edit", FactoryEdit.as_view(), name="factory_edit"),
-
-    path("factory/<int:pk>/production", FactoryProduction.as_view(), name="factory_production"),
-    path("factory/production/chart", FactoryProductionChart.as_view(), name="factory_production_chart"),
-
+    path(
+        "factory/<int:pk>/production",
+        FactoryProduction.as_view(),
+        name="factory_production",
+    ),
+    path(
+        "factory/production/chart",
+        FactoryProductionChart.as_view(),
+        name="factory_production_chart",
+    ),
     path("price/chart", ElectricityPriceChart.as_view(), name="energy_price_chart"),
     path("price", ElectricityPlanView.as_view(), name="view_electricity_plan"),
-
     path("entity/<int:pk>", view_entity_detail, name="entity"),
     path("entity/my_entity", view_my_entity_detail, name="my_entity"),
     path("entity/platform", view_entity_platform, name="platform_legal"),

@@ -5,7 +5,6 @@ from .models.factory import (
     ElectricityFactoryComponents,
     docfile_content_types,
 )
-from .models.campaign import InvestementInCampaign, Campaign as CampaignModel
 from .models.electricity_price import ElectricityPricePlan
 from .models.profile import UserProfile
 from .models.legal import LegalEntity, find_legal_entity
@@ -252,107 +251,6 @@ class SearchForm(forms.Form):
     )
 
 
-class CampaignCreateForm(forms.Form):
-    amount_offered = MoneyField(
-        default_amount=1000,
-        decimal_places=2,
-        label=_("Campaign amount"),
-        help_text=_("Total amount you want to collect for this campaign"),
-    )
-
-    persent_from_profit = forms.DecimalField(
-        label=_("Share from factory [%]"),
-        help_text=_(
-            "This share will be sold to investors in this platform. The amount you will recieve is this share times capitalization minus platform commision."
-        ),
-        initial=10.0,
-        widget=forms.widgets.NumberInput(
-            attrs={
-                "class": "form-control",
-                "inputmode": "decimal",
-            }
-        ),
-    )
-
-    start_date = forms.DateField(
-        label=_("Campaing end date"),
-        help_text=_(
-            "Until this date investors can declare interest in this project. If enough people declare interst in this project you will be able to complete the campaing"
-        ),
-        initial=date(2024, 12, 31),
-        widget=BootstrapDatePicker(
-            attrs={
-                "title": _("Date"),
-                "class": "form-control",
-                "style": "width:18ch",
-                "data-date-autoclose": "true",
-                "data-date-clear-btn": "false",
-                "data-date-today-btn": "linked",
-                "data-date-today-highlight": "true",
-            }
-        ),
-    )
-
-    duration = forms.CharField(
-        initial="180",
-        label=_("Duration"),
-        help_text=_(
-            "Number of months that investors will recieve percent form the profit proportional to their share. After this period ownership will be transfered to original factory owner. A duration of 15 years is good in most cases."
-        ),
-        required=True,
-        widget=forms.widgets.TextInput(
-            attrs={
-                "class": "form-control",
-                "autocomplete": "off",
-                "pattern": "[0-9\.]+",
-                "style": "width:9ch",
-                "title": _("Enter numbers Only"),
-            }
-        ),
-    )
-
-    commision = forms.DecimalField(
-        label=_("Commision [%]"),
-        help_text=_(
-            "%% commision for the platform. This commision is withholded once when the initial amout it"
-            "s collected and transfered to the factory originar and each time a payment to investors is carried out in the future."
-        ),
-        initial=1.5,
-        widget=forms.widgets.TextInput(
-            attrs={
-                "class": "form-control",
-                "autocomplete": "off",
-                "pattern": "[0-9\.]+",
-                "style": "width:9ch",
-                "title": _("Enter numbers Only"),
-                "readonly": True,
-            }
-        ),
-    )
-
-    def __init__(self, *args, **kwargs):
-        super(CampaignCreateForm, self).__init__(*args, **kwargs)
-        # If you pass FormHelper constructor a form instance
-        # It builds a default layout with all its fields
-        self.helper = FormHelper(self)
-        create = Submit("complete", _("Start campaign"))
-        create.field_classes = "btn btn-success btn-block"
-        self.helper.layout = Layout(
-            Row(
-                Column("amount_offered", css_class="form-group"),
-                Column("persent_from_profit"),
-                css_class="form-row",
-            ),
-            Row(
-                Column("start_date"),
-                Column("duration"),
-                css_class="form-row",
-            ),
-            Row(Column("commision")),
-            Row(Column(create)),
-        )
-
-
 class CreateInvestmentForm(forms.Form):
     amount = MoneyField(
         default_amount=1000,
@@ -386,79 +284,6 @@ class LoiginOrRegisterForm(forms.Form):
         authenticate = Submit("authenticate", _("Login or Register"))
         authenticate.field_classes = "btn btn-success btn-block"
         self.helper.layout = Layout(Row(authenticate))
-
-
-class CampaingEditForm(forms.Form):
-    start_date = forms.DateField(
-        label=_("Campaing end date"),
-        help_text=_(
-            "Until this date investors can declare interest in this project. If enough people declare interst in this project you will be able to complete the campaing"
-        ),
-        initial=date(2024, 12, 31),
-        widget=BootstrapDatePicker(
-            attrs={
-                "title": _("Date"),
-                "class": "form-control",
-                "style": "width:18ch",
-                "data-date-autoclose": "true",
-                "data-date-clear-btn": "false",
-                "data-date-today-btn": "linked",
-                "data-date-today-highlight": "true",
-            }
-        ),
-    )
-
-    def __init__(self, instance, is_reviewer=False, *args, **kwargs):
-        super(CampaingEditForm, self).__init__(*args, **kwargs)
-
-        # If you pass FormHelper constructor a form instance
-        # It builds a default layout with all its fields
-        self.helper = FormHelper(self)
-        self.helper.layout = Layout()
-        if instance.allow_cancel():
-            cancel = Submit("cancel", _("Cancel campaign"))
-            cancel.field_classes = "btn btn-danger btn-block"
-            self.helper.layout.append(Row(cancel))
-        if instance.allow_finish():
-            complete = Submit("complete", _("Finish campaign"))
-            complete.field_classes = "btn btn-success btn-block"
-            self.helper.layout.append(Row(complete))
-        if instance.allow_extend():
-            extend = Submit("extend", _("Extend campaign"))
-            extend.field_classes = "btn btn-warning btn-block"
-            self.helper.layout.append(Row(Field("start_date")))
-            self.helper.layout.append(Row(extend))
-        else:
-            del self.fields["start_date"]
-
-        if is_reviewer and instance.need_approval():
-            approve = Submit("approve", _("Approve campaign"))
-            approve.field_classes = "btn btn-success btn-block"
-            self.helper.layout.append(Row(approve))
-
-
-class EditInvestmentForm(forms.ModelForm):
-    class Meta:
-        model = InvestementInCampaign
-        fields = ("amount",)
-
-    def __init__(self, *args, **kwargs):
-        super(EditInvestmentForm, self).__init__(*args, **kwargs)
-        # If you pass FormHelper constructor a form instance
-        # It builds a default layout with all its fields
-        self.helper = FormHelper(self)
-        cancel = Submit("cancel", _("Cancel"))
-        cancel.field_classes = "btn btn-danger"
-        save = Submit("save", _("Save"))
-        save.field_classes = "btn btn-warning"
-        self.helper.layout = Layout(
-            Row(Column("amount", css_class="form-group"), css_class="form-row"),
-            save,
-            cancel,
-        )
-        self.fields["amount"].label = _("Your interest")
-        # self.fields['amount'].fields[1].choices = [('EUR', 'EUR €')]
-        # [('BGN', 'BGN лв'), ('EUR', 'EUR €'), ('USD', 'USD $')]
 
 
 class CustomImageField(Field):
