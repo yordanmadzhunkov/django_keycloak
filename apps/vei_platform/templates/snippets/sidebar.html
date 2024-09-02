@@ -28,20 +28,19 @@
             <span>{% trans "Electricity prices" %}</span>
         </a>
     </li>
-    <!--
+
     <li class="nav-item active">
-        <a class="nav-link" href="{% url 'campaigns'  %}">
+        <a class="nav-link" href="{% url 'factories_all'  %}">
             <i class="fas fa-fw fa-search-dollar"></i>
-            <span>{% trans "Offers for investors" %}</span>
+            <span>{% trans "All factories" %}</span>
         </a>
     </li>
-    -->
 
     {% if request.user.is_authenticated %}
     <li class="nav-item active">
         <a class="nav-link" href="{% url 'my_factories'  %}">
             <i class="fas fa-fw fa-warehouse"></i>
-            <span>{% trans "Offer your Electrical factory" %}</span>
+            <span>{% trans "Your Electrical factory" %}</span>
         </a>
     </li>
     {% endif %}

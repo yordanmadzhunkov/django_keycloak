@@ -6,7 +6,6 @@ from django.forms import formset_factory
 
 from vei_platform.models.profile import get_user_profile
 from vei_platform.models.electricity_price import ElectricityPricePlan, ElectricityPrice
-from vei_platform.forms import PricePlanForm, NumberPerMonthForm
 
 from decimal import Decimal, DecimalException
 from django.utils.translation import gettext as _

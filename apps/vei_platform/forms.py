@@ -78,37 +78,6 @@ class BootstrapDatePicker(forms.DateInput):
         return re.sub(self.format_re, lambda x: format_map[x.group()], format)
 
 
-class PricePlanForm(forms.ModelForm):
-    class Meta:
-        model = ElectricityPricePlan
-        fields = "__all__"
-        labels = {
-            "name": _("Plan name"),
-            "start_year": _("Start year"),
-            "end_year": _("End year"),
-        }
-        widgets = {
-            "name": forms.TextInput(
-                attrs={
-                    "class": "form-control",
-                    "autocomplete": "off",
-                    "title": _("Plan name"),
-                }
-            ),
-            "start_year": forms.NumberInput(
-                attrs={
-                    "class": "form-control",
-                    "style": "width:9ch",
-                }
-            ),
-            "end_year": forms.NumberInput(
-                attrs={
-                    "class": "form-control",
-                    "style": "width:9ch",
-                }
-            ),
-        }
-
 
 class LegalEntityForm(forms.ModelForm):
     class Meta:
@@ -249,30 +218,6 @@ class SearchForm(forms.Form):
             }
         ),
     )
-
-
-class CreateInvestmentForm(forms.Form):
-    amount = MoneyField(
-        default_amount=1000,
-        decimal_places=2,
-        label=_("Interest amount"),
-        help_text=_("Amount which you want to participate in this project"),
-    )
-
-    def __init__(self, *args, **kwargs):
-        super(CreateInvestmentForm, self).__init__(*args, **kwargs)
-        if "initial" in kwargs.keys():
-            if "amount" in kwargs["initial"].keys():
-                amount = kwargs["initial"]["amount"]
-                self.initial["amunt"] = amount
-
-        # If you pass FormHelper constructor a form instance
-        # It builds a default layout with all its fields
-        self.helper = FormHelper(self)
-        self.helper.layout = Layout(
-            Row(Column("amount", css_class="form-group"), css_class="form-row"),
-            Submit("invest", _("Claim interest")),
-        )
 
 
 class LoiginOrRegisterForm(forms.Form):

@@ -47,8 +47,8 @@ class UrlTest(TestCase):
         url = reverse("team")
         self.assertEquals(resolve(url).func.view_class, Team.as_view().view_class)
 
-    def test_factories_with_campaigns_page_url(self):
-        url = reverse("campaigns")
+    def test_factories_all_page_url(self):
+        url = reverse("factories_all")
         self.assertEquals(
             resolve(url).func.view_class, FactoriesList.as_view().view_class
         )
