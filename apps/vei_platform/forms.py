@@ -346,13 +346,17 @@ class FactoryModelForm(forms.ModelForm):
             choices=FACTORY_TYPE_CHOISES, label=_("Type energy source"), coerce=str
         )
         self.fields["factory_type"] = factory_type
-
+        currency = forms.TypedChoiceField(
+            choices=CURRENCY_CHOICES, label=_("Currency"), coerce=str
+        )
+        self.fields["currency"] = currency
         for key, value in self.Meta.labels.items():
             self.fields[key].label = _(value)
         save = Submit("save", _("Save"), css_class="btn btn-primary")
         save.field_classes = "btn btn-success"
         # If you pass FormHelper constructor a form instance
         # It builds a default layout with all its fields
+
 
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
@@ -376,6 +380,11 @@ class FactoryModelForm(forms.ModelForm):
                 Column("owner_name", css_class="form-group col-md-8 mb-0"),
                 Column("tax_id", css_class="form-group col-md-4 mb-0"),
                 css_class="form-row",
+            ),
+            Row(
+                Column("plan", css_class="form-group col-md-5 mb-2"),
+                Column("currency", css_class="form-group col-md-2 mb-2"),
+                Column("timezone", css_class="form-group col-md-3 mb-2"),
             ),
             Row(
                 Column(CustomImageField("image"), css_class="form-group col-md-12"),

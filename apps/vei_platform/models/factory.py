@@ -5,18 +5,20 @@ from django.db.models.signals import post_save
 from django.conf import settings
 from decimal import Decimal
 from django.dispatch import receiver
-from django_q.tasks import async_task
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from .restricted_file_field import RestrictedFileField
 from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
+from .timezone_choises import TIMEZONE_CHOICES
+from djmoney.models.fields import CurrencyField
 
 import os
 from django.db import models
 
 from . import TimeStampMixin
 from . import unique_slug_generator
+from .electricity_price import ElectricityPricePlan
 
 
 def user_image_upload_directory_path(instance, filename):
@@ -97,6 +99,16 @@ class ElectricityFactory(TimeStampMixin):
         blank=True,
         default=None,
     )
+
+    plan = models.ForeignKey(ElectricityPricePlan, null=True, blank=True, on_delete=models.SET_NULL)
+    timezone = models.CharField(
+        verbose_name="Timezone",
+        max_length=50,
+        default="UTC",
+        choices=TIMEZONE_CHOICES,
+    )
+    currency = CurrencyField(default="EUR")
+
 
     def __str__(self):
         return self.name
@@ -222,41 +234,3 @@ def auto_delete_file_on_change(sender, instance, update_fields, **kwargs):
             _delete_file(old_file.path)
     except ElectricityFactoryComponents.DoesNotExist:
         return False
-
-
-# FACTORY WORKING PLANNING
-# class FactoryProductionPlan(models.Model):
-#     name = models.CharField(max_length=128)
-#     factory = models.ForeignKey(
-#         ElectricityFactory, null=True, blank=True, on_delete=models.DO_NOTHING
-#     )
-#     start_year = models.IntegerField(
-#         default=2022, validators=[MaxValueValidator(2050), MinValueValidator(1990)]
-#     )
-#     end_year = models.IntegerField(
-#         default=2025, validators=[MaxValueValidator(2050), MinValueValidator(1990)]
-#     )
-
-#     def get_working_hours(self, month):
-#         objects = ElectricityFactoryProduction.objects.filter(plan=self)
-#         s = objects.filter(month__month=month.month)
-#         y = s.filter(month__year=month.year)
-#         if len(y) > 0:
-#             return s[0].number
-
-#         count = len(s)
-#         sum = Decimal(0)
-#         for k in s:
-#             sum = sum + k.number
-
-#         if len(s) > 0:
-#             return sum / count
-
-#         return Decimal(100)
-
-#     def __str__(self) -> str:
-#         return self.name
-
-#     def get_absolute_url(self):
-#         res = self.factory.get_absolute_url()
-#         return res + "/production/%s" % self.pk

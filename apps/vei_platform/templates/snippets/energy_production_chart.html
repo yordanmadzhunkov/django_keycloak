@@ -11,10 +11,10 @@
                         datasets: [{
                             type: 'bar',
                             yAxisID: 'leftY',
-                            label: data.label,
+                            label: data.y1_label,
                             data: data.y1_values,
                             fill: false,
-                            stepped: true,
+                            stepped: false,
                             step: 'after',
                             //step: 'middle',
                             tension: 0.1,
@@ -24,14 +24,14 @@
                         {
                             type: 'line',
                             yAxisID: 'rightY',
-                            label: data.label,
+                            label: data.y2_label,
                             data: data.y2_values,
                             fill: false,
                             stepped: true,
                             step: 'after',
                             //step: 'middle',
                             tension: 0.1,
-                            //borderColor: 'rgb(0, 99, 132)',
+                            borderColor: 'rgb(0, 99, 132)',
                             //backgroundColor: 'rgba(255, 99, 132, 0.2)',
                         }
                         ],
@@ -102,7 +102,8 @@
                                 beginAtZero: true,
                                 ticks:
                                 {
-                                    color: 'green'
+                                    //color: 'green',
+                                    color: 'rgb(0, 99, 132)',
                                 },
                                 grid: { display: false }
                             },

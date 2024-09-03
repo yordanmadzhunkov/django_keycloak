@@ -25,6 +25,11 @@ def factory_actions(factory, user):
                 "title": _("Edit factory"),
                 "css_class": "btn btn-block btn-warning",
             },
+            {
+                "href": reverse("factory_production", kwargs={"pk": factory.pk}),
+                "title": _("View production"),
+                "css_class": "btn btn-block btn-info",
+            },
         ]
     return []
 

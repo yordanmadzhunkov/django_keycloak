@@ -8,7 +8,7 @@ from vei_platform.models.factory import (
 )
 from vei_platform.models.factory_production import ElectricityFactoryProduction
 
-from vei_platform.models.electricity_price import ElectricityPricePlan
+from vei_platform.models.electricity_price import ElectricityPricePlan, ElectricityPrice
 from vei_platform.models.profile import get_user_profile
 from vei_platform.forms import (
     FactoryModelForm,
@@ -35,6 +35,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from djmoney.money import Money
+from djmoney.contrib.exchange.models import convert_money
 
 
 class FactoriesList(ListView):
@@ -79,7 +80,6 @@ class FactoryDetail(View):
 
         components = ElectricityFactoryComponents.objects.filter(factory=factory)
         context["components"] = components
-        context["price_plans"] = ElectricityPricePlan.objects.all()
         if factory.manager is None:
             context["manager"] = None
         else:
@@ -257,7 +257,6 @@ class FactoryProduction(View):
 
         components = ElectricityFactoryComponents.objects.filter(factory=factory)
         context["components"] = components
-        context["price_plans"] = ElectricityPricePlan.objects.all()
         if factory.manager is None:
             context["manager"] = None
         else:
@@ -278,36 +277,45 @@ class FactoryProductionChart(View):
     def get(self, request, *args, **kwargs):
         factory_slug = request.GET.get("factory")
         factory = get_object_or_404(ElectricityFactory, slug=factory_slug)
-        num_days = 3
+        num_days = 7
         production = ElectricityFactoryProduction.objects.filter(
             factory=factory
         ).order_by("-start_interval")[: 24 * num_days]
         x = []
-        y = []
-        requested_timezone = request.GET.get("timezone")
+        y1 = []
+        y2 = []
+        prices = ElectricityPrice.objects.filter(plan=factory.plan)
+        display_currency = factory.currency
+        requested_timezone = factory.timezone
         if requested_timezone is None:
             requested_timezone = "UTC"
         tz = pytz.timezone(requested_timezone)
-        # pytz.tzinfo.StaticTzInfo
-        # offset_str = datetime.datetime.now().astimezone(pytz_tz).strftime("%z")
         x_scale = requested_timezone + " timezone"
         x_min = None
         x_max = datetime_to_chartjs_format(production[0].end_interval, tz)
         for p in production:
             x.append(datetime_to_chartjs_format(p.start_interval, tz))
-            y.append(p.energy_in_kwh)
+            y1.append(p.energy_in_kwh)
+            p2 = prices.filter(start_interval=p.start_interval)
+            if len(p2) > 0:
+                y2.append(Decimal(convert_money(p2[0].price, display_currency).amount))
+            else:
+                y2.append(None)
         x_min = datetime_to_chartjs_format(p.start_interval, tz=tz)
-        y = y[::-1]
+        y1 = y1[::-1]
+        y2 = y2[::-1]
         x = x[::-1]
-        y.append(y[-1])
+        #y1.append(y1[-1])
+        y2.append(y2[-1])
         x.append(x_max)
         y_scale = "kWh"
         return JsonResponse(
             data={
                 "x_values": x,
-                "y1_values": y,
-                "y2_values": y,
-                "label": factory.name + " Production in " + y_scale,
+                "y1_values": y1,
+                "y2_values": y2,
+                "y1_label": factory.name + " Production in " + y_scale,
+                "y2_label": factory.plan.name,
                 "y_scale": y_scale,
                 "x_scale": x_scale,
                 "x_min": x_min,
