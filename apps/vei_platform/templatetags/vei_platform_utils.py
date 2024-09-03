@@ -12,7 +12,6 @@ from django.urls import reverse
 register = template.Library()
 
 
-
 @register.filter(is_safe=True)
 def factory_actions(factory, user):
     is_manager = factory.manager == user

@@ -100,7 +100,9 @@ class ElectricityFactory(TimeStampMixin):
         default=None,
     )
 
-    plan = models.ForeignKey(ElectricityPricePlan, null=True, blank=True, on_delete=models.SET_NULL)
+    plan = models.ForeignKey(
+        ElectricityPricePlan, null=True, blank=True, on_delete=models.SET_NULL
+    )
     timezone = models.CharField(
         verbose_name="Timezone",
         max_length=50,
@@ -108,7 +110,6 @@ class ElectricityFactory(TimeStampMixin):
         choices=TIMEZONE_CHOICES,
     )
     currency = CurrencyField(default="EUR")
-
 
     def __str__(self):
         return self.name

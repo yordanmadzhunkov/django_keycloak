@@ -78,7 +78,6 @@ class BootstrapDatePicker(forms.DateInput):
         return re.sub(self.format_re, lambda x: format_map[x.group()], format)
 
 
-
 class LegalEntityForm(forms.ModelForm):
     class Meta:
         model = LegalEntity
@@ -356,7 +355,6 @@ class FactoryModelForm(forms.ModelForm):
         save.field_classes = "btn btn-success"
         # If you pass FormHelper constructor a form instance
         # It builds a default layout with all its fields
-
 
         self.helper = FormHelper(self)
         self.helper.layout = Layout(

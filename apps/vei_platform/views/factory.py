@@ -305,7 +305,7 @@ class FactoryProductionChart(View):
         y1 = y1[::-1]
         y2 = y2[::-1]
         x = x[::-1]
-        #y1.append(y1[-1])
+        # y1.append(y1[-1])
         y2.append(y2[-1])
         x.append(x_max)
         y_scale = "kWh"

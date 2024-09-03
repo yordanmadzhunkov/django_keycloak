@@ -21,4 +21,3 @@ class Dashboard(View):
     def add_my_legal_entity(self, request, context):
         if request.user and request.user.is_authenticated:
             context["my_legal_entity"] = find_legal_entity(user=request.user)
-
