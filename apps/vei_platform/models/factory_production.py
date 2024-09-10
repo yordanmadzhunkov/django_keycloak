@@ -2,6 +2,7 @@ from django.db import models
 from datetime import datetime, timezone
 from decimal import Decimal
 from .factory import ElectricityFactory
+from djmoney.models.fields import Decimal, CurrencyField, MoneyField
 
 
 class ElectricityFactoryProduction(models.Model):
@@ -36,3 +37,13 @@ class ElectricityFactoryProduction(models.Model):
             self.start_interval.strftime("%y-%m-%d %h:%m"),
             self.energy_in_kwh,
         )
+
+
+class ElectricityFactorySchedule(models.Model):
+    factory = models.ForeignKey(
+        ElectricityFactory, null=True, blank=True, on_delete=models.CASCADE
+    )
+
+    min_price = MoneyField(
+        max_digits=14, decimal_places=2, default_currency="BGN", default=Decimal(0)
+    )

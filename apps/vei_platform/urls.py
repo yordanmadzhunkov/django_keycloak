@@ -12,6 +12,7 @@ from .views.factory import (
     FactoryEdit,
     FactoryProduction,
     FactoryProductionChart,
+    FactorySchedule,
 )
 
 from .views.dashboard import Dashboard
@@ -68,6 +69,9 @@ urlpatterns = [
         "factory/production/chart",
         FactoryProductionChart.as_view(),
         name="factory_production_chart",
+    ),
+    path(
+        "factory/<int:pk>/schedule", FactorySchedule.as_view(), name="factory_schedule"
     ),
     path("price/chart", ElectricityPriceChart.as_view(), name="energy_price_chart"),
     path("price", ElectricityPlanView.as_view(), name="view_electricity_plan"),

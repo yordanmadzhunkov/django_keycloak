@@ -6,6 +6,7 @@ from .models.factory import (
     docfile_content_types,
 )
 from .models.electricity_price import ElectricityPricePlan
+from .models.factory_production import ElectricityFactorySchedule
 from .models.profile import UserProfile
 from .models.legal import LegalEntity, find_legal_entity
 
@@ -437,6 +438,37 @@ class ElectricityPlanForm(forms.Form):
                 Column("timezone", css_class="form-group col-md-3 mb-2"),
                 Column("days", css_class="form-group col-md-2 mb-1"),
                 show,
+                css_class="form-row",
+            ),
+        )
+
+
+class FactoryScheduleForm(forms.ModelForm):
+    class Meta:
+        model = ElectricityFactorySchedule
+        fields = ("min_price",)
+        labels = {
+            "min_price": _("Min price"),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(FactoryScheduleForm, self).__init__(*args, **kwargs)
+        # If you pass FormHelper constructor a form instance
+        # It builds a default layout with all its fields
+        self.helper = FormHelper(self)
+        self.helper.form_show_labels = True
+        for key, value in self.Meta.labels.items():
+            self.fields[key].label = _(value)
+
+        save = Submit("show", _("Save"), css_class="btn btn-primary")
+        save.field_classes = "btn btn-success"
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Row(
+                Column("min_price", css_class="form-group"),
+                # Column("currency", css_class="form-group col-md-2 mb-2"),
+                save,
                 css_class="form-row",
             ),
         )

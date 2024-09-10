@@ -6,23 +6,27 @@ from vei_platform.models.factory import (
     ElectricityFactory,
     ElectricityFactoryComponents,
 )
-from vei_platform.models.factory_production import ElectricityFactoryProduction
+from vei_platform.models.factory_production import (
+    ElectricityFactoryProduction,
+    ElectricityFactorySchedule,
+)
 
 from vei_platform.models.electricity_price import ElectricityPricePlan, ElectricityPrice
 from vei_platform.models.profile import get_user_profile
 from vei_platform.forms import (
     FactoryModelForm,
     ElectricityFactoryComponentsForm,
+    FactoryScheduleForm,
 )
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.views.generic import ListView, CreateView, UpdateView
+from django.views.generic import ListView, CreateView, UpdateView, FormView
 from django.views import View
 
 from decimal import Decimal, DecimalException
-from datetime import date
+from datetime import date, timedelta, datetime, timezone
 from django import template
 from django.forms import BaseModelForm, formset_factory
 from django.forms.models import model_to_dict
@@ -265,6 +269,136 @@ class FactoryProduction(View):
         return render(request, "factory_production.html", context)
 
 
+class FactorySchedule(FormView):
+
+    def get_schedule(self, factory: ElectricityFactory):
+        num_days = 4
+        prices = ElectricityPrice.objects.filter(plan=factory.plan).order_by(
+            "-start_interval"
+        )[: 24 * num_days]
+        prices = prices[::-1]
+        display_currency = factory.currency
+
+        min_price = ElectricityFactorySchedule.objects.filter(factory=factory).first()
+        if min_price is not None:
+            min_price_in_display_currency = Decimal(
+                convert_money(min_price.min_price, display_currency).amount
+            )
+        else:
+            min_price_in_display_currency = None
+
+        tz = factory.get_pytz_timezone()
+        headers = ["%s" % tz.zone]
+        rows = []
+        for i in range(24):
+            rows.append(
+                [
+                    {
+                        "text": "%d:00 - %d:00" % (i, i + 1),
+                    }
+                ]
+            )
+        start_date = (
+            prices[0].start_interval.astimezone(tz).date()
+        )  # .strftime("%Y-%m-%d")
+        end_date = prices[len(prices) - 1].start_interval.astimezone(tz).date()
+        # headers.append(end_date)
+        d = start_date
+        now = datetime.now(tz=timezone.utc)
+        while d <= end_date:
+            headers.append(d)
+            for i in range(24):
+                t = tz.localize(
+                    datetime(
+                        year=d.year,
+                        month=d.month,
+                        day=d.day,
+                        hour=i,
+                    )
+                )
+
+                p = ElectricityPrice.objects.filter(plan=factory.plan).filter(
+                    start_interval=t
+                )
+                if len(p) > 0:
+                    value = Decimal(convert_money(p[0].price, display_currency).amount)
+                    color = (
+                        "warning"
+                        if min_price is not None
+                        and value < min_price_in_display_currency
+                        else "info"
+                    )
+                    if now < t:
+                        color = (
+                            "danger"
+                            if min_price is not None
+                            and value < min_price_in_display_currency
+                            else "success"
+                        )
+                    rows[i].append(
+                        {
+                            "color": color,
+                            "text_color": "gray-100",
+                            "text": str(value),
+                        }
+                    )
+                else:
+                    rows[i].append({"text": "-"})
+            d = d + timedelta(days=1)
+
+        return {
+            "headers": headers,
+            "rows": rows,
+        }
+
+    def get(self, request, pk=None, *args, **kwargs):
+        context = common_context(request)
+        factory = get_object_or_404(ElectricityFactory, pk=pk)
+        context["factory"] = factory
+        if factory.manager is None:
+            context["manager"] = None
+        else:
+            # profile = get_user_profile(factory.manager)
+            context["manager_profile"] = get_user_profile(factory.manager)
+        queryset = ElectricityFactorySchedule.objects.filter(factory=factory)
+
+        if len(queryset) > 0:
+            obj = queryset[0]
+        else:
+            obj = None
+        context["form"] = FactoryScheduleForm(instance=obj)
+        context["schedule"] = self.get_schedule(factory)
+
+        return render(request, "factory_schedule.html", context)
+
+    def post(self, request, pk=None, *args, **kwargs):
+        context = common_context(request)
+        factory = get_object_or_404(ElectricityFactory, pk=pk)
+        context["factory"] = factory
+        if factory.manager is None:
+            context["manager"] = None
+        else:
+            # profile = get_user_profile(factory.manager)
+            context["manager_profile"] = get_user_profile(factory.manager)
+        form = FactoryScheduleForm(data=request.POST)
+        context["form"] = form
+        if form.is_valid():
+            queryset = ElectricityFactorySchedule.objects.filter(factory=factory)
+            if len(queryset) == 0:
+                obj = ElectricityFactorySchedule.objects.create(
+                    factory=factory, min_price=form.cleaned_data["min_price"]
+                )
+                obj.save()
+            else:
+                obj = queryset[0]
+                obj.min_price = form.cleaned_data["min_price"]
+                obj.save()
+                form.save()
+        else:
+            pass
+        return render(request, "factory_schedule.html", context)
+
+
 def datetime_to_chartjs_format(dt, tz):
     return str(dt.astimezone(tz).strftime("%Y-%m-%d %H:%M:%S"))
 
@@ -277,7 +411,7 @@ class FactoryProductionChart(View):
     def get(self, request, *args, **kwargs):
         factory_slug = request.GET.get("factory")
         factory = get_object_or_404(ElectricityFactory, slug=factory_slug)
-        num_days = 7
+        num_days = 10
         production = ElectricityFactoryProduction.objects.filter(
             factory=factory
         ).order_by("-start_interval")[: 24 * num_days]
@@ -286,37 +420,92 @@ class FactoryProductionChart(View):
         y2 = []
         prices = ElectricityPrice.objects.filter(plan=factory.plan)
         display_currency = factory.currency
-        requested_timezone = factory.timezone
-        if requested_timezone is None:
-            requested_timezone = "UTC"
-        tz = pytz.timezone(requested_timezone)
-        x_scale = requested_timezone + " timezone"
+        tz = factory.get_pytz_timezone()
+        x_scale = tz.zone + " timezone"
         x_min = None
         x_max = datetime_to_chartjs_format(production[0].end_interval, tz)
+
+        min_price = ElectricityFactorySchedule.objects.filter(factory=factory).first()
+        if min_price is not None:
+            y1_backgroundColor = []
+            min_price_in_display_currency = Decimal(
+                convert_money(min_price.min_price, display_currency).amount
+            )
+        else:
+            y1_backgroundColor = "rgba(255, 99, 132, 0.2)"
+
         for p in production:
             x.append(datetime_to_chartjs_format(p.start_interval, tz))
-            y1.append(p.energy_in_kwh)
+            y1.append(Decimal(p.energy_in_kwh) * Decimal("0.001"))
+
             p2 = prices.filter(start_interval=p.start_interval)
             if len(p2) > 0:
-                y2.append(Decimal(convert_money(p2[0].price, display_currency).amount))
+                p0 = Decimal(convert_money(p2[0].price, display_currency).amount)
+                y2.append(p0)
+                if p0 > min_price_in_display_currency:
+                    color = ("rgba(54, 162, 235, 0.5)",)
+                else:
+                    color = "rgba(255, 45, 33, 0.2)"
             else:
+                color = "rgba(54, 162, 235, 0.5)"
                 y2.append(None)
+            if min_price is not None:
+                y1_backgroundColor.append(color)
+
         x_min = datetime_to_chartjs_format(p.start_interval, tz=tz)
         y1 = y1[::-1]
+        y1_backgroundColor = y1_backgroundColor[::-1]
         y2 = y2[::-1]
         x = x[::-1]
         # y1.append(y1[-1])
         y2.append(y2[-1])
         x.append(x_max)
-        y_scale = "kWh"
+        y_scale = "MWh"
+        y1_label = factory.name + " " + _("production")
+        y2_label = factory.plan.name
+        y1_scale_label = "MWh"
+        y2_scale_label = factory.plan.electricity_unit + "/" + display_currency
+        # y1_backgroundColor = [
+        #                         'rgba(255, 99, 132, 0.2)',
+        #                         'rgba(255, 159, 64, 0.2)',
+        #                         'rgba(255, 205, 86, 0.2)',
+        #                         'rgba(75, 192, 192, 0.2)',
+
+        #                         'rgba(54, 162, 235, 0.2)',
+        #                         'rgba(153, 102, 255, 0.2)',
+        #                         'rgba(201, 203, 207, 0.2)',
+        #                         'rgba(255, 99, 132, 0.2)',
+
+        #                         'rgba(255, 159, 64, 0.2)',
+        #                         'rgba(255, 205, 86, 0.2)',
+        #                         'rgba(75, 192, 192, 0.2)',
+        #                         'rgba(54, 162, 235, 0.2)',
+
+        #                         'rgba(153, 102, 255, 0.2)',
+        #                         'rgba(201, 203, 207, 0.2)',
+        #                         'rgba(255, 99, 132, 0.2)',
+        #                         'rgba(255, 159, 64, 0.2)',
+
+        #                         'rgba(255, 205, 86, 0.2)',
+        #                         'rgba(75, 192, 192, 0.2)',
+        #                         'rgba(54, 162, 235, 0.2)',
+        #                         'rgba(153, 102, 255, 0.2)',
+
+        #                         'rgba(201, 203, 207, 0.2)',
+        #                         'rgba(201, 203, 207, 0.2)',
+        #                         'rgba(201, 203, 207, 0.2)',
+        #                         'rgba(201, 203, 207, 0.2)',
+        #                     ]
         return JsonResponse(
             data={
                 "x_values": x,
                 "y1_values": y1,
+                "y1_backgroundColor": y1_backgroundColor,  #'rgba(255, 99, 132, 0.7)',
                 "y2_values": y2,
-                "y1_label": factory.name + " Production in " + y_scale,
-                "y2_label": factory.plan.name,
-                "y_scale": y_scale,
+                "y1_label": y1_label,
+                "y2_label": y2_label,
+                "y1_scale_label": y1_scale_label,
+                "y2_scale_label": y2_scale_label,
                 "x_scale": x_scale,
                 "x_min": x_min,
                 "x_max": x_max,

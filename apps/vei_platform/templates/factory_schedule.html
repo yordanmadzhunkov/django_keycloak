@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block head_title %}
+{% trans "Electricity price" %}
+{% endblock%}
+{% block content %}
+<section style="background-color: #eee;">
+  <div class="container py-5">
+    {% include "snippets/factory_card.html"%}
+  </div>
+</section>
+<section></section>
+<div class="container">
+  {% if schedule %}
+  <table class="table table-light table-striped">
+    <thead>
+      <tr>
+        {% for header in schedule.headers %}
+        <th>{{header}}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% if schedule.rows %}
+      {% for row in schedule.rows %}
+      <tr>
+        {% for r in row %}
+        <td class="text-{{r.text_color}} bg-gradient-{{r.color}}"><b>{{r.text}}</b></td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+      {% endif %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+</section>
+
+<section>
+  <div class="row justify-content-center mb-3">
+    {% crispy form %}
+    <div id="container" style="width: 90%;">
+      <canvas id="energy-production-chart"
+        data-url="{% url 'factory_production_chart' %}?factory={{ factory.slug | urlencode}}">
+      </canvas>
+    </div>
+  </div>
+</section>
+{% include "snippets/energy_production_chart.html" %}
+{% endblock content %}

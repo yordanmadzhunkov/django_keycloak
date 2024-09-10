@@ -19,6 +19,7 @@ from django.db import models
 from . import TimeStampMixin
 from . import unique_slug_generator
 from .electricity_price import ElectricityPricePlan
+import pytz
 
 
 def user_image_upload_directory_path(instance, filename):
@@ -148,6 +149,13 @@ class ElectricityFactory(TimeStampMixin):
         if not self.slug:
             self.slug = unique_slug_generator(self)  # Handle Unicode characters
         super().save(*args, **kwargs)
+
+    def get_pytz_timezone(self):
+        requested_timezone = self.timezone
+        if requested_timezone is None:
+            requested_timezone = "UTC"
+        tz = pytz.timezone(requested_timezone)
+        return tz
 
 
 def docfile_content_types():

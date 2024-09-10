@@ -19,7 +19,8 @@
                             //step: 'middle',
                             tension: 0.1,
                             //borderColor: 'rgb(0, 99, 132)',
-                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            backgroundColor: data.y1_backgroundColor, //'rgba(255, 99, 132, 0.2)',
+
                         },
                         {
                             type: 'line',
@@ -33,6 +34,7 @@
                             tension: 0.1,
                             borderColor: 'rgb(0, 99, 132)',
                             //backgroundColor: 'rgba(255, 99, 132, 0.2)',
+
                         }
                         ],
                     },
@@ -93,7 +95,7 @@
                                 grid: { display: false },
                                 title: {
                                     display: true,
-                                    text: data.y_scale,
+                                    text: data.y1_scale_label,
                                 },
                             },
                             rightY: {
@@ -105,7 +107,11 @@
                                     //color: 'green',
                                     color: 'rgb(0, 99, 132)',
                                 },
-                                grid: { display: false }
+                                grid: { display: false },
+                                title: {
+                                    display: true,
+                                    text: data.y2_scale_label,
+                                },
                             },
                         },
                     }
