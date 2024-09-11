@@ -12,10 +12,17 @@
     {% include "snippets/factory_card.html"%}
   </div>
 </section>
-<section></section>
+<section>
+  <div class="container">
+    <div class="row justify-content-center mb-6">
+      {% crispy form %}
+    </div>
+  </div>
+
+</section>
 <div class="container">
   {% if schedule %}
-  <table class="table table-light table-striped">
+  <table class="table table-light table-striped table-bordered">
     <thead>
       <tr>
         {% for header in schedule.headers %}
@@ -38,16 +45,4 @@
   {% endif %}
 </div>
 </section>
-
-<section>
-  <div class="row justify-content-center mb-3">
-    {% crispy form %}
-    <div id="container" style="width: 90%;">
-      <canvas id="energy-production-chart"
-        data-url="{% url 'factory_production_chart' %}?factory={{ factory.slug | urlencode}}">
-      </canvas>
-    </div>
-  </div>
-</section>
-{% include "snippets/energy_production_chart.html" %}
 {% endblock content %}

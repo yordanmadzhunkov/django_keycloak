@@ -248,7 +248,6 @@ class ElectricityFactorySerializer(serializers.ModelSerializer):
 
 class ElectricityFactoryAPIView(generics.ListCreateAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
-    # queryset = ElectricityFactory.objects.all()
     serializer_class = ElectricityFactorySerializer
 
     def get_queryset(self):

@@ -396,6 +396,8 @@ class FactorySchedule(FormView):
                 form.save()
         else:
             pass
+
+        context["schedule"] = self.get_schedule(factory)
         return render(request, "factory_schedule.html", context)
 
 
