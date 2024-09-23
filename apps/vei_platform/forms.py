@@ -1,5 +1,4 @@
 from django import forms
-from datetime import date, datetime
 from .models.factory import (
     ElectricityFactory,
     ElectricityFactoryComponents,
@@ -455,8 +454,11 @@ class FactoryScheduleForm(forms.ModelForm):
         for key, value in self.Meta.labels.items():
             self.fields[key].label = _(value)
 
-        save = Submit("show", _("Save"), css_class="btn btn-primary")
-        save.field_classes = "btn btn-success"
+        save = Submit("save", _("Save"), css_class="btn btn-primary")
+        save.field_classes = "btn btn-primary"
+
+        generate = Submit("generate", _("Generate"), css_class="btn btn-success")
+        generate.field_classes = "btn btn-success"
 
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
@@ -464,6 +466,7 @@ class FactoryScheduleForm(forms.ModelForm):
                 Column("min_price", css_class="form-group"),
                 # Column("currency", css_class="form-group col-md-2 mb-2"),
                 save,
+                generate,
                 css_class="form-row",
             ),
         )

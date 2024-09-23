@@ -20,6 +20,7 @@ from vei_platform.forms import ElectricityPlanForm
 from djmoney.money import Money
 from djmoney.contrib.exchange.models import convert_money
 
+
 class ElectricityPlanView(View):
     def get(self, request, *args, **kwargs):
         context = common_context(request)
@@ -60,8 +61,6 @@ class ElectricityPlanView(View):
 
 def datetime_to_chartjs_format(dt, tz):
     return str(dt.astimezone(tz).strftime("%Y-%m-%d %H:%M:%S"))
-
-
 
 
 class ElectricityPriceChart(View):

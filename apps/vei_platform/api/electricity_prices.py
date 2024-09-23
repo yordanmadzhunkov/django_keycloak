@@ -9,10 +9,7 @@ from vei_platform.models.production import (
     ElectricityFactory,
     ElectricityFactoryProduction,
 )
-from vei_platform.models.schedule import (
-    MinPriceCriteria,
-    ElectricityFactorySchedule
-)
+from vei_platform.models.schedule import MinPriceCriteria, ElectricityFactorySchedule
 
 from django.db.models import Q
 
@@ -261,14 +258,17 @@ class ElectricityFactoryAPIView(generics.ListCreateAPIView):
     def get_queryset(self):
         return ElectricityFactory.objects.filter(manager=self.request.user)
 
+
 class ElectricityFactoryScheduleSerializer(serializers.ModelSerializer):
     factory = serializers.SlugRelatedField(
         slug_field="slug", queryset=ElectricityFactory.objects.all()
     )
+
     class Meta:
         model = ElectricityFactorySchedule
         fields = ("start_interval", "end_interval", "working", "factory")
         read_only_fields = ("factory",)
+
 
 class ElectricityFactoryScheduleAPIView(generics.ListCreateAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
@@ -282,7 +282,7 @@ class ElectricityFactoryScheduleAPIView(generics.ListCreateAPIView):
             end_interval = self.request.query_params.get("end_interval")
             # print(factory)
             obj = ElectricityFactorySchedule.objects.filter(factory=factory)
-            #print(obj)
+            # print(obj)
             if start_interval and end_interval:
                 query_overlapping_intervals = (
                     create_query_for_finding_overlapping_intervals(
@@ -299,47 +299,31 @@ class ElectricityFactoryScheduleAPIView(generics.ListCreateAPIView):
 
     def create(self, request, *args, **kwargs):
         factory_slug = request.data.get("factory")
-        start_interval = self.request.data.get("start_interval")
-        end_interval = self.request.data.get("end_interval")
+        # start_interval = self.request.data.get("start_interval")
+        # end_interval = self.request.data.get("end_interval")
         if not factory_slug:
-            return Response({"error" : "missing `factory` parameter"}, 
-                                 status=status.HTTP_404_NOT_FOUND, 
-                                 headers={}) 
+            return Response(
+                {"error": "missing `factory` parameter"},
+                status=status.HTTP_404_NOT_FOUND,
+                headers={},
+            )
         factory = ElectricityFactory.objects.get(slug=factory_slug)
         if not factory:
-            return Response({"error" : "Factory not found slug = '%s' " % factory_slug}, 
-                                 status=status.HTTP_404_NOT_FOUND, 
-                                 headers={}) 
-        
-        plan = factory.plan
-        if not plan:
-            return Response({"error" : "Factory with slug = '%s' has no plan" % factory_slug}, 
-                                 status=status.HTTP_404_NOT_FOUND, 
-                                 headers={})
-        criteria = MinPriceCriteria.objects.filter(factory=factory).first()
-        num_prices = 24
-        prices = ElectricityPrice.objects.filter(plan=plan).order_by("-start_interval")[:num_prices]
-        schedule = ElectricityFactorySchedule.objects.filter(factory=factory)
-        initial_data = []
-        for p in prices:
-            s = schedule.filter(start_interval=p.start_interval)
-            if len(s) == 0:
-                initial_data.append({
-                    'factory': factory.slug,
-                    'start_interval': p.start_interval,
-                    'end_interval': p.end_interval,
-                    'working': p.price >= criteria.min_price
-                })
-            else:
-                break
-        initial_data = initial_data[::-1]
-        serializer = self.get_serializer(data=initial_data)
+            return Response(
+                {"error": "Factory not found slug = '%s' " % factory_slug},
+                status=status.HTTP_404_NOT_FOUND,
+                headers={},
+            )
+
+        data = ElectricityFactorySchedule.generate_schedule(factory, num_prices=24)
+        serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
 
-    
     def get_serializer(self, *args, **kwargs):
         # https://medium.com/swlh/efficient-bulk-create-with-django-rest-framework-f73da6af7ddc
         if isinstance(kwargs.get("data", {}), list):

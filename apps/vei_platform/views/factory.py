@@ -279,7 +279,7 @@ class FactorySchedule(FormView):
         else:
             min_price_in_display_currency = None
         return min_price_in_display_currency
-    
+
     def get_last_prices(self, factory: ElectricityFactory, num_days: int):
         prices = ElectricityPrice.objects.filter(plan=factory.plan).order_by(
             "-start_interval"
@@ -295,12 +295,16 @@ class FactorySchedule(FormView):
         rows = []
         if len(prices) > 0:
             for i in range(24):
-                rows.append([{"text": "%d:00 - %d:00" % (i, i + 1),  }])
-            start_date = (
-                prices[0].start_interval.astimezone(tz).date()
-            )
+                rows.append(
+                    [
+                        {
+                            "text": "%d:00 - %d:00" % (i, i + 1),
+                        }
+                    ]
+                )
+            start_date = prices[0].start_interval.astimezone(tz).date()
             end_date = prices[len(prices) - 1].start_interval.astimezone(tz).date()
-            
+
             d = start_date
             now = datetime.now(tz=timezone.utc)
             while d <= end_date:
@@ -319,7 +323,9 @@ class FactorySchedule(FormView):
                         start_interval=t
                     )
                     if len(p) > 0:
-                        value = Decimal(convert_money(p[0].price, factory.currency).amount)
+                        value = Decimal(
+                            convert_money(p[0].price, factory.currency).amount
+                        )
                         color = (
                             "warning"
                             if min_price_in_display_currency is not None
@@ -356,17 +362,11 @@ class FactorySchedule(FormView):
         if factory.manager is None:
             context["manager"] = None
         else:
-            # profile = get_user_profile(factory.manager)
             context["manager_profile"] = get_user_profile(factory.manager)
-        queryset = MinPriceCriteria.objects.filter(factory=factory)
-
-        if len(queryset) > 0:
-            obj = queryset[0]
-        else:
-            obj = None
-        context["form"] = FactoryScheduleForm(instance=obj)
+        context["form"] = FactoryScheduleForm(
+            instance=MinPriceCriteria.objects.filter(factory=factory).first()
+        )
         context["schedule"] = self.get_schedule(factory)
-
         return render(request, "factory_schedule.html", context)
 
     def post(self, request, pk=None, *args, **kwargs):
@@ -380,20 +380,25 @@ class FactorySchedule(FormView):
             context["manager_profile"] = get_user_profile(factory.manager)
         form = FactoryScheduleForm(data=request.POST)
         context["form"] = form
-        if form.is_valid():
-            queryset = MinPriceCriteria.objects.filter(factory=factory)
-            if len(queryset) == 0:
-                obj = MinPriceCriteria.objects.create(
-                    factory=factory, min_price=form.cleaned_data["min_price"]
-                )
-                obj.save()
+
+        if "generate" in self.request.POST:
+            print("Generate schedule")
+
+        if "save" in self.request.POST:
+            if form.is_valid():
+                queryset = MinPriceCriteria.objects.filter(factory=factory)
+                if len(queryset) == 0:
+                    obj = MinPriceCriteria.objects.create(
+                        factory=factory, min_price=form.cleaned_data["min_price"]
+                    )
+                    obj.save()
+                else:
+                    obj = queryset[0]
+                    obj.min_price = form.cleaned_data["min_price"]
+                    obj.save()
+                    form.save()
             else:
-                obj = queryset[0]
-                obj.min_price = form.cleaned_data["min_price"]
-                obj.save()
-                form.save()
-        else:
-            pass
+                pass
 
         context["schedule"] = self.get_schedule(factory)
         return render(request, "factory_schedule.html", context)
