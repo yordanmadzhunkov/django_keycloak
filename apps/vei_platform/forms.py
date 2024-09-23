@@ -5,10 +5,8 @@ from .models.factory import (
     ElectricityFactoryComponents,
     docfile_content_types,
 )
-from .models.electricity_price import ElectricityPricePlan
-from .models.factory_production import ElectricityFactorySchedule
-from .models.profile import UserProfile
-from .models.legal import LegalEntity, find_legal_entity
+from .models.schedule import MinPriceCriteria
+from .models.legal import LegalEntity
 
 
 from crispy_forms.helper import FormHelper
@@ -18,12 +16,9 @@ from .custom_layout_object import Formset
 
 import re
 from django.conf import settings
+from django.utils import formats
 from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
-from django import forms
-from django.utils import formats, timezone
-from django.core.validators import MaxValueValidator, MinValueValidator
-from djmoney.forms.fields import MoneyField
 from .models.timezone_choises import TIMEZONE_CHOICES
 from .settings.base import CURRENCY_CHOICES
 
@@ -445,7 +440,7 @@ class ElectricityPlanForm(forms.Form):
 
 class FactoryScheduleForm(forms.ModelForm):
     class Meta:
-        model = ElectricityFactorySchedule
+        model = MinPriceCriteria
         fields = ("min_price",)
         labels = {
             "min_price": _("Min price"),

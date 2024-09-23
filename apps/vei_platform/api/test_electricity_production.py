@@ -4,7 +4,7 @@ from rest_framework.test import APITestCase
 from django.contrib.auth.models import User
 from vei_platform.models.factory import ElectricityFactory
 from vei_platform.models.legal import LegalEntity
-from vei_platform.models.factory_production import ElectricityFactoryProduction
+from vei_platform.models.production import ElectricityFactoryProduction
 from datetime import date, datetime, timezone
 from decimal import Decimal
 

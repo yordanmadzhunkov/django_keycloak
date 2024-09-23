@@ -1,4 +1,4 @@
-from . import common_context, generate_formset_table
+from . import common_context
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
@@ -17,6 +17,8 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from vei_platform.forms import ElectricityPlanForm
 
+from djmoney.money import Money
+from djmoney.contrib.exchange.models import convert_money
 
 class ElectricityPlanView(View):
     def get(self, request, *args, **kwargs):
@@ -60,8 +62,6 @@ def datetime_to_chartjs_format(dt, tz):
     return str(dt.astimezone(tz).strftime("%Y-%m-%d %H:%M:%S"))
 
 
-from djmoney.money import Money
-from djmoney.contrib.exchange.models import convert_money
 
 
 class ElectricityPriceChart(View):

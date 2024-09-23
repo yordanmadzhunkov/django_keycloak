@@ -10,7 +10,7 @@ def common_context(request):
     context = {
         "platform_name": "Fraction Energy",
         "platform_logo": "/static/img/Fraction_Energy_logo.png",
-        "copyright": "Data Intensive 2023",
+        "copyright": "Solar Estates All right reserved",
         "head_title": "Fraction Energy",
     }
     if request:
@@ -29,49 +29,3 @@ def common_context(request):
         django_languages.append((lang[0], lang[1], "selected" if selected else ""))
     context["django_languages"] = django_languages
     return context
-
-
-def generate_formset_table(years, objects, NumberPerMonthFormSet, prefix):
-    initial = []
-    index = 0
-    for year in years:
-        for month in range(12):
-            s = objects.filter(month__year=year).filter(month__month=month + 1)
-            if len(s) == 0:
-                initial.append({"month": date(year=year, month=month + 1, day=1)})
-            else:
-                initial.append({"number": s[0].number, "month": s[0].month})
-            index = index + 1
-    formset = NumberPerMonthFormSet(initial=initial, prefix=prefix)
-
-    rows = []
-    index = 0
-    for year in years:
-        row = []
-        row.append(str(year))
-        for month in range(12):
-            val = formset[index].as_table()
-            input = re.search(r"<td>(.*)</td>", val)
-            if input:
-                row.append(input.group(1))
-            index = index + 1
-        rows.append(row)
-    table = {
-        "labels": [
-            "Year",
-            "Jan",
-            "Feb",
-            "Mar",
-            "Apr",
-            "May",
-            "Jun",
-            "Jul",
-            "Aug",
-            "Sep",
-            "Oct",
-            "Nov",
-            "Dec",
-        ],
-        "rows": rows,
-    }
-    return formset, table

@@ -33,6 +33,7 @@ class ElectricityPriceAPIWithUserTestCases(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="123")
         self.client.force_authenticate(self.user)
+        self.url = reverse("price_plans_api")
 
     def tearDown(self):
         self.user.delete()
@@ -41,7 +42,6 @@ class ElectricityPriceAPIWithUserTestCases(APITestCase):
         """
         Ensure we have at least one billing zone for Bulgaria
         """
-        url = reverse("price_series")
         bg_code = {"code": "BG", "name": "Bulgaria"}
         data = {
             "name": "Test plan 1",
@@ -50,7 +50,7 @@ class ElectricityPriceAPIWithUserTestCases(APITestCase):
             "currency": "EUR",
             "electricity_unit": "MWh",
         }
-        response = self.client.post(url, data, format="json")
+        response = self.client.post(self.url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data["name"], "Test plan 1")
         self.assertEqual(response.data["billing_zone"], "BG")
@@ -64,7 +64,6 @@ class ElectricityPriceAPIWithUserTestCases(APITestCase):
         """
         Ensure we have at least one billing zone for Bulgaria
         """
-        url = reverse("price_series")
         bg_code = {"code": "BG", "name": "Bulgaria"}
         data = {
             "name": "Test plan 1",
@@ -73,7 +72,7 @@ class ElectricityPriceAPIWithUserTestCases(APITestCase):
             "currency": "EUR",
             "electricity_unit": "MWh",
         }
-        response = self.client.post(url, data, format="json")
+        response = self.client.post(self.url, data, format="json")
         # print(response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data["name"], "Test plan 1")
@@ -86,7 +85,7 @@ class ElectricityPriceAPIWithUserTestCases(APITestCase):
 
         self.assertFalse("pk" in response.data.keys())
 
-        response = self.client.post(url, data, format="json")
+        response = self.client.post(self.url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data["name"], "Test plan 1")
         self.assertEqual(response.data["billing_zone"], "BG")
@@ -101,7 +100,6 @@ class ElectricityPriceAPIWithUserTestCases(APITestCase):
         """
         Ensure we have at least one billing zone for Bulgaria
         """
-        url = reverse("price_series")
         bg_code = {"code": "BG", "name": "Bulgaria"}
         data = {
             "name": "Test plan 1",
@@ -110,9 +108,9 @@ class ElectricityPriceAPIWithUserTestCases(APITestCase):
             "currency": "EUR",
             "electricity_unit": "MWh",
         }
-        response = self.client.post(url, data, format="json")
+        response = self.client.post(self.url, data, format="json")
         data = {}
-        response = self.client.get(url, data, format="json")
+        response = self.client.get(self.url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["name"], "Test plan 1")
@@ -127,7 +125,6 @@ class ElectricityPriceAPIWithUserTestCases(APITestCase):
         """
         Ensure we have at least one billing zone for Bulgaria
         """
-        url = reverse("price_series")
         bg_code = {"code": "BG", "name": "Bulgaria"}
         data = {
             "name": "Test plan 1",
@@ -136,7 +133,7 @@ class ElectricityPriceAPIWithUserTestCases(APITestCase):
             "currency": "EUR",
             "electricity_unit": "dWh",
         }
-        response = self.client.post(url, data, format="json")
+        response = self.client.post(self.url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.data["electricity_unit"],
@@ -145,18 +142,22 @@ class ElectricityPriceAPIWithUserTestCases(APITestCase):
 
 
 class ElectricityPriceAPITestCases(APITestCase):
+    def setUp(self):
+        self.url = reverse("price_plans_api")
+
     def test_billing_zones_get_objects(self):
         """
         Ensure we have at least one billing zone in data base
         """
-        url = reverse("billing_zones")
         data = {}
+        url = reverse("billing_zones")
         response = self.client.get(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreaterEqual(len(response.data), 45)
         self.assertEqual(
             self.client.post(url, data, format="json").status_code,
             status.HTTP_405_METHOD_NOT_ALLOWED,
+            status.HTTP_401_UNAUTHORIZED,
         )
         self.assertEqual(
             self.client.put(url, data, format="json").status_code,
@@ -186,11 +187,10 @@ class ElectricityPriceAPITestCases(APITestCase):
 
     def test_get_electricity_price_plan(self):
         """
-        Ensure we have at least one billing zone for Bulgaria
+        Ensure we can get price plans url
         """
-        url = reverse("price_series")
         data = {}
-        response = self.client.get(url, data, format="json")
+        response = self.client.get(self.url, data, format="json")
         # print(response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -198,7 +198,6 @@ class ElectricityPriceAPITestCases(APITestCase):
         """
         Ensure we have at least one billing zone for Bulgaria
         """
-        url = reverse("price_series")
         bg_code = {"code": "BG", "name": "Bulgaria"}
         data = {
             "name": "Test plan 1",
@@ -207,14 +206,13 @@ class ElectricityPriceAPITestCases(APITestCase):
             "currency": "EUR",
             "electricity_unit": "MWh",
         }
-        response = self.client.post(url, data, format="json")
+        response = self.client.post(self.url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_create_electricity_price_plan_no_user(self):
         """
         Ensure we have at least one billing zone for Bulgaria
         """
-        url = reverse("price_series")
         bg_code = {"code": "BG", "name": "Bulgaria"}
         data = {
             "name": "Test plan 1",
@@ -223,7 +221,7 @@ class ElectricityPriceAPITestCases(APITestCase):
             "currency": "EUR",
             "electricity_unit": "MWh",
         }
-        response = self.client.post(url, data, format="json")
+        response = self.client.post(self.url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 

@@ -6,12 +6,10 @@ from vei_platform.models.factory import (
     ElectricityFactory,
     ElectricityFactoryComponents,
 )
-from vei_platform.models.factory_production import (
-    ElectricityFactoryProduction,
-    ElectricityFactorySchedule,
-)
+from vei_platform.models.production import ElectricityFactoryProduction
+from vei_platform.models.schedule import MinPriceCriteria
 
-from vei_platform.models.electricity_price import ElectricityPricePlan, ElectricityPrice
+from vei_platform.models.electricity_price import ElectricityPrice
 from vei_platform.models.profile import get_user_profile
 from vei_platform.forms import (
     FactoryModelForm,
@@ -271,80 +269,80 @@ class FactoryProduction(View):
 
 class FactorySchedule(FormView):
 
-    def get_schedule(self, factory: ElectricityFactory):
-        num_days = 4
-        prices = ElectricityPrice.objects.filter(plan=factory.plan).order_by(
-            "-start_interval"
-        )[: 24 * num_days]
-        prices = prices[::-1]
+    def get_min_price_in_display_currency(self, factory: ElectricityFactory):
         display_currency = factory.currency
-
-        min_price = ElectricityFactorySchedule.objects.filter(factory=factory).first()
+        min_price = MinPriceCriteria.objects.filter(factory=factory).first()
         if min_price is not None:
             min_price_in_display_currency = Decimal(
                 convert_money(min_price.min_price, display_currency).amount
             )
         else:
             min_price_in_display_currency = None
+        return min_price_in_display_currency
+    
+    def get_last_prices(self, factory: ElectricityFactory, num_days: int):
+        prices = ElectricityPrice.objects.filter(plan=factory.plan).order_by(
+            "-start_interval"
+        )[: 24 * num_days]
+        prices = prices[::-1]
+        return prices
 
+    def get_schedule(self, factory: ElectricityFactory):
+        prices = self.get_last_prices(factory, num_days=4)
+        min_price_in_display_currency = self.get_min_price_in_display_currency(factory)
         tz = factory.get_pytz_timezone()
         headers = ["%s" % tz.zone]
         rows = []
-        for i in range(24):
-            rows.append(
-                [
-                    {
-                        "text": "%d:00 - %d:00" % (i, i + 1),
-                    }
-                ]
-            )
-        start_date = (
-            prices[0].start_interval.astimezone(tz).date()
-        )  # .strftime("%Y-%m-%d")
-        end_date = prices[len(prices) - 1].start_interval.astimezone(tz).date()
-        # headers.append(end_date)
-        d = start_date
-        now = datetime.now(tz=timezone.utc)
-        while d <= end_date:
-            headers.append(d)
+        if len(prices) > 0:
             for i in range(24):
-                t = tz.localize(
-                    datetime(
-                        year=d.year,
-                        month=d.month,
-                        day=d.day,
-                        hour=i,
-                    )
-                )
-
-                p = ElectricityPrice.objects.filter(plan=factory.plan).filter(
-                    start_interval=t
-                )
-                if len(p) > 0:
-                    value = Decimal(convert_money(p[0].price, display_currency).amount)
-                    color = (
-                        "warning"
-                        if min_price is not None
-                        and value < min_price_in_display_currency
-                        else "info"
-                    )
-                    if now < t:
-                        color = (
-                            "danger"
-                            if min_price is not None
-                            and value < min_price_in_display_currency
-                            else "success"
+                rows.append([{"text": "%d:00 - %d:00" % (i, i + 1),  }])
+            start_date = (
+                prices[0].start_interval.astimezone(tz).date()
+            )
+            end_date = prices[len(prices) - 1].start_interval.astimezone(tz).date()
+            
+            d = start_date
+            now = datetime.now(tz=timezone.utc)
+            while d <= end_date:
+                headers.append(d)
+                for i in range(24):
+                    t = tz.localize(
+                        datetime(
+                            year=d.year,
+                            month=d.month,
+                            day=d.day,
+                            hour=i,
                         )
-                    rows[i].append(
-                        {
-                            "color": color,
-                            "text_color": "gray-100",
-                            "text": str(value),
-                        }
                     )
-                else:
-                    rows[i].append({"text": "-"})
-            d = d + timedelta(days=1)
+
+                    p = ElectricityPrice.objects.filter(plan=factory.plan).filter(
+                        start_interval=t
+                    )
+                    if len(p) > 0:
+                        value = Decimal(convert_money(p[0].price, factory.currency).amount)
+                        color = (
+                            "warning"
+                            if min_price_in_display_currency is not None
+                            and value < min_price_in_display_currency
+                            else "info"
+                        )
+                        if now < t:
+                            color = (
+                                "danger"
+                                if min_price_in_display_currency is not None
+                                and value < min_price_in_display_currency
+                                else "success"
+                            )
+                        rows[i].append(
+                            {
+                                "color": color,
+                                "text_color": "gray-100",
+                                "text": str(value),
+                            }
+                        )
+                    else:
+                        rows[i].append({"text": "-"})
+                d = d + timedelta(days=1)
 
         return {
             "headers": headers,
@@ -360,7 +358,7 @@ class FactorySchedule(FormView):
         else:
             # profile = get_user_profile(factory.manager)
             context["manager_profile"] = get_user_profile(factory.manager)
-        queryset = ElectricityFactorySchedule.objects.filter(factory=factory)
+        queryset = MinPriceCriteria.objects.filter(factory=factory)
 
         if len(queryset) > 0:
             obj = queryset[0]
@@ -383,9 +381,9 @@ class FactorySchedule(FormView):
         form = FactoryScheduleForm(data=request.POST)
         context["form"] = form
         if form.is_valid():
-            queryset = ElectricityFactorySchedule.objects.filter(factory=factory)
+            queryset = MinPriceCriteria.objects.filter(factory=factory)
             if len(queryset) == 0:
-                obj = ElectricityFactorySchedule.objects.create(
+                obj = MinPriceCriteria.objects.create(
                     factory=factory, min_price=form.cleaned_data["min_price"]
                 )
                 obj.save()
@@ -427,7 +425,7 @@ class FactoryProductionChart(View):
         x_min = None
         x_max = datetime_to_chartjs_format(production[0].end_interval, tz)
 
-        min_price = ElectricityFactorySchedule.objects.filter(factory=factory).first()
+        min_price = MinPriceCriteria.objects.filter(factory=factory).first()
         if min_price is not None:
             y1_backgroundColor = []
             min_price_in_display_currency = Decimal(

@@ -15,10 +15,9 @@ class VeiPlatformAPI:
     token = None
     endpoint_base_url = "http://127.0.0.1:8000/"
     hello_url = "api/v1/hello"
-    billing_zone_url = "api/v1/billing_zones"
+    billing_zone_url = "api/v1/zones"
     plans_url = "api/v1/plans"
     prices_url = "api/v1/prices"
-
     factories_url = "api/v1/factories"
     production_url = "api/v1/production"
 
