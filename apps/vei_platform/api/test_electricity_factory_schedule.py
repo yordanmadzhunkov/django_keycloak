@@ -14,6 +14,7 @@ from datetime import date, datetime, timezone, timedelta
 from decimal import Decimal
 
 from djmoney.money import Money, Currency
+from django.core import mail
 
 
 class ElectricityProductionScheduleAPIWithUserTestCases(APITestCase):
@@ -125,6 +126,7 @@ class ElectricityProductionScheduleAPIWithUserTestCases(APITestCase):
         response = self.client.post(self.url, data=data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.check_response(response.data)
+        #self.assertEqual(len(mail.outbox), 1)
 
     def test_get_schedule_after_create(self):
         self.test_create_schedule()

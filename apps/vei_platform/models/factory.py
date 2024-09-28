@@ -6,7 +6,6 @@ from django.conf import settings
 from decimal import Decimal
 from django.dispatch import receiver
 
-from django.core.validators import MaxValueValidator, MinValueValidator
 from .restricted_file_field import RestrictedFileField
 from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
@@ -18,7 +17,7 @@ from django.db import models
 
 from . import TimeStampMixin
 from . import unique_slug_generator
-from .electricity_price import ElectricityPricePlan
+from .electricity_price import ElectricityPricePlan, ElectricityPrice
 import pytz
 
 
@@ -156,6 +155,14 @@ class ElectricityFactory(TimeStampMixin):
             requested_timezone = "UTC"
         tz = pytz.timezone(requested_timezone)
         return tz
+
+    def get_last_prices(self, num_days):
+        if self.plan is None:
+            return []
+        prices = ElectricityPrice.objects.filter(plan=self.plan).order_by(
+            "-start_interval"
+        )[: num_days * 24]
+        return prices[::-1]
 
 
 def docfile_content_types():

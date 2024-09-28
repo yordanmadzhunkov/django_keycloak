@@ -18,3 +18,5 @@ AUTHENTICATION_BACKENDS = (
     # 'mozilla_django_oidc.auth.OIDCAuthenticationBackend',
     # ...
 )
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

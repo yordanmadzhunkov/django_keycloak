@@ -53,16 +53,6 @@ class ElectricityPricePlan(models.Model):
     def __str__(self) -> str:
         return self.name
 
-    def get_price(self, month):
-        prices = ElectricityPrice.objects.filter(plan=self).order_by("-month")
-        if len(prices) > 0:
-            for price in prices:
-                if price.month <= month:
-                    return price.number
-            price = prices[len(prices) - 1]
-            return price.number
-        return Decimal(0)
-
     def get_absolute_url(self):
         return "/electricity/%s" % self.pk
 

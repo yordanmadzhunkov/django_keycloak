@@ -7,7 +7,7 @@ from vei_platform.models.factory import (
     ElectricityFactoryComponents,
 )
 from vei_platform.models.production import ElectricityFactoryProduction
-from vei_platform.models.schedule import MinPriceCriteria
+from vei_platform.models.schedule import MinPriceCriteria, ElectricityFactorySchedule
 
 from vei_platform.models.electricity_price import ElectricityPrice
 from vei_platform.models.profile import get_user_profile
@@ -38,6 +38,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from djmoney.money import Money
 from djmoney.contrib.exchange.models import convert_money
+
+from vei_platform.api.electricity_prices import (
+    ElectricityFactoryScheduleSerializer,
+    send_notifications,
+)
 
 
 class FactoriesList(ListView):
@@ -267,7 +272,7 @@ class FactoryProduction(View):
         return render(request, "factory_production.html", context)
 
 
-class FactorySchedule(FormView):
+class FactoryScheduleView(FormView):
 
     def get_min_price_in_display_currency(self, factory: ElectricityFactory):
         display_currency = factory.currency
@@ -280,19 +285,14 @@ class FactorySchedule(FormView):
             min_price_in_display_currency = None
         return min_price_in_display_currency
 
-    def get_last_prices(self, factory: ElectricityFactory, num_days: int):
-        prices = ElectricityPrice.objects.filter(plan=factory.plan).order_by(
-            "-start_interval"
-        )[: 24 * num_days]
-        prices = prices[::-1]
-        return prices
-
     def get_schedule(self, factory: ElectricityFactory):
-        prices = self.get_last_prices(factory, num_days=4)
+        prices = factory.get_last_prices(num_days=4)
+        working = ElectricityFactorySchedule.get_last(factory=factory, num_days=4)
         min_price_in_display_currency = self.get_min_price_in_display_currency(factory)
         tz = factory.get_pytz_timezone()
         headers = ["%s" % tz.zone]
         rows = []
+        j = 0
         if len(prices) > 0:
             for i in range(24):
                 rows.append(
@@ -318,27 +318,11 @@ class FactorySchedule(FormView):
                             hour=i,
                         )
                     )
-
-                    p = ElectricityPrice.objects.filter(plan=factory.plan).filter(
-                        start_interval=t
-                    )
-                    if len(p) > 0:
-                        value = Decimal(
-                            convert_money(p[0].price, factory.currency).amount
-                        )
-                        color = (
-                            "warning"
-                            if min_price_in_display_currency is not None
-                            and value < min_price_in_display_currency
-                            else "info"
-                        )
-                        if now < t:
-                            color = (
-                                "danger"
-                                if min_price_in_display_currency is not None
-                                and value < min_price_in_display_currency
-                                else "success"
-                            )
+                    while j < len(working) and working[j].start_interval < t:
+                        j = j + 1
+                    if j < len(working) and working[j].start_interval == t:
+                        value = "On" if working[j].working else "Off"
+                        color = "success" if working[j].working else "danger"
                         rows[i].append(
                             {
                                 "color": color,
@@ -347,7 +331,35 @@ class FactorySchedule(FormView):
                             }
                         )
                     else:
-                        rows[i].append({"text": "-"})
+                        p = ElectricityPrice.objects.filter(plan=factory.plan).filter(
+                            start_interval=t
+                        )
+                        if len(p) > 0:
+                            value = Decimal(
+                                convert_money(p[0].price, factory.currency).amount
+                            ).quantize(Decimal("1.00"))
+                            color = (
+                                "warning"
+                                if min_price_in_display_currency is not None
+                                and value < min_price_in_display_currency
+                                else "info"
+                            )
+                            if now < t:
+                                color = (
+                                    "danger"
+                                    if min_price_in_display_currency is not None
+                                    and value < min_price_in_display_currency
+                                    else "success"
+                                )
+                            rows[i].append(
+                                {
+                                    "color": color,
+                                    "text_color": "gray-100",
+                                    "text": str(value),
+                                }
+                            )
+                        else:
+                            rows[i].append({"text": "-"})
                 d = d + timedelta(days=1)
 
         return {
@@ -382,7 +394,23 @@ class FactorySchedule(FormView):
         context["form"] = form
 
         if "generate" in self.request.POST:
-            print("Generate schedule")
+            new_schedule = ElectricityFactorySchedule.generate_schedule(
+                factory, num_days=4
+            )
+            serializer = ElectricityFactoryScheduleSerializer(
+                many=True, data=new_schedule
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            send_notifications(factory, serializer.data)
+            num_created = len(new_schedule)
+            if num_created > 0:
+                messages.success(
+                    self.request,
+                    _("Generated %d hours of production schedule") % num_created,
+                )
+            else:
+                messages.warning(self.request, _("No new hours of production schedule"))
 
         if "save" in self.request.POST:
             if form.is_valid():
@@ -398,7 +426,7 @@ class FactorySchedule(FormView):
                     obj.save()
                     form.save()
             else:
-                pass
+                messages.error(request, _("Invalid form") + str(form.errors))
 
         context["schedule"] = self.get_schedule(factory)
         return render(request, "factory_schedule.html", context)

@@ -19,6 +19,7 @@ from djmoney.money import Money
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from django.core.mail import send_mail
 
 
 class ElectricityBillingZoneSerializer(serializers.ModelSerializer):
@@ -314,12 +315,15 @@ class ElectricityFactoryScheduleAPIView(generics.ListCreateAPIView):
                 status=status.HTTP_404_NOT_FOUND,
                 headers={},
             )
+        return self.create_for_factory(factory)
 
-        data = ElectricityFactorySchedule.generate_schedule(factory, num_prices=24)
+    def create_for_factory(self, factory: ElectricityFactory, num_days=4):
+        data = ElectricityFactorySchedule.generate_schedule(factory, num_days)
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
+        #send_notifications(factory, serializer.data)
         return Response(
             serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
@@ -329,3 +333,17 @@ class ElectricityFactoryScheduleAPIView(generics.ListCreateAPIView):
         if isinstance(kwargs.get("data", {}), list):
             kwargs["many"] = True
         return super().get_serializer(*args, **kwargs)
+
+
+def send_notifications(factory: ElectricityFactory, data):
+    subject = "Wokring schedule for %s" % factory.name
+    message = "Working schedule for factory 1,2,3"
+    sender = "from@example.com"
+    recipeint_list = ["to@example.com"]
+    send_mail(
+        subject,
+        message,
+        sender,
+        recipeint_list,
+        fail_silently=False,
+    )
