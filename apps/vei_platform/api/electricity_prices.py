@@ -323,7 +323,7 @@ class ElectricityFactoryScheduleAPIView(generics.ListCreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        #send_notifications(factory, serializer.data)
+        send_notifications(factory, serializer.data)
         return Response(
             serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
@@ -335,9 +335,39 @@ class ElectricityFactoryScheduleAPIView(generics.ListCreateAPIView):
         return super().get_serializer(*args, **kwargs)
 
 
+from prettytable import PrettyTable
+from datetime import datetime
+
+
 def send_notifications(factory: ElectricityFactory, data):
+    if len(data) == 0:
+        return
+    has_shutdown = False
+    tz = factory.get_pytz_timezone()
+    tz_name = factory.get_requested_timezone()
+    if factory.factory_code is None:
+        title = "%s" % factory.name
+    else:
+        title = "%s %s" % (factory.name, factory.factory_code)
+    title = title + " " + tz_name
+    table = PrettyTable(["Date", "Time %s" % tz_name, "Working"], title=title)
+
+    for d in data:
+        st = datetime.strptime(d["start_interval"], "%Y-%m-%dT%H:%M:%SZ").astimezone(tz)
+        et = datetime.strptime(d["end_interval"], "%Y-%m-%dT%H:%M:%SZ").astimezone(tz)
+        table.add_row(
+            [
+                st.date(),
+                "%d - %d" % (st.time().hour, et.time().hour),
+                "On" if d["working"] else "Off",
+            ]
+        )
+
+        if not d["working"]:
+            has_shutdown = True
+
     subject = "Wokring schedule for %s" % factory.name
-    message = "Working schedule for factory 1,2,3"
+    message = table.get_string()
     sender = "from@example.com"
     recipeint_list = ["to@example.com"]
     send_mail(

@@ -126,7 +126,11 @@ class ElectricityProductionScheduleAPIWithUserTestCases(APITestCase):
         response = self.client.post(self.url, data=data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.check_response(response.data)
-        #self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(len(mail.outbox), 1)
+        # print(mail.outbox[0].subject)
+        # print(mail.outbox[0].from_email)
+        # print(mail.outbox[0].recipients())
+        # print(mail.outbox[0].message())
 
     def test_get_schedule_after_create(self):
         self.test_create_schedule()
