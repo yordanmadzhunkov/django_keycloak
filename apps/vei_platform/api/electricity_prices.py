@@ -368,8 +368,8 @@ def send_notifications(factory: ElectricityFactory, data):
 
     subject = "Wokring schedule for %s" % factory.name
     message = table.get_string()
-    sender = "from@example.com"
-    recipeint_list = ["to@example.com"]
+    sender = "data.intensive99@gmail.com"
+    recipeint_list = ["y.madzhunkov@vei-imot.bg"]
     send_mail(
         subject,
         message,
