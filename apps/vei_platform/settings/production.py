@@ -39,7 +39,9 @@ DATABASES = {
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
 
 EMAIL_HOST          = config("EMAIL_HOST", default='smtp.gmail.com')  # SMTP server host
 EMAIL_PORT          = config("EMAIL_PORT", default=465)  # SMTP server port (587 for TLS, 465 for SSL)
