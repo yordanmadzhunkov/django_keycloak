@@ -33,7 +33,7 @@ class VeiPlatformAPI:
 
     def check_billing_zone(self, billing_zone):
         full_url = self.endpoint_base_url + self.billing_zone_url
-        print_blue("GET + " + full_url + " HEADERS = " + self.headers)
+        print_blue("GET REQUEST TO " + full_url + " HEADERS = " + str(self.headers))
         response = requests.get(
             full_url,
             data={},
@@ -45,7 +45,7 @@ class VeiPlatformAPI:
                 if zone["code"] == billing_zone:
                     found = zone
         else:
-            print_red("Response CODE = " + str(response.status_code) + " REASON = " + response.reason)
+            print_red("Response CODE = " + str(response.status_code) + " REASON = " + str(response.reason))
             return {
                 "error": "response check_billing_zone Status is not OK",
                 "status": response.status_code,
