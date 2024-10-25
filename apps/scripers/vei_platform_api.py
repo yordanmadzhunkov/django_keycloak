@@ -10,6 +10,8 @@ from decimal import Decimal
 from tzlocal import get_localzone  # $ pip install tzlocal
 import json
 
+import time
+
 
 class VeiPlatformAPI:
     token = None
@@ -303,38 +305,53 @@ class VeiPlatformAPI:
                 "error": "response Status is not OK, probably missing authentication token"
             }
 
+    def find_factory_slug(self, factory_name, num_retries=3):
+        factories = {}
+        for i in range(num_retries):
+            factories = self.get_my_factories()
+            if "factories" in factories.keys():
+                break
+            # Sleep 3 seconds
+            time.sleep(3)
+        if "factories" in factories.keys():
+            for f in factories["factories"]:
+                if f["name"] == factory_name:
+                    factory_slug = f["slug"]
+                    return factory_slug
+        return None
+
     def prepare_and_post_production(self, scriper, factory_name, production):
-        factories = self.get_my_factories()
-        for f in factories["factories"]:
-            if f["name"] == factory_name:
-                factory_slug = f["slug"]
-                timestamps = production["unix_seconds"]
-                volume_in_kwh = production["volume_in_kwh"]
-                server_values = self.get_server_values_in_timewindow(
-                    self.production_url, timestamps, params={"factory": factory_slug}
+        factory_slug = self.find_factory_slug(factory_name)
+        if factory_slug:
+            timestamps = production["unix_seconds"]
+            volume_in_kwh = production["volume_in_kwh"]
+            server_values = self.get_server_values_in_timewindow(
+                self.production_url, timestamps, params={"factory": factory_slug}
+            )
+            new, matched, different = self.compute_ovelaping_prices(
+                {"factory": factory_slug},
+                "energy_in_kwh",
+                timestamps,
+                volume_in_kwh,
+                server_values,
+            )
+            if len(new) == 0:
+                return {
+                    "info": "Skiping update on %s because there is not new production, Matched production count = %d"
+                    % (factory_slug, len(matched))
+                }
+            else:
+                response = requests.post(
+                    self.endpoint_base_url + self.production_url,
+                    data=json.dumps(new),
+                    headers=self.headers,
                 )
-                new, matched, different = self.compute_ovelaping_prices(
-                    {"factory": factory_slug},
-                    "energy_in_kwh",
-                    timestamps,
-                    volume_in_kwh,
-                    server_values,
-                )
-                if len(new) == 0:
-                    return {
-                        "info": "Skiping update on %s because there is not new production, Matched production count = %d"
-                        % (factory_slug, len(matched))
-                    }
+                if response.status_code == 201:
+                    return {"info": response.json()}
                 else:
-                    response = requests.post(
-                        self.endpoint_base_url + self.production_url,
-                        data=json.dumps(new),
-                        headers=self.headers,
-                    )
-                    if response.status_code == 201:
-                        return {"info": response.json()}
-                    else:
-                        return {"error": "failed to create bulk production data"}
+                    return {"error": "failed to create bulk production data"}
+        else:
+            return {"error": "failed to find factory"}
 
     def report_result(self, res, showInfo=True):
         url = self.endpoint_base_url

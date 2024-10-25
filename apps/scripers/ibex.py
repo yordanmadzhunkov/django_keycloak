@@ -138,9 +138,9 @@ class IBexScriper:
                         res = vei_platform.prepare_and_post_prices(self, zone, prices)
                         vei_platform.report_result(res)
 
-                        res = vei_platform.prepare_and_post_production(
-                            self, factory_name="Гигамрежата 33", production=prices
-                        )
+                        # res = vei_platform.prepare_and_post_production(
+                        #    self, factory_name="Гигамрежата 33", production=prices
+                        # )
                         vei_platform.report_result(res)
 
                         # break
