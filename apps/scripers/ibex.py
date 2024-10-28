@@ -48,9 +48,13 @@ def parse_ibex(soup):
                     )
                     d = localtimezone.localize(d)
                     d = d.astimezone(utc)
-                    entry = energy_price_entry(d, price)
-                    entry["unit"] = row[1]
-                    entries.append(entry)
+                    try:
+                        p = Decimal(price)
+                        entry = energy_price_entry(d, price)
+                        entry["unit"] = row[1]
+                        entries.append(entry)
+                    except:
+                        print("Skiping price = " + price + " at " + str(d))
             if len(head) == len(row) + 1:
                 for i in range(len(head) - 2):
                     volume = row[i + 1]
@@ -64,11 +68,15 @@ def parse_ibex(soup):
                     )
                     d = localtimezone.localize(d)
                     d = d.astimezone(utc)
-                    for i in range(len(entries)):
-                        if entries[i]["start_interval"] == d:
-                            entries[i].update(
-                                {"volume_in_kwh": Decimal(volume) * Decimal(1000)}
-                            )
+                    try:
+                        v = Decimal(volume)
+                        for i in range(len(entries)):
+                            if entries[i]["start_interval"] == d:
+                                entries[i].update(
+                                    {"volume_in_kwh": Decimal(volume) * Decimal(1000)}
+                                )
+                    except:
+                        print("Skiping volume = " + volume + " at " + str(d))
 
         first = False
     return sorted(entries, key=lambda k: k["start_interval"])

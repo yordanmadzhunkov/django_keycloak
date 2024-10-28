@@ -1,6 +1,7 @@
 import requests
 from prettytable import PrettyTable
 from vei_platform_api import VeiPlatformAPI
+from datetime import datetime
 
 
 class EnergyChartsAPI:
@@ -76,13 +77,26 @@ class EnergyChartsAPI:
                 table.add_row([p, paths[p]["get"]["summary"]])
             print(table)
 
-    def fetch_prices_day_ahead(self, billing_zone="BG"):
-        prices = requests.get(
-            self.base_url + "/price",  # The URL of the API you want to access
-            params={
-                "bzn": billing_zone,
-            },  # The parameters you want to pass to the API (like "?key=value" at the end of the URL)
-        )
+    def fetch_prices_day_ahead(self, billing_zone="BG", start=None, end=None):
+        params = {
+            "bzn": billing_zone,
+        }
+        if start:
+            params["start"] = int(start.strftime("%s"))
+        if end:
+            params["end"] = int(end.strftime("%s"))
+        # Returns the day-ahead spot market price for a specified bidding zone in EUR/MWh.
+        # Available bidding zones (bzn) are shown above.
+        # Response schema:
+        # json
+        # {
+        #    "license_info": str,
+        #    "unix_seconds": [int],
+        #    "price": [float],
+        #    "unit": str,
+        #    "deprecated": bool
+        # }'
+        prices = requests.get(self.base_url + "/price", params)
         if prices.status_code == 200:
             return prices.json()
         return None
@@ -94,16 +108,18 @@ class EnergyChartsAPI:
     def get_currency_and_unit(self, prices):
         return prices["unit"].split("/")
 
-    def process(self, target_list):
+    def process(self, target_list, start: datetime = None, end: datetime = None):
         for zone in self.billing_zones.keys():
-            prices = self.fetch_prices_day_ahead(zone)
-            if prices:
+            prices_response = self.fetch_prices_day_ahead(zone, start, end)
+            if prices_response:
                 for target in target_list:
                     try:
                         vei_platform = VeiPlatformAPI(
                             target["url"], token=target["token"]
                         )
-                        res = vei_platform.prepare_and_post_prices(self, zone, prices)
+                        res = vei_platform.prepare_and_post_prices(
+                            self, zone, prices_response
+                        )
                         vei_platform.report_result(res)
                         # break
                     except Exception as e:
