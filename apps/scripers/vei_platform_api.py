@@ -45,7 +45,12 @@ class VeiPlatformAPI:
                 if zone["code"] == billing_zone:
                     found = zone
         else:
-            print_red("Response CODE = " + str(response.status_code) + " REASON = " + str(response.reason))
+            print_red(
+                "Response CODE = "
+                + str(response.status_code)
+                + " REASON = "
+                + str(response.reason)
+            )
             return {
                 "error": "response check_billing_zone Status is not OK",
                 "status": response.status_code,

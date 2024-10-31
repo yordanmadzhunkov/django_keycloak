@@ -33,7 +33,7 @@ class ElectricityFactoryProduction(models.Model):
     )
 
     def __str__(self) -> str:
-        return "%s %s" % (
-            self.start_interval.strftime("%y-%m-%d %h:%m"),
+        return "%s %s kWh" % (
+            self.start_interval.strftime("%y-%m-%d %H:%M %Z"),
             self.energy_in_kwh,
         )

@@ -6,17 +6,12 @@ from pytz import timezone, utc
 
 import calendar
 from decimal import Decimal
+from vei_platform.models.factory import ElectricityFactory
+#from vei_platform.models.legal import LegalEntity
 
-
-if __name__ == "__main__":
+def process_excel_report(filename="./Справка м.07.2024_ГОФРИЛО КО ЕООД.xlsx" ):
     # Open Excel file
-
-    workbook = openpyxl.load_workbook("./Справка м.07.2024_ГОФРИЛО КО ЕООД.xlsx")
-    # print(workbook.get_sheet_names())
-    # print(workbook)
-    timezone_label = "Europe/Sofia"
-    localtimezone = timezone(timezone_label)
-
+    workbook = openpyxl.load_workbook(filename)
     factories = []
 
     for sheet_name in workbook.sheetnames:
@@ -29,7 +24,17 @@ if __name__ == "__main__":
         factory_name = sheet["C2"].value
         some_id = sheet["C3"].value
         num_days = calendar.monthrange(month.year, month.month)[1]
-        factory_slug = "малката-кофа-за-фотони"
+        
+        factory_object = ElectricityFactory.objects.filter(name=factory_name).first()
+        if factory_object:
+            factory_slug = factory_object.slug    
+            timezone_label = factory_object.get_requested_timezone()
+        else:
+            factory_slug = None
+            timezone_label = "UTC"
+        
+        localtimezone = timezone(timezone_label)
+        
 
         # print(month)
         # print(type(month))
@@ -99,4 +104,4 @@ if __name__ == "__main__":
         }
         factories.append(res)
 
-    print(factories)
+    return factories
