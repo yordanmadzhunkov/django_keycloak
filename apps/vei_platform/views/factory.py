@@ -6,28 +6,32 @@ from vei_platform.models.factory import (
     ElectricityFactory,
     ElectricityFactoryComponents,
 )
-from vei_platform.models.production import ElectricityFactoryProduction
+from vei_platform.models.production import (
+    ElectricityFactoryProduction,
+    ElectricityFactoryUploadedProductionReport,
+    ElectricityFactoryProductionReport,
+    process_excel_report,
+)
 from vei_platform.models.schedule import MinPriceCriteria, ElectricityFactorySchedule
 
 from vei_platform.models.electricity_price import ElectricityPrice
+
 from vei_platform.models.profile import get_user_profile
 from vei_platform.forms import (
     FactoryModelForm,
     ElectricityFactoryComponentsForm,
     FactoryScheduleForm,
+    UploadFileForm,
 )
 
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.views.generic import ListView, CreateView, UpdateView, FormView
 from django.views import View
 
-from decimal import Decimal, DecimalException
-from datetime import date, timedelta, datetime, timezone
-from django import template
-from django.forms import BaseModelForm, formset_factory
-from django.forms.models import model_to_dict
+from decimal import Decimal
+from datetime import timedelta, datetime, timezone
+
 
 from django.urls import reverse_lazy, reverse
 from django.db import transaction
@@ -43,6 +47,9 @@ from vei_platform.api.electricity_prices import (
     ElectricityFactoryScheduleSerializer,
     send_notifications,
 )
+import os
+
+from vei_platform.api.electricity_prices import ElectricityProductionSerializer
 
 
 class FactoriesList(ListView):
@@ -261,15 +268,159 @@ class FactoryProduction(View):
         context = common_context(request)
         factory = ElectricityFactory.objects.get(pk=pk)
         context["factory"] = factory
-
         components = ElectricityFactoryComponents.objects.filter(factory=factory)
         context["components"] = components
         if factory.manager is None:
             context["manager"] = None
         else:
-            # profile = get_user_profile(factory.manager)
             context["manager_profile"] = get_user_profile(factory.manager)
+            if factory.manager == request.user:
+                context["form"] = UploadFileForm()
+                context["reports"] = self.get_production_reports(factory)
         return render(request, "factory_production.html", context)
+
+    def get_production_reports(self, factory):
+        res = []
+        for r in (
+            ElectricityFactoryProductionReport.objects.filter(factory=factory)
+            .order_by("year")
+            .order_by("month")
+        ):
+            res.append(
+                {
+                    "year": r.year,
+                    "month": r.month,
+                    "name": os.path.basename(r.report.docfile.name),
+                    "status": r.report.updated_at,
+                    "url": r.report.docfile.url,
+                }
+            )
+        return res
+
+    def create_excel_report(
+        self, user, file_in_memory
+    ) -> ElectricityFactoryUploadedProductionReport:
+        filename = str(file_in_memory)
+        path = "documents/user_{0}/{1}".format(str(user), filename)
+        excel_report = ElectricityFactoryUploadedProductionReport.objects.create(
+            docfile=path, owner=user
+        )
+        dir = excel_report.docfile.storage.path("documents/user_{0}".format(str(user)))
+        os.makedirs(dir, exist_ok=True)
+        with excel_report.docfile.open("wb+") as destination:
+            for chunk in file_in_memory.chunks():
+                destination.write(chunk)
+            destination.close()
+        return excel_report
+
+    def post(self, request, pk=None, *args, **kwargs):
+        # context = common_context(request)
+        # print(request.FILES)
+        # print(request.POST)
+        if "upload" in request.POST:
+            form = UploadFileForm(request.POST, request.FILES)
+            if form.is_valid():
+                for f in form.cleaned_data["files"]:
+                    excel_report = self.create_excel_report(
+                        user=request.user, file_in_memory=f
+                    )
+                    report = process_excel_report(excel_report.docfile.path)
+                    if isinstance(report, dict) and "error" in report.keys():
+                        messages.error(request, report["error"])
+                    elif isinstance(report, list):
+                        excel_report.save()
+                        for factory_res in report:
+                            errors = factory_res["errors"]
+                            for e in errors:
+                                messages.error(request, e)
+                            self.update_production_of_factory(
+                                request, excel_report, factory_res
+                            )
+                    else:
+                        messages.error(
+                            request,
+                            "Unknown error from FactoryProduction View post method",
+                        )
+            else:
+                messages.error(request, form.errors.as_text())
+        return self.get(request, pk, args, kwargs)
+
+    def update_production_of_factory(self, request, excel_report, factory_res):
+        if factory_res["factory_slug"] is not None:
+            factory = ElectricityFactory.objects.get(slug=factory_res["factory_slug"])
+            if factory:
+                month = factory_res["month"]
+                year = factory_res["year"]
+                try:
+                    report_for_factory = ElectricityFactoryProductionReport.objects.get(
+                        factory=factory, year=year, month=month
+                    )
+                    report_for_factory.report = excel_report
+                except ElectricityFactoryProductionReport.DoesNotExist:
+                    report_for_factory = (
+                        ElectricityFactoryProductionReport.objects.create(
+                            report=excel_report,
+                            factory=factory,
+                            year=year,
+                            month=month,
+                        )
+                    )
+                finally:
+                    messages.info(
+                        request,
+                        "Production report updated for year %d month %d factory %s"
+                        % (year, month, factory.name),
+                    )
+                    production_in_kwh = factory_res["production_in_kwh"]
+                    production = ElectricityFactoryProduction.objects.filter(
+                        factory=factory
+                    )
+                    new_production = 0
+                    matched_production = 0
+                    updated_production = 0
+                    for prod in production_in_kwh:
+                        start_interval = datetime.strptime(
+                            prod["start_interval"], "%Y-%m-%dT%H:%M:%S%z"
+                        )
+                        end_interval = datetime.strptime(
+                            prod["end_interval"], "%Y-%m-%dT%H:%M:%S%z"
+                        )
+                        energy_in_kwh = prod["energy_in_kwh"]
+                        try:
+                            p = production.get(start_interval=start_interval)
+                            if (
+                                p.energy_in_kwh == energy_in_kwh
+                                and end_interval == p.end_interval
+                            ):
+                                matched_production += 1
+                            else:
+                                p.energy_in_kwh = energy_in_kwh
+                                p.end_interval = end_interval
+                                p.save()
+                                updated_production += 1
+                        except ElectricityFactoryProduction.DoesNotExist:
+                            new_prod = ElectricityFactoryProduction.objects.create(
+                                factory=factory,
+                                start_interval=start_interval,
+                                end_interval=end_interval,
+                                energy_in_kwh=energy_in_kwh,
+                            )
+                            new_prod.save()
+                            new_production += 1
+                        finally:
+                            pass
+
+                    report_for_factory.save()
+                    messages.success(
+                        request,
+                        "Factory %s new=%d, updated=%d, matched=%d"
+                        % (
+                            factory.name,
+                            new_production,
+                            updated_production,
+                            matched_production,
+                        ),
+                    )
 
 
 class FactoryScheduleView(FormView):
@@ -456,7 +607,10 @@ class FactoryProductionChart(View):
         tz = factory.get_pytz_timezone()
         x_scale = tz.zone + " timezone"
         x_min = None
-        x_max = datetime_to_chartjs_format(production[0].end_interval, tz)
+        if len(production) > 0:
+            x_max = datetime_to_chartjs_format(production[0].end_interval, tz)
+        else:
+            x_max = None
 
         min_price = MinPriceCriteria.objects.filter(factory=factory).first()
         if min_price is not None:
@@ -465,6 +619,7 @@ class FactoryProductionChart(View):
                 convert_money(min_price.min_price, display_currency).amount
             )
         else:
+            min_price_in_display_currency = None
             y1_backgroundColor = "rgba(255, 99, 132, 0.2)"
 
         for p in production:
@@ -475,7 +630,10 @@ class FactoryProductionChart(View):
             if len(p2) > 0:
                 p0 = Decimal(convert_money(p2[0].price, display_currency).amount)
                 y2.append(p0)
-                if p0 > min_price_in_display_currency:
+                if (
+                    min_price_in_display_currency is not None
+                    and p0 > min_price_in_display_currency
+                ):
                     color = ("rgba(54, 162, 235, 0.5)",)
                 else:
                     color = "rgba(255, 45, 33, 0.2)"
@@ -484,15 +642,18 @@ class FactoryProductionChart(View):
                 y2.append(None)
             if min_price is not None:
                 y1_backgroundColor.append(color)
-
-        x_min = datetime_to_chartjs_format(p.start_interval, tz=tz)
+        if len(production) > 0:
+            x_min = datetime_to_chartjs_format(p.start_interval, tz=tz)
+        else:
+            x_min = None
         y1 = y1[::-1]
         y1_backgroundColor = y1_backgroundColor[::-1]
         y2 = y2[::-1]
         x = x[::-1]
         # y1.append(y1[-1])
-        y2.append(y2[-1])
-        x.append(x_max)
+        if len(y2) > 0:
+            y2.append(y2[-1])
+            x.append(x_max)
         y_scale = "MWh"
         y1_label = factory.name + " " + _("production")
         y2_label = factory.plan.name

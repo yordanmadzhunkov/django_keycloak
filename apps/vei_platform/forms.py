@@ -470,3 +470,65 @@ class FactoryScheduleForm(forms.ModelForm):
                 css_class="form-row",
             ),
         )
+
+
+class MultipleFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+
+
+class MultipleFileField(forms.FileField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("widget", MultipleFileInput())
+        super().__init__(*args, **kwargs)
+
+    def clean(self, data, initial=None):
+        single_file_clean = super().clean
+        if isinstance(data, (list, tuple)):
+            result = [single_file_clean(d, initial) for d in data]
+        else:
+            result = [single_file_clean(data, initial)]
+        return result
+
+
+from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator
+
+
+class MaxSizeValidator(MaxValueValidator):
+    def __call__(self, value):
+        # get the file size as cleaned value
+        cleaned = self.clean(value.size)
+        message = _("The file %s exceed the maximum size of %d MB.") % (
+            value.name,
+            self.limit_value,
+        )
+
+        if self.compare(
+            cleaned, self.limit_value * 1024 * 1024
+        ):  # convert limit_value from MB to Bytes
+            raise ValidationError(message, code=self.code, params=None)
+
+
+class UploadFileForm(forms.Form):
+    # file = forms.FileField()
+    files = MultipleFileField(validators=[MaxSizeValidator(6)])
+
+    def __init__(self, *args, **kwargs):
+        super(UploadFileForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.form_show_labels = True
+
+        upload = Submit("upload", _("Upload"), css_class="btn btn-primary")
+        upload.field_classes = "btn btn-primary"
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Row(
+                Column("files", css_class="form-group"),
+                css_class="form-row",
+            ),
+            Row(
+                upload,
+                css_class="form-row",
+            ),
+        )

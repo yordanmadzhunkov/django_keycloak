@@ -4,7 +4,7 @@ from ibex import IBexScriper
 from energy_charts_api import EnergyChartsAPI
 
 from decouple import config
-
+from datetime import datetime, timezone
 
 if __name__ == "__main__":
 
@@ -21,3 +21,6 @@ if __name__ == "__main__":
 
     IBexScriper().process(target_list)
     EnergyChartsAPI().process(target_list)
+    # start_time = datetime(2024, 10, 1, 00, 00, 00, tzinfo=timezone.utc)
+    # end_time = datetime(2024, 11, 1, 00, 00, 00, tzinfo=timezone.utc)
+    # EnergyChartsAPI().process(target_list, start=start_time, end=end_time)

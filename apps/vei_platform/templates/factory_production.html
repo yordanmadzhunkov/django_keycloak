@@ -22,4 +22,44 @@
   </div>
 </section>
 {% include "snippets/energy_production_chart.html" %}
+
+<section style="background-color: #eee;">
+  <div class="container py-5">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-bordered table-dark" id="dataTable" width="100%" cellspacing="0">
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>Month</th>
+              <th>Status</th>
+              <th>File</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for report in reports %}
+            <tr>
+              <td>{{report.year}}</td>
+              <td>{{report.month}}</td>
+              <td></td>
+              <td><a href={{report.url}}>{{report.name}}</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        {% if form %}
+        <section style="background-color: #eee;">
+          <div class="container py-5">
+            <strong>Add production excel file:</strong>
+            <form action='' enctype='multipart/form-data' method='post'>
+              {% crispy form %}
+            </form>
+          </div>
+        </section>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
 {% endblock content %}
