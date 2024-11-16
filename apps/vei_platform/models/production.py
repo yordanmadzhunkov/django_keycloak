@@ -105,6 +105,163 @@ import calendar
 from decimal import Decimal
 from vei_platform.models.factory import ElectricityFactory
 from django.utils.translation import gettext as _
+import re
+
+def exctract_timezone_currency_unit(sheet):
+    if 'IBEX_DAM_Price' == sheet["B1"].value and 'лв./MWh' == sheet["B2"].value:
+        r = re.match(r"Date\/(\S+)", sheet["A1"].value)
+        if r:
+            timezone_label = r.group(1)
+            #print(timezone_label)
+            num_factories = count_factories_old_format(sheet)
+            #print(num_factories)
+            #print("A1 = ", sheet["A1"].value)
+            #print("A2 = ", sheet["A2"].value)
+            if num_factories > 0:
+                return timezone_label, 'BGN', 'MWh'
+            #return num_factories > 0
+    return None, None, None
+
+def count_factories_old_format(sheet):
+    res = 0
+    for h in range(1024):
+        v1 = sheet.cell(row=2, column=4 + 2 * h + 0).value
+        v2 = sheet.cell(row=2, column=4 + 2 * h + 1).value
+        if v1 == 'Производство, MWh' and v2 == 'Сума, лв.':
+            res = res + 1
+        else:
+            #print ("v1 = %s", v1)
+            #print ("v2 = %s", v2)
+            break
+    return res
+
+def find_factory(search_id):
+    factory_name = None
+    factory_slug = None
+    factory_id = None
+    for id in search_id.split(' '):
+        try:
+            f = ElectricityFactory.objects.get(factory_code=id)
+            factory_slug = f.slug
+            factory_name = f.name
+            factory_id = f.factory_code
+            return factory_name, factory_slug, factory_id
+        except ElectricityFactory.DoesNotExist:
+            pass
+
+    d = search_id.split(' ')
+    if len(d) > 0:
+        factory_id = d[0]
+    return factory_name, factory_slug, factory_id
+
+
+def add_production(production_in_kwh, prices, factory_slug, production_in_mwh, price, localtimezone, start_interval, end_interval=None):
+
+    start = start_interval
+    start = localtimezone.localize(start)
+    start = start.astimezone(utc)
+    end = start + timedelta(hours=1) if end_interval is None else end_interval
+
+    energy_in_mwh = production_in_mwh if isinstance(production_in_mwh, Decimal) else Decimal("%0.4f" % production_in_mwh)
+    energy_in_kwh = energy_in_mwh * Decimal(1000)
+    start_str = start.strftime("%Y-%m-%dT%H:%M:%S%z")
+    end_str = end.strftime("%Y-%m-%dT%H:%M:%S%z")
+
+    price_decimal = price if isinstance(price, Decimal) else Decimal("%0.2f" % price)
+       
+    production_in_kwh.append({
+                        "factory": factory_slug,
+                        "energy_in_kwh": energy_in_kwh,
+                        "start_interval": start_str,
+                        "end_interval": end_str,
+    })
+    prices.append({
+                        "factory": factory_slug,
+                        "price": price_decimal,
+                        "start_interval": start_str,
+                        "end_interval": end_str,
+    })
+
+
+def extract_factory_production(sheet, h, timezone_label, currency, unit):
+    errors = []
+    factory_name = None
+    factory_slug = None
+    factory_id = None
+    owner_legal = None
+    month = None
+    production_in_kwh = []
+    prices = []
+    localtimezone = timezone(timezone_label)
+
+
+    v1 = sheet.cell(row=2, column=4 + 2 * h + 0).value
+    v2 = sheet.cell(row=2, column=4 + 2 * h + 1).value
+    start_interval, end_interval = None, None
+    if v1 == 'Производство, MWh' and v2 == 'Сума, лв.':
+        factory_name, factory_slug, factory_id = find_factory(sheet.cell(row=1, column=4 + 2 * h + 0).value)
+        for r in range(4*24*31 + 10):
+            start = sheet.cell(row=3 + r, column=1).value
+            # end interval check
+            #if end_interval is not None and end_interval == start:
+            if end_interval is not None and num_intervals == 4:
+                add_production(production_in_kwh, 
+                               prices, 
+                               factory_slug, 
+                               price, 
+                               total_prod, 
+                               localtimezone, 
+                               start_interval=start_interval)
+                start_interval = end_interval
+                end_interval = start_interval + timedelta(hours=1)
+                total_prod = Decimal(0)
+                num_intervals = 0
+
+            #else: 
+                #print("start = %s != %s" % (str(start), str(end_interval)))
+                #print("end interval check %s" % )
+
+            if not start:          
+                break
+
+            # start inteval check
+            price = Decimal(str(sheet.cell(row=3 + r, column=2).value))
+            prod = Decimal(str(sheet.cell(row=3 + r, column=4 + 2 * h + 0).value))
+
+            if start_interval is None:
+                start_interval = start
+                end_interval = start_interval + timedelta(hours=1)
+                total_prod = Decimal(0)
+                num_intervals = 0
+
+            if start_interval is not None:
+                total_prod += prod
+                num_intervals += 1
+                if month is None:
+                    month = start_interval
+        
+    res = {
+            "factory_name": factory_name,
+            "factory_slug": factory_slug,
+            "timezone": timezone_label,
+            "factory_id": factory_id,
+            "legal_entity": owner_legal,
+            "month": month.month,
+            "year": month.year,
+            "production_in_kwh": production_in_kwh,
+            "prices": prices,
+            "currency": currency,
+            "errors": errors,
+    }
+    return res
+
+def process_old_excel_report(sheet, timezone_label, currency, unit):
+    factories = []
+    num_factories = count_factories_old_format(sheet)
+    for num_factory in range(num_factories):
+        factories.append(extract_factory_production(sheet, num_factory, timezone_label, currency, unit))
+    return factories
+
 
 
 def process_excel_report(filename):
@@ -115,14 +272,34 @@ def process_excel_report(filename):
     for sheet_name in workbook.sheetnames:
         # print(sheet_name)
         sheet = workbook[sheet_name]  # Access sheet by name
+        timezone_label, currency, unit = exctract_timezone_currency_unit(sheet)
+        if timezone_label and currency and unit:
+            return process_old_excel_report(sheet, timezone_label, currency, unit)
+
+        errors = []
         # print(sheet)
+
 
         month = sheet["B1"].value
         owner_legal = sheet["C1"].value
         factory_name = sheet["C2"].value
         some_id = sheet["C3"].value
-        num_days = calendar.monthrange(month.year, month.month)[1]
-        errors = []
+
+        if isinstance(month, datetime):
+            num_days = calendar.monthrange(month.year, month.month)[1]
+        else:
+            errors.append(_("Report does not contain period in B1 cell, found %s") % str(month))
+            num_days = 0    
+
+        production_label = sheet["B4"].value
+        if production_label != "Количество\nМВтч":
+            errors.append("Expected B4 to be 'Количество\nМВтч'")
+            res = {
+                "errors": errors,
+            }
+            factories.append(res)
+            continue
+
 
         factory_object = ElectricityFactory.objects.filter(name=factory_name).first()
         if factory_object:
@@ -135,9 +312,6 @@ def process_excel_report(filename):
 
         localtimezone = timezone(timezone_label)
 
-        production_label = sheet["B4"].value
-        if production_label != "Количество\nМВтч":
-            errors.append("Expected B4 to be 'Количество\nМВтч'")
 
         # print("Num Days %d" % num_days)
         # check hour labels
@@ -159,42 +333,13 @@ def process_excel_report(filename):
                 production = sheet.cell(row=5 + d, column=3 + h).value
                 price = sheet.cell(row=5 + d, column=3 + h + 27).value
                 d1 = datetime(year=month.year, month=month.month, day=d + 1, hour=h)
-                d1 = localtimezone.localize(d1)
-                d1 = d1.astimezone(utc)
-                energy_in_kwh = Decimal("%0.4f" % production) * Decimal(1000)
-                # try:
-                #     p = production.get(start_interval=d1)
-                # except ElectricityFactoryProduction.DoesNotExist:
-                #     ElectricityFactoryProduction.objects.create(factory_name=factory_object,
-                #                                                 start_interval=d1,
-                #                                                 end_interval=d1 + timedelta(hours=1),
-                #                                                 energy_in_kwh=production_in_kwh)
-                # finally:
-                #     pass
-                start_interval = d1.strftime("%Y-%m-%dT%H:%M:%S%z")
-                end_interval = (d1 + timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%S%z")
-                # print(type(production))
-
-                price = Decimal("%0.2f" % price)
-                # print(str(d1) + ' -> ' + str(p) + ' kWh @ ' + str(price) )
-                production_in_kwh.append(
-                    {
-                        "factory": factory_slug,
-                        "energy_in_kwh": energy_in_kwh,
-                        "start_interval": start_interval,
-                        "end_interval": end_interval,
-                    }
-                )
-
-                prices.append(
-                    {
-                        "factory": factory_slug,
-                        "price": price,
-                        "start_interval": start_interval,
-                        "end_interval": end_interval,
-                    }
-                )
-
+                add_production(production_in_kwh, 
+                               prices, 
+                               factory_slug, 
+                               price, 
+                               production, 
+                               localtimezone, 
+                               start_interval=d1)
         res = {
             "factory_name": factory_name,
             "factory_slug": factory_slug,

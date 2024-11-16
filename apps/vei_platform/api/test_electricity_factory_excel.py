@@ -4,20 +4,18 @@ from rest_framework.test import APITestCase
 from django.contrib.auth.models import User
 from vei_platform.models.factory import ElectricityFactory
 from vei_platform.models.production import ElectricityFactoryProduction
+from vei_platform.models.production import process_excel_report
 from vei_platform.models.legal import LegalEntity
-from vei_platform.models.schedule import MinPriceCriteria
 from vei_platform.models.electricity_price import (
     ElectricityPrice,
     ElectricityPricePlan,
     ElectricityBillingZone,
 )
-from datetime import date, datetime, timezone, timedelta
+from datetime import date
 from decimal import Decimal
 
-from djmoney.money import Money, Currency
-from django.core import mail
+
 import os
-from vei_platform.models.production import process_excel_report
 
 
 class ElectricityProductionFromExcelWithUserTestCases(APITestCase):
@@ -55,6 +53,7 @@ class ElectricityProductionFromExcelWithUserTestCases(APITestCase):
             capacity_in_mw=Decimal("0.2"),
             timezone="Europe/Sofia",
             plan=self.plan,
+            factory_code='32Z140000211335I',
         )
         self.factory.save()
         self.url = reverse("production_api")
@@ -64,16 +63,7 @@ class ElectricityProductionFromExcelWithUserTestCases(APITestCase):
         self.factory.delete()
         self.legal_entity.delete()
 
-    def test_create_electricity_production_with_user(self):
-        """
-        Ensure that we can submit a electricity produced in time window
-        """
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        excel_filename = dir_path + "/Справка м.07.2024_ГОФРИЛО КО ЕООД.xlsx"
-        # print(excel_filename)
-        factories_from_excel = process_excel_report(excel_filename)
-        factory_kneja = None
-        factory_obnova = None
+    def check_processed_report_keys(self, factories_from_excel):
         for factory in factories_from_excel:
             self.assertTrue("factory_name" in factory.keys())
             self.assertTrue("factory_slug" in factory.keys())
@@ -86,6 +76,17 @@ class ElectricityProductionFromExcelWithUserTestCases(APITestCase):
             self.assertTrue("prices" in factory.keys())
             self.assertTrue("currency" in factory.keys())
 
+    def test_create_electricity_production_with_user(self):
+        """
+        Ensure that we can submit a electricity produced in time window
+        """
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        excel_filename = dir_path + "/Справка м.07.2024_ГОФРИЛО КО ЕООД.xlsx"
+        factories_from_excel = process_excel_report(excel_filename)
+        self.check_processed_report_keys(factories_from_excel)
+        factory_kneja = None
+        factory_obnova = None
+        for factory in factories_from_excel:
             self.assertEquals(factory["currency"], "BGN")
             self.assertEquals(factory["year"], 2024)
             self.assertEquals(factory["month"], 7)
@@ -97,8 +98,7 @@ class ElectricityProductionFromExcelWithUserTestCases(APITestCase):
 
         self.assertNotEqual(factory_kneja, None)
         self.assertNotEqual(factory_obnova, None)
-        # print("GO6o!!!")
-        # print(factory['factory_slug'])
+
         self.assertEquals(factory_kneja["factory_slug"], self.factory.slug)
         self.assertEquals(factory_obnova["factory_slug"], None)
         self.assertEquals(factory_kneja["timezone"], "Europe/Sofia")
@@ -113,18 +113,45 @@ class ElectricityProductionFromExcelWithUserTestCases(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(ElectricityFactoryProduction.objects.count(), 31 * 24)
 
-        # for p in ElectricityFactoryProduction.objects.filter(factory=self.factory):
-        #    print(p)
-        # , 'factory_slug', 'timezone', 'factory_id', 'legal_entity', 'month', 'year', 'production_in_kwh', 'prices', 'currency'
-        # print(factory.keys())
-        # url = self.url
 
-        # response = self.client.post(reverse("production_api"), data=factory_kneja['production_in_kwh'], format="json")
-        # self.assertEqual(ElectricityFactoryProduction.objects.count(), 31*24)
-        # response = self.client.post(url, data, format="json")
+    def test_create_electricity_production_from_old_report_with_user(self):
+        """
+        Ensure that we can submit a electricity produced in time window
+        """
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        excel_filename = dir_path + '/03-24_ГОФРИЛО КО ЕООД.xlsx'
+        factories_from_excel = process_excel_report(excel_filename)
+        #print(factories_from_excel)
+        self.assertEquals(2, len(factories_from_excel))
+        self.check_processed_report_keys(factories_from_excel)
+        factory_kneja = None
+        factory_obnova = None
+        for factory in factories_from_excel:
+            self.assertEquals(factory["currency"], "BGN")
+            self.assertEquals(factory["year"], 2024)
+            self.assertEquals(factory["month"], 3)
+            
+            if factory["factory_id"] == '32Z140000211335I':
+                factory_kneja = factory
 
-        # self.assertEqual(ElectricityFactoryProduction.objects.count(), 1)
-        # self.assertEqual(response.data["factory"], "малката-кофа-за-фотони")
-        # self.assertEqual(Decimal(response.data["energy_in_kwh"]), Decimal("10.19"))
-        # self.checkTime(2024, 5, 19, 9, 0, response.data["start_interval"])
-        # self.checkTime(2024, 5, 19, 10, 0, response.data["end_interval"])
+            if factory["factory_id"] == '32Z140000237585R':
+                factory_obnova = factory
+
+        self.assertNotEqual(factory_kneja, None)
+        self.assertNotEqual(factory_obnova, None)
+        self.assertEquals(factory_kneja["factory_slug"], self.factory.slug)
+        self.assertEquals(factory_obnova["factory_slug"], None)
+        self.assertEquals(factory_kneja["timezone"], 'EET')
+        self.assertEquals(factory_obnova["timezone"], 'EET')
+
+        self.assertEqual(ElectricityFactoryProduction.objects.count(), 0)
+        response = self.client.post(
+            reverse("production_api"),
+            data=factory_kneja["production_in_kwh"],
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(ElectricityFactoryProduction.objects.count(), 31 * 24 - 1)
+
+        #print(factories_from_excel)
+

@@ -32,7 +32,6 @@
             <tr>
               <th>Year</th>
               <th>Month</th>
-              <th>Status</th>
               <th>File</th>
             </tr>
           </thead>
@@ -41,23 +40,24 @@
             <tr>
               <td>{{report.year}}</td>
               <td>{{report.month}}</td>
-              <td></td>
               <td><a href={{report.url}}>{{report.name}}</a></td>
             </tr>
             {% endfor %}
+            {% if upload_form %}
+            <tr>
+              <td>Add</td>
+              <td>excel </td>
+              <td>
+                <form action='' enctype='multipart/form-data' method='post'>
+                  {% crispy upload_form %}
+                </form>
+              </td>
+              {% endif %}
+            </tr>
           </tbody>
         </table>
 
-        {% if form %}
-        <section style="background-color: #eee;">
-          <div class="container py-5">
-            <strong>Add production excel file:</strong>
-            <form action='' enctype='multipart/form-data' method='post'>
-              {% crispy form %}
-            </form>
-          </div>
-        </section>
-        {% endif %}
+
       </div>
     </div>
   </div>

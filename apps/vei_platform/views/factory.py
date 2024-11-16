@@ -275,7 +275,7 @@ class FactoryProduction(View):
         else:
             context["manager_profile"] = get_user_profile(factory.manager)
             if factory.manager == request.user:
-                context["form"] = UploadFileForm()
+                context["upload_form"] = UploadFileForm()
                 context["reports"] = self.get_production_reports(factory)
         return render(request, "factory_production.html", context)
 
