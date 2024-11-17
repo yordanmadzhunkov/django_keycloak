@@ -283,8 +283,7 @@ class FactoryProduction(View):
         res = []
         for r in (
             ElectricityFactoryProductionReport.objects.filter(factory=factory)
-            .order_by("year")
-            .order_by("month")
+            .order_by('-year', '-month')
         ):
             res.append(
                 {
