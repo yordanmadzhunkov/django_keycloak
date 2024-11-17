@@ -212,7 +212,7 @@ def extract_factory_production(sheet, h, timezone_label, currency, unit):
         f = find_factory(search_text)
         factory_slug = f.slug if f is not None else None
         factory_name = f.name if f is not None else None
-        factory_id = f.factory_code if f is not None else search_text.split(' ')[0]
+        factory_id = f.factory_code if f is not None else search_text.split(" ")[0]
 
         for r in range(4 * 24 * 31 + 10):
             start = sheet.cell(row=3 + r, column=1).value
@@ -231,7 +231,6 @@ def extract_factory_production(sheet, h, timezone_label, currency, unit):
                 end_interval = start_interval + timedelta(hours=1)
                 total_prod = Decimal(0)
                 num_intervals = 0
-
 
             if not start:
                 break
@@ -253,7 +252,6 @@ def extract_factory_production(sheet, h, timezone_label, currency, unit):
             if start_interval is not None:
                 total_prod += prod
                 num_intervals += 1
-
 
     res = {
         "factory_name": factory_name,
@@ -282,20 +280,21 @@ def process_old_excel_report(sheet, timezone_label, currency, unit):
         )
     return factories
 
+
 def num_hours_in_day(year, month, day, localtimezone):
-    d0 = datetime(year=year, month=month, day = day, hour=0)
+    d0 = datetime(year=year, month=month, day=day, hour=0)
     d0 = localtimezone.localize(d0)
     d0 = d0.astimezone(utc)
     num_days = calendar.monthrange(year, month)[1]
     if day + 1 <= num_days:
-        d1 = datetime(year=year, month=month, day = day + 1, hour=0)
+        d1 = datetime(year=year, month=month, day=day + 1, hour=0)
     elif month < 12:
-        d1 = datetime(year=year, month=month+1, day = 1, hour=0)
+        d1 = datetime(year=year, month=month + 1, day=1, hour=0)
     else:
-        d1 = datetime(year=year+1, month=1, day=1)
+        d1 = datetime(year=year + 1, month=1, day=1)
     d1 = localtimezone.localize(d1)
     d1 = d1.astimezone(utc)
-    return int(d1.timestamp()-d0.timestamp()) // 3600
+    return int(d1.timestamp() - d0.timestamp()) // 3600
 
 
 def process_excel_report(filename):
@@ -335,19 +334,18 @@ def process_excel_report(filename):
             factories.append(res)
             continue
 
-        expected_price_label = 'Цена\nЛева/МВтч'
+        expected_price_label = "Цена\nЛева/МВтч"
         max_hours_in_day = 0
         for c in range(12):
-            if sheet.cell(row=4, column=2+27 + c).value == expected_price_label:
+            if sheet.cell(row=4, column=2 + 27 + c).value == expected_price_label:
                 max_hours_in_day = 24 + c
                 break
-        
-        #print(max_hours_in_day)
 
+        # print(max_hours_in_day)
 
         factory_object = find_factory(factory_name)
 
-        #factory_object = ElectricityFactory.objects.filter(name=factory_name).first()
+        # factory_object = ElectricityFactory.objects.filter(name=factory_name).first()
         if factory_object:
             factory_slug = factory_object.slug
             timezone_label = factory_object.get_requested_timezone()
@@ -371,17 +369,19 @@ def process_excel_report(filename):
         production_in_kwh = []
         prices = []
         production = ElectricityFactoryProduction.objects.filter(factory=factory_object)
-        d0 = datetime(year=month.year, month=month.month, day = 1, hour=0)
+        d0 = datetime(year=month.year, month=month.month, day=1, hour=0)
         d0 = localtimezone.localize(d0)
-        d0 = d0.astimezone(utc)        
+        d0 = d0.astimezone(utc)
         for d in range(num_days):
             date_label = sheet.cell(row=5 + d, column=2).value
             day = d + 1
             n = num_hours_in_day(month.year, month.month, day, localtimezone)
             for h in range(n):
                 production = sheet.cell(row=5 + d, column=3 + h).value
-                #print(production)
-                price = sheet.cell(row=5 + d, column=max_hours_in_day + 3 + h + 27 - 24).value
+                # print(production)
+                price = sheet.cell(
+                    row=5 + d, column=max_hours_in_day + 3 + h + 27 - 24
+                ).value
                 add_production(
                     production_in_kwh,
                     prices,
@@ -391,7 +391,7 @@ def process_excel_report(filename):
                     start_interval=d0,
                 )
                 d0 = d0 + timedelta(hours=1)
-                #if n == 25:
+                # if n == 25:
                 #    print(d0, ' -> %.2f' % price)
         res = {
             "factory_name": factory_name,

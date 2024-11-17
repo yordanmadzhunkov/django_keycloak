@@ -140,7 +140,7 @@ class ElectricityProductionFromExcelWithUserTestCases(APITestCase):
         self.assertEquals(factory_kneja["timezone"], "Europe/Sofia")
 
         self.assertEqual(ElectricityFactoryProduction.objects.count(), 0)
-        #print(factory_kneja["production_in_kwh"][38])
+        # print(factory_kneja["production_in_kwh"][38])
         response = self.client.post(
             reverse("production_api"),
             data=factory_kneja["production_in_kwh"],
@@ -148,17 +148,15 @@ class ElectricityProductionFromExcelWithUserTestCases(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(ElectricityFactoryProduction.objects.count(), 31 * 24 + 1)
-        ps = ElectricityFactoryProduction.objects.filter(factory=self.factory).order_by('start_interval')
-        self.assertEqual(ps[ 1*24 + 7  + 0].energy_in_kwh, Decimal('1.5'))
-        self.assertEqual(ps[26*24 + 25 + 0].energy_in_kwh, Decimal('0'))
-        self.assertEqual(ps[30*24 + 16 + 1].energy_in_kwh, Decimal('4'))
+        ps = ElectricityFactoryProduction.objects.filter(factory=self.factory).order_by(
+            "start_interval"
+        )
+        self.assertEqual(ps[1 * 24 + 7 + 0].energy_in_kwh, Decimal("1.5"))
+        self.assertEqual(ps[26 * 24 + 25 + 0].energy_in_kwh, Decimal("0"))
+        self.assertEqual(ps[30 * 24 + 16 + 1].energy_in_kwh, Decimal("4"))
 
-
-        #for i in range(24):
+        # for i in range(24):
         #    print(ps[24 + i])
-
-
-    
 
     def test_create_electricity_production_from_old_report_with_user(self):
         """
