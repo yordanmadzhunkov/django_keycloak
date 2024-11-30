@@ -8,11 +8,11 @@ def timestamp_to_datetime(timestamp):
     return datetime.fromtimestamp(timestamp, tz=timezone.utc)
 
 
-def str_to_datetime(str_dt):
+def str_to_datetime(str_dt:str) -> datetime:
     return datetime.strptime(str_dt, "%Y-%m-%dT%H:%M:%S%z")
 
 
-def datetime_to_str(date_time):
+def datetime_to_str(date_time:datetime) -> str:
     return date_time.strftime("%Y-%m-%dT%H:%M:%S%z")
 
 

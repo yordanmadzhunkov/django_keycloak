@@ -418,7 +418,7 @@ class ElectricityPlanForm(forms.Form):
             coerce=str,
         )
         self.fields["timezone"] = timezone
-        days = forms.IntegerField(max_value=30, min_value=1, required=True, initial=3)
+        days = forms.IntegerField(max_value=90, min_value=1, required=True, initial=3)
         self.fields["days"] = days
 
         show = Submit("show", _("Show"), css_class="btn btn-primary")
@@ -435,6 +435,49 @@ class ElectricityPlanForm(forms.Form):
                 css_class="form-row",
             ),
         )
+
+from datetime import datetime, timedelta
+
+class TimeWindowDaysForm(forms.Form):
+
+    days = forms.IntegerField(max_value=90, min_value=1, required=True, initial=7)    
+    start_date = forms.DateTimeField(
+        #input_formats=['%Y-%M-%D'],
+        widget=BootstrapDatePicker(
+                attrs={
+                    "class": "form-control col-md-12 mb-12",
+                    "title": "Date of transaction",
+                    "style": "width:18ch",
+                    "data-date-autoclose": "true",
+                    "data-date-clear-btn": "false",
+                    "data-date-today-btn": "linked",
+                    "data-date-today-highlight": "true",
+                }
+            ),
+    )
+
+    def get_start_date():
+        today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        return today - timedelta(days=90)
+
+    def __init__(
+        self, *args, **kwargs
+    ):
+        kwargs.update( initial = { 'start_date': TimeWindowDaysForm.get_start_date() } )
+
+        super(TimeWindowDaysForm, self).__init__(*args, **kwargs)
+        show = Submit("show", _("Show"), css_class="btn btn-primary")
+        show.field_classes = "btn btn-success"
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Row(
+                Column("start_date"),#, css_class="form-group col-md-6 mb-6"),
+                Column("days", css_class="form-group col-md-5 mb-5"),
+                show,
+                css_class="form-row",
+            ),
+        )
+
 
 
 class FactoryScheduleForm(forms.ModelForm):

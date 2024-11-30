@@ -86,6 +86,22 @@ class VeiPlatformAPI:
         else:
             return {"error": "response Status is not OK"}
 
+    def get_all_plans_in_zone(self, billing_zone):
+        response = requests.get(
+            self.endpoint_base_url + self.plans_url,
+            data={},
+            headers=self.headers,
+        )
+        if response.status_code == 200:
+            res = []
+            for plan in response.json():
+                if plan["billing_zone"] == billing_zone:
+                    res.append(plan)
+            return res
+        else:
+            return {"error": "response Status is not OK"}
+
+
     def create_plan(
         self, billing_zone, name, currency="EUR", electricity_unit="MWh"
     ) -> dict:
@@ -145,8 +161,8 @@ class VeiPlatformAPI:
         end_interval = end_interval + window_size
         return start_interval, end_interval
 
-    def get_server_values_in_timewindow(self, url, timestamps, params):
-        start_interval, end_interval = self.compute_time_windows(timestamps)
+    def get_server_values_in_timewindow(self, url, start_interval:datetime, end_interval:datetime, params):
+        #start_interval, end_interval = self.compute_time_windows(timestamps)
         params.update(self.time_params(start_interval, end_interval))
         response = requests.get(
             self.endpoint_base_url + url,
@@ -167,30 +183,34 @@ class VeiPlatformAPI:
             start_interval = timestamp_to_datetime(timestamps[i])
             end_interval = start_interval + timedelta(hours=1)
             data = initial_data.copy()
-            data.update(
-                {
-                    # slug_key: slug,
-                    value_key: str(Decimal(values[i]).quantize(Decimal("0.01"))),
-                }
-            )
-            data.update(self.time_params(start_interval, end_interval))
+            if values[i] is None:
+                print_yellow("None price for start_interval = %s" % str(start_interval))
+                continue
+            else:
+                data.update(
+                    {
+                        # slug_key: slug,
+                        value_key: str(Decimal(values[i]).quantize(Decimal("0.01"))),
+                    }
+                )
+                data.update(self.time_params(start_interval, end_interval))
 
-            while j < len(server_values):
-                s = str_to_datetime(server_values[j]["start_interval"])
-                if s < start_interval:
-                    j = j + 1
-                else:
-                    break
-
-            if j < len(server_values):
-                s = str_to_datetime(server_values[j]["start_interval"])
-                if s == start_interval:
-                    if data[value_key] == server_values[j][value_key]:
-                        matched_prices.append(data)
+                while j < len(server_values):
+                    s = str_to_datetime(server_values[j]["start_interval"])
+                    if s < start_interval:
+                        j = j + 1
                     else:
-                        wrong_price.append(data)
-                    j = j + 1
-                    continue
+                        break
+
+                if j < len(server_values):
+                    s = str_to_datetime(server_values[j]["start_interval"])
+                    if s == start_interval:
+                        if data[value_key] == server_values[j][value_key]:
+                            matched_prices.append(data)
+                        else:
+                            wrong_price.append(data)
+                        j = j + 1
+                        continue
 
             new_prices_to_post.append(data)
 
@@ -241,8 +261,10 @@ class VeiPlatformAPI:
         time_slot_in_unix = prices["unix_seconds"]
         plan_slug = plan_info["slug"]
         res = {}
+        start_interval, end_interval = self.compute_time_windows(time_slot_in_unix)
+
         server_prices = self.get_server_values_in_timewindow(
-            self.prices_url, time_slot_in_unix, params={"plan": plan_info["slug"]}
+            self.prices_url, start_interval, end_interval, params={"plan": plan_info["slug"]}
         )
         if server_prices is None:
             res["error"] = "failed to get server prices for comparisons"
@@ -281,6 +303,7 @@ class VeiPlatformAPI:
             else:
                 res["error"] = "failed to create bulk data"
         return res
+
 
     def prepare_and_post_prices(self, scriper, zone, prices):
         billing_zone_info = self.check_billing_zone(zone)
@@ -327,13 +350,15 @@ class VeiPlatformAPI:
                     return factory_slug
         return None
 
-    def prepare_and_post_production(self, scriper, factory_name, production):
+    def prepare_and_post_production(self, factory_name, production):
         factory_slug = self.find_factory_slug(factory_name)
         if factory_slug:
             timestamps = production["unix_seconds"]
             volume_in_kwh = production["volume_in_kwh"]
+            start_interval, end_interval = self.compute_time_windows(timestamps)
+
             server_values = self.get_server_values_in_timewindow(
-                self.production_url, timestamps, params={"factory": factory_slug}
+                self.production_url, start_interval, end_interval, params={"factory": factory_slug}
             )
             new, matched, different = self.compute_ovelaping_prices(
                 {"factory": factory_slug},

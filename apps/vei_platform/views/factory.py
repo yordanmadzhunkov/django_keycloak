@@ -14,7 +14,7 @@ from vei_platform.models.production import (
 )
 from vei_platform.models.schedule import MinPriceCriteria, ElectricityFactorySchedule
 
-from vei_platform.models.electricity_price import ElectricityPrice
+from vei_platform.models.electricity_price import ElectricityPrice, ElectricityPricePlan
 
 from vei_platform.models.profile import get_user_profile
 from vei_platform.forms import (
@@ -22,6 +22,7 @@ from vei_platform.forms import (
     ElectricityFactoryComponentsForm,
     FactoryScheduleForm,
     UploadFileForm,
+    TimeWindowDaysForm,
 )
 
 from django.shortcuts import render, redirect
@@ -265,19 +266,30 @@ class FactoryCreate(CreateView):
 
 class FactoryProduction(View):
     def get(self, request, pk=None, *args, **kwargs):
+        context, factory = self.get_common_context_and_factory(request, pk)
+        time_window_form = TimeWindowDaysForm(
+            prefix='time_window'
+        )
+        context['time_window_form'] = time_window_form
+        self.add_production_reports(request, context, factory)
+        return render(request, "factory_production.html", context)
+
+    def get_common_context_and_factory(self, request, pk):
         context = common_context(request)
         factory = ElectricityFactory.objects.get(pk=pk)
         context["factory"] = factory
         components = ElectricityFactoryComponents.objects.filter(factory=factory)
         context["components"] = components
+        return context,factory
+
+    def add_production_reports(self, request, context, factory):
         if factory.manager is None:
             context["manager"] = None
         else:
             context["manager_profile"] = get_user_profile(factory.manager)
             if factory.manager == request.user:
-                context["upload_form"] = UploadFileForm()
+                context["upload_form"] = UploadFileForm(prefix='upload_report')
                 context["reports"] = self.get_production_reports(factory)
-        return render(request, "factory_production.html", context)
 
     def get_production_reports(self, factory):
         res = []
@@ -312,11 +324,8 @@ class FactoryProduction(View):
         return excel_report
 
     def post(self, request, pk=None, *args, **kwargs):
-        # context = common_context(request)
-        # print(request.FILES)
-        # print(request.POST)
         if "upload" in request.POST:
-            form = UploadFileForm(request.POST, request.FILES)
+            form = UploadFileForm(request.POST, request.FILES, prefix='upload_report')
             if form.is_valid():
                 for f in form.cleaned_data["files"]:
                     excel_report = self.create_excel_report(
@@ -334,6 +343,7 @@ class FactoryProduction(View):
                             self.update_production_of_factory(
                                 request, excel_report, factory_res
                             )
+                            self.update_prices_of_plan(request, factory_res["prices"])
                     else:
                         messages.error(
                             request,
@@ -341,6 +351,19 @@ class FactoryProduction(View):
                         )
             else:
                 messages.error(request, form.errors.as_text())
+        if "show" in request.POST:
+            context, factory = self.get_common_context_and_factory(request, pk)
+            form = TimeWindowDaysForm(request.POST, request.FILES, prefix='time_window')
+            if form.is_valid():
+                context['start_date'] = form.cleaned_data['start_date']
+                context['num_days'] = form.cleaned_data['days']
+            else:
+                messages.error(request, form.errors.as_text())
+            context['time_window_form'] = form
+            self.add_production_reports(request, context, factory)
+            return render(request, "factory_production.html", context)
+
+
         return self.get(request, pk, args, kwargs)
 
     def update_production_of_factory(self, request, excel_report, factory_res):
@@ -419,6 +442,54 @@ class FactoryProduction(View):
                             matched_production,
                         ),
                     )
+
+    def update_prices_of_plan(self, request, prices):
+        if len(prices) == 0:
+            return
+        try:
+            plan = ElectricityPricePlan.objects.get(slug=prices[0]["plan"])
+            # print(plan)
+            plan_prices = ElectricityPrice.objects.filter(plan=plan)
+            num_created = 0
+            num_matched = 0
+            num_updated = 0
+            currency = plan.currency
+            print(plan, " -> ", currency)
+            for price in prices:
+                start_interval = datetime.strptime(
+                    price["start_interval"], "%Y-%m-%dT%H:%M:%S%z"
+                )
+                end_interval = datetime.strptime(
+                    price["end_interval"], "%Y-%m-%dT%H:%M:%S%z"
+                )
+                p = Money(price["price"], currency)
+                try:
+                    print('start_interval', start_interval)
+                    price_in_db = plan_prices.get(start_interval=start_interval)
+                    print(price_in_db.price, " vs ", p, "diff", price_in_db.price - p)
+                    if p == price_in_db.price:
+                        num_matched += 1
+                    else:
+                        num_updated += 1
+                except ElectricityPrice.DoesNotExist:
+                    print("Does not exist %s -> %s" % (price["start_interval"], str(p)))
+                    # new_price = ElectricityPrice.objects.create(
+                    #            plan=plan,
+                    #            start_interval=start_interval,
+                    #            end_interval=end_interval,
+                    #            price=Money(price['price'], currency),
+                    # )
+                    # new_price.save()
+                    num_created += 1
+        except ElectricityPricePlan.DoesNotExist:
+            pass
+        # if prices[0]['plan']
+        # print(prices[:10])
+        messages.success(
+            request,
+            "Prices in this file %d, matched=%d, created=%d, updated=%d"
+            % (len(prices), num_matched, num_created, num_updated),
+        )
 
 
 class FactoryScheduleView(FormView):
@@ -590,13 +661,42 @@ from django.http import JsonResponse
 
 
 class FactoryProductionChart(View):
+
+    def get_start_date(self, request, num_days, factory: ElectricityFactory):
+        start_date = request.GET.get("start_date")
+        if start_date is None:
+            start_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            start_date = start_date - timedelta(days=num_days)
+        else:
+            start_date = datetime.strptime(start_date, "%Y-%m-%dT%H:%M:%S 00:00")#datetime.fromisoformat(start_date)
+        start_date = start_date.replace(tzinfo=None)
+        tz = factory.get_pytz_timezone()
+        start_date = tz.localize(start_date)
+        start_date = start_date.astimezone(pytz.timezone("UTC"))
+        return start_date
+    
+    def get_num_days(self, request):
+        num_days = request.GET.get("num_days")
+        if num_days is None:
+            num_days = 5
+        else:
+            num_days = int(num_days)
+        return num_days
+
+        
+
     def get(self, request, *args, **kwargs):
         factory_slug = request.GET.get("factory")
         factory = get_object_or_404(ElectricityFactory, slug=factory_slug)
-        num_days = 10
-        production = ElectricityFactoryProduction.objects.filter(
-            factory=factory
-        ).order_by("-start_interval")[: 24 * num_days]
+        num_days = self.get_num_days(request)
+        start_date = self.get_start_date(request, num_days, factory)
+        end_date = start_date + timedelta(days=num_days)
+        #print("Start date = ", start_date, "end date = ", end_date, "num days = ", num_days)
+        #print("Factory = ", factory)
+        production = ElectricityFactoryProduction.objects.filter(factory=factory)
+        production = production.filter(start_interval__gte=start_date)
+        production = production.filter(start_interval__lt=end_date)
+        production = production.order_by("-start_interval")[: 24 * num_days]
         x = []
         y1 = []
         y2 = []

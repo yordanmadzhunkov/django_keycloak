@@ -7,12 +7,12 @@ from vei_platform.models.production import ElectricityFactoryProduction
 from vei_platform.models.production import process_excel_report
 from vei_platform.models.legal import LegalEntity
 from vei_platform.models.electricity_price import (
+    ElectricityPrice,
     ElectricityPricePlan,
     ElectricityBillingZone,
 )
-from datetime import date
+from datetime import date, datetime, timezone
 from decimal import Decimal
-
 
 import os
 
@@ -34,9 +34,9 @@ class ElectricityProductionFromExcelWithUserTestCases(APITestCase):
         self.billing_zone_object = ElectricityBillingZone.objects.filter(code="BG")[0]
         self.plan = ElectricityPricePlan.objects.create(
             name="Day ahead price pac",
-            electricity_unit="kWh",
+            electricity_unit="MWh",
             billing_zone=self.billing_zone_object,
-            currency="EUR",
+            currency="BGN",
             owner=self.user,
         )
         self.plan.save()
@@ -61,6 +61,12 @@ class ElectricityProductionFromExcelWithUserTestCases(APITestCase):
         self.user.delete()
         self.factory.delete()
         self.legal_entity.delete()
+
+    def checkTime(self, year, month, day, hour, minute, resp):
+        self.assertEqual(
+            datetime(year, month, day, hour, minute, 00, tzinfo=timezone.utc),
+            datetime.strptime(resp, "%Y-%m-%dT%H:%M:%S%z"),
+        )
 
     def check_processed_report_keys(self, factories_from_excel):
         for factory in factories_from_excel:
@@ -196,5 +202,68 @@ class ElectricityProductionFromExcelWithUserTestCases(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(ElectricityFactoryProduction.objects.count(), 31 * 24 - 1)
+        self.assertEqual(
+            ElectricityPrice.objects.filter(plan=self.factory.plan).count(), 0
+        )
+        response = self.client.post(
+            reverse("prices"),
+            data=factory_kneja["prices"],
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertGreaterEqual(len(response.data), 31 * 24 - 1)
+        self.assertEqual(response.data[0]["plan"], self.factory.plan.slug)
+        self.assertEqual(response.data[1]["plan"], self.factory.plan.slug)
+        self.assertEqual(response.data[2]["plan"], self.factory.plan.slug)
 
-        # print(factories_from_excel)
+        # self.assertEqual(response.data[0]["price"], "60.90") # EUR
+        # self.assertEqual(response.data[1]["price"], "62.04") # EUR
+        # self.assertEqual(response.data[2]["price"], "61.42") # EUR
+
+        # self.assertEqual(response.data[0+30*24]["price"], "65.74") # 128.58 BGN
+        # self.assertEqual(response.data[1+30*24]["price"], "60.47") # 118.27 BGN
+        # self.assertEqual(response.data[2+30*24]["price"], "48.50") #  94.86 BGN
+        # self.assertEqual(response.data[3+30*24]["price"], "31.17") #  60.96 BGN
+        # self.assertEqual(response.data[4+30*24]["price"], "32.31") #  63.19 BGN
+        # self.assertEqual(response.data[5+30*24]["price"], "40.50") #  79.21 BGN
+        # self.assertEqual(response.data[6+30*24]["price"], "30.33") #  59.32 BGN
+        # self.assertEqual(response.data[7+30*24]["price"], "32.66") #  63.88 BGN
+
+        self.assertEqual(response.data[0 + 30 * 24]["price"], "128.58")
+        self.assertEqual(response.data[1 + 30 * 24]["price"], "118.27")
+        self.assertEqual(response.data[2 + 30 * 24]["price"], "94.86")
+        self.assertEqual(response.data[3 + 30 * 24]["price"], "60.96")
+        self.assertEqual(response.data[4 + 30 * 24]["price"], "63.19")
+        self.assertEqual(response.data[5 + 30 * 24]["price"], "79.21")
+        self.assertEqual(response.data[6 + 30 * 24]["price"], "59.32")
+        self.assertEqual(response.data[7 + 30 * 24]["price"], "63.88")
+
+        self.checkTime(2024, 2, 29, 22, 00, response.data[0]["start_interval"])
+        self.checkTime(2024, 2, 29, 23, 00, response.data[1]["start_interval"])
+        self.checkTime(2024, 3, 1, 00, 00, response.data[2]["start_interval"])
+
+        self.checkTime(
+            2024, 3, 30, 22, 00, response.data[0 + 30 * 24]["start_interval"]
+        )
+        self.checkTime(
+            2024, 3, 30, 23, 00, response.data[1 + 30 * 24]["start_interval"]
+        )
+        self.checkTime(
+            2024, 3, 31, 00, 00, response.data[2 + 30 * 24]["start_interval"]
+        )
+        self.checkTime(2024, 3, 31, 1, 00, response.data[3 + 30 * 24]["start_interval"])
+        self.checkTime(2024, 3, 31, 2, 00, response.data[4 + 30 * 24]["start_interval"])
+        self.checkTime(2024, 3, 31, 3, 00, response.data[5 + 30 * 24]["start_interval"])
+        self.checkTime(2024, 3, 31, 4, 00, response.data[6 + 30 * 24]["start_interval"])
+        self.checkTime(2024, 3, 31, 5, 00, response.data[7 + 30 * 24]["start_interval"])
+        self.checkTime(
+            2024, 3, 31, 20, 00, response.data[22 + 30 * 24]["start_interval"]
+        )
+
+        self.checkTime(2024, 2, 29, 23, 00, response.data[0]["end_interval"])
+        self.checkTime(2024, 3, 1, 00, 00, response.data[1]["end_interval"])
+        self.checkTime(2024, 3, 1, 1, 00, response.data[2]["end_interval"])
+
+        self.assertEqual(
+            ElectricityPrice.objects.filter(plan=self.factory.plan).count(), 31 * 24 - 1
+        )

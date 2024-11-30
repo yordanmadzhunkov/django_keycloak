@@ -12,16 +12,34 @@
     {% include "snippets/factory_card.html"%}
   </div>
 </section>
+
 <section>
   <div class="row justify-content-center mb-3">
+    {% crispy time_window_form %}
+  </div>
+  <div class="row justify-content-center mb-3">
     <div id="container" style="width: 90%;">
+      {{ start_date }}
+      {{ num_days }}
       <canvas id="energy-production-chart"
-        data-url="{% url 'factory_production_chart' %}?factory={{ factory.slug | urlencode}}">
+        data-url="{% url 'factory_production_chart' %}?factory={{ factory.slug | urlencode}}&num_days={{num_days | stringformat:'i'}}&start_date={{start_date | date:'c'}}">
+      </canvas>
+
+
+
+      {% with start_date=start_date|urlencode %}
+      {% with factory=factory.slug|urlencode %}
+      {% url 'factory_production_chart' factory=factory start_date=start_date num_days=num_days as final_url %}
+      {% endwith %}
+      {% endwith %}
+      {{final_url}}
+      <canvas id="energy-production-chart" data-url="{{final_url}}">
       </canvas>
     </div>
   </div>
+  {% include "snippets/energy_production_chart.html" %}
 </section>
-{% include "snippets/energy_production_chart.html" %}
+
 
 <section style="background-color: #eee;">
   <div class="container py-5">

@@ -75,7 +75,7 @@ class ElectricityPriceChart(View):
             num_days = 1
         else:
             num_days = int(num_days)
-            if num_days < 1 or num_days > 30:
+            if num_days < 1 or num_days > 90:
                 num_days = 1
 
         prices = ElectricityPrice.objects.filter(plan=plan).order_by("-start_interval")[

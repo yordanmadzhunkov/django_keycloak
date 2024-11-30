@@ -149,13 +149,13 @@ class ElectricityFactory(TimeStampMixin):
             self.slug = unique_slug_generator(self)  # Handle Unicode characters
         super().save(*args, **kwargs)
 
-    def get_requested_timezone(self):
+    def get_requested_timezone(self) -> str:
         requested_timezone = self.timezone
         if requested_timezone is None:
             requested_timezone = "UTC"
         return requested_timezone
 
-    def get_pytz_timezone(self):
+    def get_pytz_timezone(self) -> pytz.timezone:
         requested_timezone = self.timezone
         if requested_timezone is None:
             requested_timezone = "UTC"

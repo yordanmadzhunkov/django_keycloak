@@ -1,9 +1,14 @@
 from django.db import models
 from datetime import datetime, timezone
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from .factory import ElectricityFactory
 from .restricted_file_field import RestrictedFileField
 from django.contrib.auth.models import User
+from djmoney.models.fields import Decimal, MoneyField
+from djmoney.money import Money
+from djmoney.contrib.exchange.models import convert_money
+
+from .electricity_price import ElectricityPricePlan, ElectricityPrice
 
 
 class ElectricityFactoryProduction(models.Model):
@@ -155,6 +160,7 @@ def add_production(
     production_in_kwh,
     prices,
     factory_slug,
+    plan_slug,
     production_in_mwh,
     price,
     start_interval: datetime,
@@ -182,14 +188,36 @@ def add_production(
             "end_interval": end_str,
         }
     )
+
     prices.append(
         {
-            "factory": factory_slug,
+            "plan": plan_slug,
             "price": price_decimal,
             "start_interval": start_str,
             "end_interval": end_str,
         }
     )
+
+
+from djmoney.contrib.exchange.exceptions import MissingRate
+
+
+def convert_to_correct_currency(price, currency, plan_currency=None):
+    if plan_currency is None:
+        return price
+    # price = Decimal(str(sheet.cell(row=3 + r, column=2).value))
+    try:
+        p0 = Money(price, currency)
+        p1 = convert_money(p0, plan_currency)
+        res = p1.amount.quantize(Decimal(".01"), rounding=ROUND_HALF_UP)
+        # print(p0, " -> ", p1, ' ', res)
+        return res
+    except MissingRate:
+        # print(p0, ' ->', p1)
+        if "BGN" == currency and plan_currency == "EUR":
+            price = price * Decimal("0.51129188")
+            price = price.quantize(Decimal(".01"), rounding=ROUND_HALF_UP)
+            return price
 
 
 def extract_factory_production(sheet, h, timezone_label, currency, unit):
@@ -213,6 +241,14 @@ def extract_factory_production(sheet, h, timezone_label, currency, unit):
         factory_slug = f.slug if f is not None else None
         factory_name = f.name if f is not None else None
         factory_id = f.factory_code if f is not None else search_text.split(" ")[0]
+        plan_slug = f.plan.slug if f is not None else None
+        plan_currency = None
+        if plan_slug:
+            try:
+                plan = ElectricityPricePlan.objects.get(slug=plan_slug)
+                plan_currency = plan.currency
+            except ElectricityPricePlan.DoesNotExist:
+                pass
 
         for r in range(4 * 24 * 31 + 10):
             start = sheet.cell(row=3 + r, column=1).value
@@ -223,6 +259,7 @@ def extract_factory_production(sheet, h, timezone_label, currency, unit):
                     production_in_kwh,
                     prices,
                     factory_slug,
+                    plan_slug,
                     total_prod,
                     price,
                     start_interval=start_interval,
@@ -237,6 +274,7 @@ def extract_factory_production(sheet, h, timezone_label, currency, unit):
 
             # start inteval check
             price = Decimal(str(sheet.cell(row=3 + r, column=2).value))
+            price = convert_to_correct_currency(price, currency, plan_currency)
             prod = Decimal(str(sheet.cell(row=3 + r, column=4 + 2 * h + 0).value))
 
             if start_interval is None:
@@ -263,7 +301,7 @@ def extract_factory_production(sheet, h, timezone_label, currency, unit):
         "year": report_period_start.year,
         "production_in_kwh": production_in_kwh,
         "prices": prices,
-        "currency": currency,
+        "currency": currency if plan_currency is None else plan_currency,
         "errors": errors,
     }
     return res
@@ -335,6 +373,7 @@ def process_excel_report(filename):
             continue
 
         expected_price_label = "Цена\nЛева/МВтч"
+        currency = "BGN"
         max_hours_in_day = 0
         for c in range(12):
             if sheet.cell(row=4, column=2 + 27 + c).value == expected_price_label:
@@ -349,10 +388,13 @@ def process_excel_report(filename):
         if factory_object:
             factory_slug = factory_object.slug
             timezone_label = factory_object.get_requested_timezone()
+            plan_slug = factory_object.plan.slug
+            plan_currency = factory_object.plan.currency
         else:
             errors.append(_("Factory with name `%s` not found") % factory_name)
             factory_slug = None
             timezone_label = "EET"
+            plan_slug = None
 
         localtimezone = timezone(timezone_label)
 
@@ -382,10 +424,12 @@ def process_excel_report(filename):
                 price = sheet.cell(
                     row=5 + d, column=max_hours_in_day + 3 + h + 27 - 24
                 ).value
+                price = convert_to_correct_currency(price, currency, plan_currency)
                 add_production(
                     production_in_kwh,
                     prices,
                     factory_slug,
+                    plan_slug,
                     production,
                     price,
                     start_interval=d0,
