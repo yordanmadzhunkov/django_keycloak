@@ -101,7 +101,6 @@ class VeiPlatformAPI:
         else:
             return {"error": "response Status is not OK"}
 
-
     def create_plan(
         self, billing_zone, name, currency="EUR", electricity_unit="MWh"
     ) -> dict:
@@ -161,8 +160,10 @@ class VeiPlatformAPI:
         end_interval = end_interval + window_size
         return start_interval, end_interval
 
-    def get_server_values_in_timewindow(self, url, start_interval:datetime, end_interval:datetime, params):
-        #start_interval, end_interval = self.compute_time_windows(timestamps)
+    def get_server_values_in_timewindow(
+        self, url, start_interval: datetime, end_interval: datetime, params
+    ):
+        # start_interval, end_interval = self.compute_time_windows(timestamps)
         params.update(self.time_params(start_interval, end_interval))
         response = requests.get(
             self.endpoint_base_url + url,
@@ -264,7 +265,10 @@ class VeiPlatformAPI:
         start_interval, end_interval = self.compute_time_windows(time_slot_in_unix)
 
         server_prices = self.get_server_values_in_timewindow(
-            self.prices_url, start_interval, end_interval, params={"plan": plan_info["slug"]}
+            self.prices_url,
+            start_interval,
+            end_interval,
+            params={"plan": plan_info["slug"]},
         )
         if server_prices is None:
             res["error"] = "failed to get server prices for comparisons"
@@ -303,7 +307,6 @@ class VeiPlatformAPI:
             else:
                 res["error"] = "failed to create bulk data"
         return res
-
 
     def prepare_and_post_prices(self, scriper, zone, prices):
         billing_zone_info = self.check_billing_zone(zone)
@@ -358,7 +361,10 @@ class VeiPlatformAPI:
             start_interval, end_interval = self.compute_time_windows(timestamps)
 
             server_values = self.get_server_values_in_timewindow(
-                self.production_url, start_interval, end_interval, params={"factory": factory_slug}
+                self.production_url,
+                start_interval,
+                end_interval,
+                params={"factory": factory_slug},
             )
             new, matched, different = self.compute_ovelaping_prices(
                 {"factory": factory_slug},

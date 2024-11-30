@@ -267,10 +267,8 @@ class FactoryCreate(CreateView):
 class FactoryProduction(View):
     def get(self, request, pk=None, *args, **kwargs):
         context, factory = self.get_common_context_and_factory(request, pk)
-        time_window_form = TimeWindowDaysForm(
-            prefix='time_window'
-        )
-        context['time_window_form'] = time_window_form
+        time_window_form = TimeWindowDaysForm(prefix="time_window")
+        context["time_window_form"] = time_window_form
         self.add_production_reports(request, context, factory)
         return render(request, "factory_production.html", context)
 
@@ -280,7 +278,7 @@ class FactoryProduction(View):
         context["factory"] = factory
         components = ElectricityFactoryComponents.objects.filter(factory=factory)
         context["components"] = components
-        return context,factory
+        return context, factory
 
     def add_production_reports(self, request, context, factory):
         if factory.manager is None:
@@ -288,7 +286,7 @@ class FactoryProduction(View):
         else:
             context["manager_profile"] = get_user_profile(factory.manager)
             if factory.manager == request.user:
-                context["upload_form"] = UploadFileForm(prefix='upload_report')
+                context["upload_form"] = UploadFileForm(prefix="upload_report")
                 context["reports"] = self.get_production_reports(factory)
 
     def get_production_reports(self, factory):
@@ -325,7 +323,7 @@ class FactoryProduction(View):
 
     def post(self, request, pk=None, *args, **kwargs):
         if "upload" in request.POST:
-            form = UploadFileForm(request.POST, request.FILES, prefix='upload_report')
+            form = UploadFileForm(request.POST, request.FILES, prefix="upload_report")
             if form.is_valid():
                 for f in form.cleaned_data["files"]:
                     excel_report = self.create_excel_report(
@@ -353,16 +351,15 @@ class FactoryProduction(View):
                 messages.error(request, form.errors.as_text())
         if "show" in request.POST:
             context, factory = self.get_common_context_and_factory(request, pk)
-            form = TimeWindowDaysForm(request.POST, request.FILES, prefix='time_window')
+            form = TimeWindowDaysForm(request.POST, request.FILES, prefix="time_window")
             if form.is_valid():
-                context['start_date'] = form.cleaned_data['start_date']
-                context['num_days'] = form.cleaned_data['days']
+                context["start_date"] = form.cleaned_data["start_date"]
+                context["num_days"] = form.cleaned_data["days"]
             else:
                 messages.error(request, form.errors.as_text())
-            context['time_window_form'] = form
+            context["time_window_form"] = form
             self.add_production_reports(request, context, factory)
             return render(request, "factory_production.html", context)
-
 
         return self.get(request, pk, args, kwargs)
 
@@ -464,7 +461,7 @@ class FactoryProduction(View):
                 )
                 p = Money(price["price"], currency)
                 try:
-                    print('start_interval', start_interval)
+                    print("start_interval", start_interval)
                     price_in_db = plan_prices.get(start_interval=start_interval)
                     print(price_in_db.price, " vs ", p, "diff", price_in_db.price - p)
                     if p == price_in_db.price:
@@ -665,16 +662,20 @@ class FactoryProductionChart(View):
     def get_start_date(self, request, num_days, factory: ElectricityFactory):
         start_date = request.GET.get("start_date")
         if start_date is None:
-            start_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            start_date = datetime.now().replace(
+                hour=0, minute=0, second=0, microsecond=0
+            )
             start_date = start_date - timedelta(days=num_days)
         else:
-            start_date = datetime.strptime(start_date, "%Y-%m-%dT%H:%M:%S 00:00")#datetime.fromisoformat(start_date)
+            start_date = datetime.strptime(
+                start_date, "%Y-%m-%dT%H:%M:%S 00:00"
+            )  # datetime.fromisoformat(start_date)
         start_date = start_date.replace(tzinfo=None)
         tz = factory.get_pytz_timezone()
         start_date = tz.localize(start_date)
         start_date = start_date.astimezone(pytz.timezone("UTC"))
         return start_date
-    
+
     def get_num_days(self, request):
         num_days = request.GET.get("num_days")
         if num_days is None:
@@ -683,16 +684,14 @@ class FactoryProductionChart(View):
             num_days = int(num_days)
         return num_days
 
-        
-
     def get(self, request, *args, **kwargs):
         factory_slug = request.GET.get("factory")
         factory = get_object_or_404(ElectricityFactory, slug=factory_slug)
         num_days = self.get_num_days(request)
         start_date = self.get_start_date(request, num_days, factory)
         end_date = start_date + timedelta(days=num_days)
-        #print("Start date = ", start_date, "end date = ", end_date, "num days = ", num_days)
-        #print("Factory = ", factory)
+        # print("Start date = ", start_date, "end date = ", end_date, "num days = ", num_days)
+        # print("Factory = ", factory)
         production = ElectricityFactoryProduction.objects.filter(factory=factory)
         production = production.filter(start_interval__gte=start_date)
         production = production.filter(start_interval__lt=end_date)

@@ -80,7 +80,9 @@ class EnergyChartsAPI:
                 table.add_row([p, paths[p]["get"]["summary"]])
             print(table)
 
-    def fetch_prices_day_ahead(self, billing_zone="BG", start: datetime = None, end: datetime = None):
+    def fetch_prices_day_ahead(
+        self, billing_zone="BG", start: datetime = None, end: datetime = None
+    ):
         params = {
             "bzn": billing_zone,
         }
@@ -100,7 +102,7 @@ class EnergyChartsAPI:
         #    "deprecated": bool
         # }'
         prices = requests.get(self.base_url + "/price", params)
-        #print(params)
+        # print(params)
         if prices.status_code == 200:
             return prices.json()
         return None
@@ -115,8 +117,10 @@ class EnergyChartsAPI:
     def process(self, target_list, start: datetime = None, end: datetime = None):
         for zone in self.billing_zones.keys():
             self.process_zone(zone, target_list, start, end)
-    
-    def process_zone(self, zone, target_list, start: datetime = None, end: datetime = None):
+
+    def process_zone(
+        self, zone, target_list, start: datetime = None, end: datetime = None
+    ):
         prices_response = self.fetch_prices_day_ahead(zone, start, end)
         if prices_response:
             for target in target_list:
@@ -124,7 +128,6 @@ class EnergyChartsAPI:
         else:
             print("Fail to fetch zone = " + zone)
 
-    
     def process_prices_response(self, zone, prices_response, target):
         try:
             if isinstance(target, dict):
@@ -140,37 +143,41 @@ class EnergyChartsAPI:
                 "Exception %s when processing Target %s token=%.4s.."
                 % (message, target["url"], target["token"])
             )
-            #raise e
+            # raise e
 
-
-    def process_historical(self, target_list, months = 12):
+    def process_historical(self, target_list, months=12):
         for target in target_list:
             vei_platform = VeiPlatformAPI(target["url"], token=target["token"])
             for zone in self.billing_zones.keys():
                 plans = vei_platform.get_all_plans_in_zone(billing_zone=zone)
                 my_plan_name = self.get_plan_name(zone_name=self.billing_zones[zone])
                 for plan in plans:
-                    if plan['owner'] == 'energy_bot' and plan['name'] == my_plan_name:
+                    if plan["owner"] == "energy_bot" and plan["name"] == my_plan_name:
                         self.process_historical_for_plan(vei_platform, plan, months)
 
-    def check_for_missing_prices(self, 
-                                 vei_platform: VeiPlatformAPI, 
-                                 plan: dict, 
-                                 start_interval:datetime, 
-                                 end_interval:datetime) -> bool:
-        delta = end_interval-start_interval
+    def check_for_missing_prices(
+        self,
+        vei_platform: VeiPlatformAPI,
+        plan: dict,
+        start_interval: datetime,
+        end_interval: datetime,
+    ) -> bool:
+        delta = end_interval - start_interval
         total_hours = int(delta.total_seconds() // 3600)
         if total_hours == 0:
             return False
         server_prices = vei_platform.get_server_values_in_timewindow(
-            vei_platform.prices_url, start_interval, end_interval, params={"plan": plan["slug"]}
+            vei_platform.prices_url,
+            start_interval,
+            end_interval,
+            params={"plan": plan["slug"]},
         )
         has_missing = total_hours > len(server_prices)
         return has_missing
 
-    def begining_of_month(self, date_in_month: datetime)-> datetime:
-        return date_in_month.replace(day=1, hour=0, minute=0, second = 0, microsecond=0)
-    
+    def begining_of_month(self, date_in_month: datetime) -> datetime:
+        return date_in_month.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
     def previous_month(self, start_of_month: datetime) -> datetime:
         month = start_of_month.month
         year = start_of_month.year
@@ -179,19 +186,28 @@ class EnergyChartsAPI:
         else:
             year -= 1
             month = 12
-        return start_of_month.replace(year=year, month=month, day=1, hour=0, minute=0, second = 0, microsecond=0)
+        return start_of_month.replace(
+            year=year, month=month, day=1, hour=0, minute=0, second=0, microsecond=0
+        )
 
-
-    def process_historical_for_plan(self, vei_platform: VeiPlatformAPI, plan, months: int):
-        zone = plan['billing_zone']
+    def process_historical_for_plan(
+        self, vei_platform: VeiPlatformAPI, plan, months: int
+    ):
+        zone = plan["billing_zone"]
         # Current month
-        end_interval = datetime.now(tz=timezone.utc).replace(hour=0, minute=0, second = 0, microsecond=0)
+        end_interval = datetime.now(tz=timezone.utc).replace(
+            hour=0, minute=0, second=0, microsecond=0
+        )
         start_interval = self.begining_of_month(end_interval)
-        if self.check_for_missing_prices(vei_platform, plan, start_interval, end_interval):
-            self.process_zone(zone, [vei_platform], start_interval, end_interval)        
+        if self.check_for_missing_prices(
+            vei_platform, plan, start_interval, end_interval
+        ):
+            self.process_zone(zone, [vei_platform], start_interval, end_interval)
 
         for m in range(months):
             end_interval = start_interval
             start_interval = self.previous_month(end_interval)
-            if self.check_for_missing_prices(vei_platform, plan, start_interval, end_interval):
+            if self.check_for_missing_prices(
+                vei_platform, plan, start_interval, end_interval
+            ):
                 self.process_zone(zone, [vei_platform], start_interval, end_interval)
