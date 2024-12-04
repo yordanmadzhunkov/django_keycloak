@@ -38,6 +38,13 @@ class ElectricityFactoryProduction(models.Model):
         max_digits=14, decimal_places=2, default=Decimal(0)
     )
 
+    reported_price_per_mwh = MoneyField(max_digits=14, 
+                                        decimal_places=2, 
+                                        default_currency="BGN", 
+                                        default=None, 
+                                        blank=True, 
+                                        null=True)
+            
     def __str__(self) -> str:
         return "%s %s kWh" % (
             self.start_interval.strftime("%y-%m-%d %H:%M %Z"),
@@ -184,6 +191,8 @@ def add_production(
         {
             "factory": factory_slug,
             "energy_in_kwh": energy_in_kwh,
+            "reported_price_per_mwh": price_decimal,
+            "reported_price_per_mwh_currency": "BGN",
             "start_interval": start_str,
             "end_interval": end_str,
         }

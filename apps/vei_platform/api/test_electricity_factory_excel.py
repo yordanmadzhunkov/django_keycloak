@@ -286,6 +286,10 @@ class ElectricityProductionFromExcelWithUserTestCases(APITestCase):
             ElectricityPrice.objects.filter(plan=self.factory.plan).count(), 31 * 24 - 1
         )
 
+    def check_production(self, response, day, hour, value: str):
+        self.assertEqual(Decimal(response.data[hour + day * 24]["energy_in_kwh"]), Decimal(value))
+
+
 
     def test_create_electricity_production_from_report_may_with_user(self):
         """
@@ -320,9 +324,34 @@ class ElectricityProductionFromExcelWithUserTestCases(APITestCase):
         self.assertEqual(ElectricityFactoryProduction.objects.count(), 0)
         response = self.client.post(
             reverse("production_api"),
-            data=factory_kneja["production_in_kwh"],
+            data=factory_obnova["production_in_kwh"],
             format="json",
         )
+        self.check_production(response, 2, 0, '0')
+        self.check_production(response, 2, 1, '0')
+        self.check_production(response, 2, 2, '0')
+        self.check_production(response, 2, 3, '0')
+        self.check_production(response, 2, 4, '0')
+        self.check_production(response, 2, 5, '0')
+        self.check_production(response, 2, 6, '0.5')
+        self.check_production(response, 2, 7, '7.5')
+        self.check_production(response, 2, 8, '35.0')
+        self.check_production(response, 2, 9, '34.0')
+        self.check_production(response, 2, 10, '22.25')
+        self.check_production(response, 2, 11, '9.75')
+        self.check_production(response, 2, 12, '16.5')
+        self.check_production(response, 2, 13, '34.0')
+        self.check_production(response, 2, 14, '27.0')
+        self.check_production(response, 2, 15, '21.25')
+        self.check_production(response, 2, 16, '32.5')
+        self.check_production(response, 2, 17, '11.0')
+        self.check_production(response, 2, 18, '13.0')
+        self.check_production(response, 2, 19, '5.75')
+        self.check_production(response, 2, 20, '0')
+        self.check_production(response, 2, 21, '0')
+        self.check_production(response, 2, 22, '0')
+        self.check_production(response, 2, 23, '0')
+        
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(ElectricityFactoryProduction.objects.count(), 31 * 24)
         self.assertEqual(
@@ -348,6 +377,7 @@ class ElectricityProductionFromExcelWithUserTestCases(APITestCase):
         self.assertEqual(response.data[5 + 30 * 24]["price"], "170.29")
         self.assertEqual(response.data[6 + 30 * 24]["price"], "202.10")
         self.assertEqual(response.data[7 + 30 * 24]["price"], "191.99")
+
 
         self.checkTime(2024, 4, 30, 21, 00, response.data[0]["start_interval"])
         self.checkTime(2024, 4, 30, 22, 00, response.data[1]["start_interval"])

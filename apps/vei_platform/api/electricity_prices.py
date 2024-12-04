@@ -174,7 +174,7 @@ class ElectricityPricesAPIView(generics.ListCreateAPIView):
 
 
 ### PRODUCTION ###
-
+from djmoney.contrib.django_rest_framework import MoneyField
 
 class ElectricityProductionSerializer(serializers.ModelSerializer):
     factory = serializers.SlugRelatedField(
@@ -183,10 +183,11 @@ class ElectricityProductionSerializer(serializers.ModelSerializer):
     start_interval = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S%z")
     end_interval = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S%z")
     energy_in_kwh = serializers.DecimalField(decimal_places=4, max_digits=14)
+    reported_price_per_mwh = MoneyField(max_digits=14, decimal_places=2, required=False, default=None)
 
     class Meta:
         model = ElectricityFactoryProduction
-        fields = ("start_interval", "end_interval", "energy_in_kwh", "factory")
+        fields = ("start_interval", "end_interval", "energy_in_kwh", "factory", "reported_price_per_mwh", "reported_price_per_mwh_currency")
         read_only_fields = ("factory",)
 
     def validate(self, data):

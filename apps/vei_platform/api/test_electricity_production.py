@@ -155,8 +155,7 @@ class ElectricityProductionAPIWithUserTestCases(APITestCase):
 
     def test_get_factory_production(self):
         """
-        Tests if creating a production that overlaps within previously
-        created production timewindow leads to error
+        Tests for errors when creating a production 
         """
         data = {
             "factory": "малката-кофа-за-фотони",
@@ -185,8 +184,33 @@ class ElectricityProductionAPIWithUserTestCases(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreaterEqual(len(response.data), 1)
 
-        # self.assertEqual(response.data["non_field_errors"][0].code, "invalid")
-        # self.assertEqual(
-        #    str(response.data["non_field_errors"][0]),
-        #    "Factory production time window overlap",
-        # )
+
+    def test_get_factory_production_reported_price_per_mwh(self):
+        """
+        Tests for errors when creating a production including reproted price
+        """
+        data = {
+            "factory": "малката-кофа-за-фотони",
+            "energy_in_kwh": "12.29",
+            'reported_price_per_mwh': '103.20', 
+            'reported_price_per_mwh_currency': 'USD',
+            "start_interval": "2024-05-19T11:00+02:00",
+            "end_interval": "2024-05-19T12:00+02:00",
+        }
+
+        response = self.client.post(self.url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertGreaterEqual(len(response.data), 1)
+
+
+        data = {
+            "factory": "малката-кофа-за-фотони",
+            "start_interval": "2024-05-19T00:00+00:00",
+            "end_interval": "2024-05-19T23:30:00+00:00",
+        }
+        response = self.client.get(self.url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertGreaterEqual(len(response.data), 1)
+
+        self.assertEqual(Decimal(response.data[0]['reported_price_per_mwh']), Decimal('103.2'))
+        self.assertEqual(response.data[0]['reported_price_per_mwh_currency'], 'USD')
