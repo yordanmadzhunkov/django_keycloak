@@ -3,7 +3,11 @@ from .models.factory import ElectricityFactory
 from .models.legal import LegalEntity, LegalEntitySources
 from .models.profile import UserProfile
 from .models.team import TeamMember
-from .models.electricity_price import ElectricityBillingZone
+from .models.electricity_price import (
+    ElectricityBillingZone,
+    ElectricityPrice,
+    ElectricityPricePlan,
+)
 
 # Register your models here.
 
@@ -13,3 +17,5 @@ admin.site.register(LegalEntitySources)
 admin.site.register(UserProfile)
 admin.site.register(TeamMember)
 admin.site.register(ElectricityBillingZone)
+admin.site.register(ElectricityPrice)
+admin.site.register(ElectricityPricePlan)

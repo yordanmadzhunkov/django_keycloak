@@ -73,6 +73,7 @@ class ElectricityPrice(models.Model):
             year=2024, month=1, day=1, hour=0, minute=0, tzinfo=timezone.utc
         ),
     )
+
     end_interval = models.DateTimeField(
         blank=False,
         null=False,

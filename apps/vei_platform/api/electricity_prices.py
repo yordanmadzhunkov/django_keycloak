@@ -36,7 +36,7 @@ class ElectricityBillingZoneListAPIView(generics.ListAPIView):
     serializer_class = ElectricityBillingZoneSerializer
 
 
-class ElectricityPricesSerializer(serializers.ModelSerializer):
+class ElectricityPricePlanSerializer(serializers.ModelSerializer):
     billing_zone = serializers.SlugRelatedField(
         slug_field="code", queryset=ElectricityBillingZone.objects.all()
     )
@@ -63,7 +63,7 @@ class ElectricityPricesSerializer(serializers.ModelSerializer):
 class ElectricityPricePlanListAPIView(generics.ListCreateAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     queryset = ElectricityPricePlan.objects.all()
-    serializer_class = ElectricityPricesSerializer
+    serializer_class = ElectricityPricePlanSerializer
 
 
 def create_query_for_finding_overlapping_intervals(
