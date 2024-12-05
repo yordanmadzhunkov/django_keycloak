@@ -341,7 +341,6 @@ class FactoryProduction(View):
                             self.update_production_of_factory(
                                 request, excel_report, factory_res
                             )
-                            self.update_prices_of_plan(request, factory_res["prices"])
                     else:
                         messages.error(
                             request,
@@ -404,16 +403,22 @@ class FactoryProduction(View):
                             prod["end_interval"], "%Y-%m-%dT%H:%M:%S%z"
                         )
                         energy_in_kwh = prod["energy_in_kwh"]
+                        reported_price_per_mwh = Money(
+                            prod["reported_price_per_mwh"],
+                            prod["reported_price_per_mwh_currency"],
+                        )
                         try:
                             p = production.get(start_interval=start_interval)
                             if (
                                 p.energy_in_kwh == energy_in_kwh
-                                and end_interval == p.end_interval
+                                and p.end_interval == end_interval
+                                and p.reported_price_per_mwh == reported_price_per_mwh
                             ):
                                 matched_production += 1
                             else:
                                 p.energy_in_kwh = energy_in_kwh
                                 p.end_interval = end_interval
+                                p.reported_price_per_mwh = reported_price_per_mwh
                                 p.save()
                                 updated_production += 1
                         except ElectricityFactoryProduction.DoesNotExist:
@@ -439,54 +444,6 @@ class FactoryProduction(View):
                             matched_production,
                         ),
                     )
-
-    def update_prices_of_plan(self, request, prices):
-        if len(prices) == 0:
-            return
-        try:
-            plan = ElectricityPricePlan.objects.get(slug=prices[0]["plan"])
-            # print(plan)
-            plan_prices = ElectricityPrice.objects.filter(plan=plan)
-            num_created = 0
-            num_matched = 0
-            num_updated = 0
-            currency = plan.currency
-            print(plan, " -> ", currency)
-            for price in prices:
-                start_interval = datetime.strptime(
-                    price["start_interval"], "%Y-%m-%dT%H:%M:%S%z"
-                )
-                end_interval = datetime.strptime(
-                    price["end_interval"], "%Y-%m-%dT%H:%M:%S%z"
-                )
-                p = Money(price["price"], currency)
-                try:
-                    print("start_interval", start_interval)
-                    price_in_db = plan_prices.get(start_interval=start_interval)
-                    print(price_in_db.price, " vs ", p, "diff", price_in_db.price - p)
-                    if p == price_in_db.price:
-                        num_matched += 1
-                    else:
-                        num_updated += 1
-                except ElectricityPrice.DoesNotExist:
-                    print("Does not exist %s -> %s" % (price["start_interval"], str(p)))
-                    # new_price = ElectricityPrice.objects.create(
-                    #            plan=plan,
-                    #            start_interval=start_interval,
-                    #            end_interval=end_interval,
-                    #            price=Money(price['price'], currency),
-                    # )
-                    # new_price.save()
-                    num_created += 1
-        except ElectricityPricePlan.DoesNotExist:
-            pass
-        # if prices[0]['plan']
-        # print(prices[:10])
-        messages.success(
-            request,
-            "Prices in this file %d, matched=%d, created=%d, updated=%d"
-            % (len(prices), num_matched, num_created, num_updated),
-        )
 
 
 class FactoryScheduleView(FormView):
@@ -678,10 +635,14 @@ class FactoryProductionChart(View):
 
     def get_num_days(self, request):
         num_days = request.GET.get("num_days")
+        initial = 5
         if num_days is None:
-            num_days = 5
+            num_days = initial
         else:
-            num_days = int(num_days)
+            try:
+                num_days = int(num_days)
+            except ValueError:
+                num_days = initial
         return num_days
 
     def get(self, request, *args, **kwargs):

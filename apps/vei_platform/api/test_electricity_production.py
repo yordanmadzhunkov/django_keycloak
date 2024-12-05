@@ -155,7 +155,7 @@ class ElectricityProductionAPIWithUserTestCases(APITestCase):
 
     def test_get_factory_production(self):
         """
-        Tests for errors when creating a production 
+        Tests for errors when creating a production
         """
         data = {
             "factory": "малката-кофа-за-фотони",
@@ -184,7 +184,6 @@ class ElectricityProductionAPIWithUserTestCases(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreaterEqual(len(response.data), 1)
 
-
     def test_get_factory_production_reported_price_per_mwh(self):
         """
         Tests for errors when creating a production including reproted price
@@ -192,8 +191,8 @@ class ElectricityProductionAPIWithUserTestCases(APITestCase):
         data = {
             "factory": "малката-кофа-за-фотони",
             "energy_in_kwh": "12.29",
-            'reported_price_per_mwh': '103.20', 
-            'reported_price_per_mwh_currency': 'USD',
+            "reported_price_per_mwh": "103.20",
+            "reported_price_per_mwh_currency": "USD",
             "start_interval": "2024-05-19T11:00+02:00",
             "end_interval": "2024-05-19T12:00+02:00",
         }
@@ -201,7 +200,6 @@ class ElectricityProductionAPIWithUserTestCases(APITestCase):
         response = self.client.post(self.url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertGreaterEqual(len(response.data), 1)
-
 
         data = {
             "factory": "малката-кофа-за-фотони",
@@ -212,5 +210,7 @@ class ElectricityProductionAPIWithUserTestCases(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreaterEqual(len(response.data), 1)
 
-        self.assertEqual(Decimal(response.data[0]['reported_price_per_mwh']), Decimal('103.2'))
-        self.assertEqual(response.data[0]['reported_price_per_mwh_currency'], 'USD')
+        self.assertEqual(
+            Decimal(response.data[0]["reported_price_per_mwh"]), Decimal("103.2")
+        )
+        self.assertEqual(response.data[0]["reported_price_per_mwh_currency"], "USD")

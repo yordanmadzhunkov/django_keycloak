@@ -38,13 +38,15 @@ class ElectricityFactoryProduction(models.Model):
         max_digits=14, decimal_places=2, default=Decimal(0)
     )
 
-    reported_price_per_mwh = MoneyField(max_digits=14, 
-                                        decimal_places=2, 
-                                        default_currency="BGN", 
-                                        default=None, 
-                                        blank=True, 
-                                        null=True)
-            
+    reported_price_per_mwh = MoneyField(
+        max_digits=14,
+        decimal_places=2,
+        default_currency="BGN",
+        default=None,
+        blank=True,
+        null=True,
+    )
+
     def __str__(self) -> str:
         return "%s %s kWh" % (
             self.start_interval.strftime("%y-%m-%d %H:%M %Z"),
@@ -165,9 +167,7 @@ def find_factory(search_id):
 
 def add_production(
     production_in_kwh,
-    prices,
     factory_slug,
-    plan_slug,
     production_in_mwh,
     price,
     start_interval: datetime,
@@ -193,15 +193,6 @@ def add_production(
             "energy_in_kwh": energy_in_kwh,
             "reported_price_per_mwh": price_decimal,
             "reported_price_per_mwh_currency": "BGN",
-            "start_interval": start_str,
-            "end_interval": end_str,
-        }
-    )
-
-    prices.append(
-        {
-            "plan": plan_slug,
-            "price": price_decimal,
             "start_interval": start_str,
             "end_interval": end_str,
         }
@@ -266,9 +257,7 @@ def extract_factory_production(sheet, h, timezone_label, currency, unit):
             if end_interval is not None and num_intervals == 4:
                 add_production(
                     production_in_kwh,
-                    prices,
                     factory_slug,
-                    plan_slug,
                     total_prod,
                     price,
                     start_interval=start_interval,
@@ -309,8 +298,6 @@ def extract_factory_production(sheet, h, timezone_label, currency, unit):
         "month": report_period_start.month,
         "year": report_period_start.year,
         "production_in_kwh": production_in_kwh,
-        "prices": prices,
-        "currency": currency if plan_currency is None else plan_currency,
         "errors": errors,
     }
     return res
@@ -418,7 +405,6 @@ def process_excel_report(filename):
                 )
 
         production_in_kwh = []
-        prices = []
         production = ElectricityFactoryProduction.objects.filter(factory=factory_object)
         d0 = datetime(year=month.year, month=month.month, day=1, hour=0)
         d0 = localtimezone.localize(d0)
@@ -436,9 +422,7 @@ def process_excel_report(filename):
                 price = convert_to_correct_currency(price, currency, plan_currency)
                 add_production(
                     production_in_kwh,
-                    prices,
                     factory_slug,
-                    plan_slug,
                     production,
                     price,
                     start_interval=d0,
@@ -455,8 +439,6 @@ def process_excel_report(filename):
             "month": month.month,
             "year": month.year,
             "production_in_kwh": production_in_kwh,
-            "prices": prices,
-            "currency": "BGN",
             "errors": errors,
         }
         factories.append(res)

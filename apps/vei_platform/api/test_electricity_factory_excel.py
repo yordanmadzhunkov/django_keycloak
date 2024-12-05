@@ -94,8 +94,6 @@ class ElectricityProductionFromExcelWithUserTestCases(APITestCase):
             self.assertTrue("month" in factory.keys())
             self.assertTrue("year" in factory.keys())
             self.assertTrue("production_in_kwh" in factory.keys())
-            self.assertTrue("prices" in factory.keys())
-            self.assertTrue("currency" in factory.keys())
 
     def test_create_electricity_production_with_user(self):
         """
@@ -108,7 +106,6 @@ class ElectricityProductionFromExcelWithUserTestCases(APITestCase):
         factory_kneja = None
         factory_obnova = None
         for factory in factories_from_excel:
-            self.assertEquals(factory["currency"], "BGN")
             self.assertEquals(factory["year"], 2024)
             self.assertEquals(factory["month"], 7)
             if factory["factory_name"] == "ФЕЦ КНЕЖА":
@@ -123,8 +120,7 @@ class ElectricityProductionFromExcelWithUserTestCases(APITestCase):
         self.assertEquals(factory_kneja["factory_slug"], self.factory.slug)
         self.assertEquals(factory_obnova["factory_slug"], self.factory2.slug)
         self.assertEquals(factory_kneja["timezone"], "Europe/Sofia")
-        self.assertEquals(factory_obnova["timezone"],  "Europe/Sofia")
-
+        self.assertEquals(factory_obnova["timezone"], "Europe/Sofia")
 
         self.assertEqual(ElectricityFactoryProduction.objects.count(), 0)
 
@@ -147,7 +143,6 @@ class ElectricityProductionFromExcelWithUserTestCases(APITestCase):
         factory_kneja = None
         factory_obnova = None
         for factory in factories_from_excel:
-            self.assertEquals(factory["currency"], "BGN")
             self.assertEquals(factory["year"], 2024)
             self.assertEquals(factory["month"], 10)
             if factory["factory_name"] == "ФЕЦ КНЕЖА":
@@ -195,7 +190,6 @@ class ElectricityProductionFromExcelWithUserTestCases(APITestCase):
         factory_kneja = None
         factory_obnova = None
         for factory in factories_from_excel:
-            self.assertEquals(factory["currency"], "BGN")
             self.assertEquals(factory["year"], 2024)
             self.assertEquals(factory["month"], 3)
 
@@ -223,42 +217,25 @@ class ElectricityProductionFromExcelWithUserTestCases(APITestCase):
         self.assertEqual(
             ElectricityPrice.objects.filter(plan=self.factory.plan).count(), 0
         )
-        response = self.client.post(
-            reverse("prices"),
-            data=factory_kneja["prices"],
-            format="json",
+
+        self.assertEqual(response.data[0 + 30 * 24]["reported_price_per_mwh"], "128.58")
+        self.assertEqual(
+            response.data[0 + 30 * 24]["reported_price_per_mwh_currency"], "BGN"
         )
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertGreaterEqual(len(response.data), 31 * 24 - 1)
-        self.assertEqual(response.data[0]["plan"], self.factory.plan.slug)
-        self.assertEqual(response.data[1]["plan"], self.factory.plan.slug)
-        self.assertEqual(response.data[2]["plan"], self.factory.plan.slug)
-
-        # self.assertEqual(response.data[0]["price"], "60.90") # EUR
-        # self.assertEqual(response.data[1]["price"], "62.04") # EUR
-        # self.assertEqual(response.data[2]["price"], "61.42") # EUR
-
-        # self.assertEqual(response.data[0+30*24]["price"], "65.74") # 128.58 BGN
-        # self.assertEqual(response.data[1+30*24]["price"], "60.47") # 118.27 BGN
-        # self.assertEqual(response.data[2+30*24]["price"], "48.50") #  94.86 BGN
-        # self.assertEqual(response.data[3+30*24]["price"], "31.17") #  60.96 BGN
-        # self.assertEqual(response.data[4+30*24]["price"], "32.31") #  63.19 BGN
-        # self.assertEqual(response.data[5+30*24]["price"], "40.50") #  79.21 BGN
-        # self.assertEqual(response.data[6+30*24]["price"], "30.33") #  59.32 BGN
-        # self.assertEqual(response.data[7+30*24]["price"], "32.66") #  63.88 BGN
-
-        self.assertEqual(response.data[0 + 30 * 24]["price"], "128.58")
-        self.assertEqual(response.data[1 + 30 * 24]["price"], "118.27")
-        self.assertEqual(response.data[2 + 30 * 24]["price"], "94.86")
-        self.assertEqual(response.data[3 + 30 * 24]["price"], "60.96")
-        self.assertEqual(response.data[4 + 30 * 24]["price"], "63.19")
-        self.assertEqual(response.data[5 + 30 * 24]["price"], "79.21")
-        self.assertEqual(response.data[6 + 30 * 24]["price"], "59.32")
-        self.assertEqual(response.data[7 + 30 * 24]["price"], "63.88")
+        self.assertEqual(response.data[1 + 30 * 24]["reported_price_per_mwh"], "118.27")
+        self.assertEqual(response.data[2 + 30 * 24]["reported_price_per_mwh"], "94.86")
+        self.assertEqual(response.data[3 + 30 * 24]["reported_price_per_mwh"], "60.96")
+        self.assertEqual(response.data[4 + 30 * 24]["reported_price_per_mwh"], "63.19")
+        self.assertEqual(response.data[5 + 30 * 24]["reported_price_per_mwh"], "79.21")
+        self.assertEqual(response.data[6 + 30 * 24]["reported_price_per_mwh"], "59.32")
+        self.assertEqual(response.data[7 + 30 * 24]["reported_price_per_mwh"], "63.88")
 
         self.checkTime(2024, 2, 29, 22, 00, response.data[0]["start_interval"])
         self.checkTime(2024, 2, 29, 23, 00, response.data[1]["start_interval"])
         self.checkTime(2024, 3, 1, 00, 00, response.data[2]["start_interval"])
+        self.checkTime(2024, 2, 29, 23, 00, response.data[0]["end_interval"])
+        self.checkTime(2024, 3, 1, 00, 00, response.data[1]["end_interval"])
+        self.checkTime(2024, 3, 1, 1, 00, response.data[2]["end_interval"])
 
         self.checkTime(
             2024, 3, 30, 22, 00, response.data[0 + 30 * 24]["start_interval"]
@@ -278,18 +255,15 @@ class ElectricityProductionFromExcelWithUserTestCases(APITestCase):
             2024, 3, 31, 20, 00, response.data[22 + 30 * 24]["start_interval"]
         )
 
-        self.checkTime(2024, 2, 29, 23, 00, response.data[0]["end_interval"])
-        self.checkTime(2024, 3, 1, 00, 00, response.data[1]["end_interval"])
-        self.checkTime(2024, 3, 1, 1, 00, response.data[2]["end_interval"])
-
+    def check_production(self, response, day, hour, value: str):
         self.assertEqual(
-            ElectricityPrice.objects.filter(plan=self.factory.plan).count(), 31 * 24 - 1
+            Decimal(response.data[hour + day * 24]["energy_in_kwh"]), Decimal(value)
         )
 
-    def check_production(self, response, day, hour, value: str):
-        self.assertEqual(Decimal(response.data[hour + day * 24]["energy_in_kwh"]), Decimal(value))
-
-
+    def check_perported_price(self, response, day, hour, value: str, currency="BGN"):
+        slot = response.data[hour + day * 24]
+        self.assertEqual(Decimal(slot["reported_price_per_mwh"]), Decimal(value))
+        self.assertEqual(slot["reported_price_per_mwh_currency"], currency)
 
     def test_create_electricity_production_from_report_may_with_user(self):
         """
@@ -304,7 +278,6 @@ class ElectricityProductionFromExcelWithUserTestCases(APITestCase):
         factory_kneja = None
         factory_obnova = None
         for factory in factories_from_excel:
-            self.assertEquals(factory["currency"], "BGN")
             self.assertEquals(factory["year"], 2024)
             self.assertEquals(factory["month"], 5)
 
@@ -327,57 +300,45 @@ class ElectricityProductionFromExcelWithUserTestCases(APITestCase):
             data=factory_obnova["production_in_kwh"],
             format="json",
         )
-        self.check_production(response, 2, 0, '0')
-        self.check_production(response, 2, 1, '0')
-        self.check_production(response, 2, 2, '0')
-        self.check_production(response, 2, 3, '0')
-        self.check_production(response, 2, 4, '0')
-        self.check_production(response, 2, 5, '0')
-        self.check_production(response, 2, 6, '0.5')
-        self.check_production(response, 2, 7, '7.5')
-        self.check_production(response, 2, 8, '35.0')
-        self.check_production(response, 2, 9, '34.0')
-        self.check_production(response, 2, 10, '22.25')
-        self.check_production(response, 2, 11, '9.75')
-        self.check_production(response, 2, 12, '16.5')
-        self.check_production(response, 2, 13, '34.0')
-        self.check_production(response, 2, 14, '27.0')
-        self.check_production(response, 2, 15, '21.25')
-        self.check_production(response, 2, 16, '32.5')
-        self.check_production(response, 2, 17, '11.0')
-        self.check_production(response, 2, 18, '13.0')
-        self.check_production(response, 2, 19, '5.75')
-        self.check_production(response, 2, 20, '0')
-        self.check_production(response, 2, 21, '0')
-        self.check_production(response, 2, 22, '0')
-        self.check_production(response, 2, 23, '0')
-        
+        self.check_production(response, 2, 0, "0")
+        self.check_production(response, 2, 1, "0")
+        self.check_production(response, 2, 2, "0")
+        self.check_production(response, 2, 3, "0")
+        self.check_production(response, 2, 4, "0")
+        self.check_production(response, 2, 5, "0")
+        self.check_production(response, 2, 6, "0.5")
+        self.check_production(response, 2, 7, "7.5")
+        self.check_production(response, 2, 8, "35.0")
+        self.check_production(response, 2, 9, "34.0")
+        self.check_production(response, 2, 10, "22.25")
+        self.check_production(response, 2, 11, "9.75")
+        self.check_production(response, 2, 12, "16.5")
+        self.check_production(response, 2, 13, "34.0")
+        self.check_production(response, 2, 14, "27.0")
+        self.check_production(response, 2, 15, "21.25")
+        self.check_production(response, 2, 16, "32.5")
+        self.check_production(response, 2, 17, "11.0")
+        self.check_production(response, 2, 18, "13.0")
+        self.check_production(response, 2, 19, "5.75")
+        self.check_production(response, 2, 20, "0")
+        self.check_production(response, 2, 21, "0")
+        self.check_production(response, 2, 22, "0")
+        self.check_production(response, 2, 23, "0")
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(ElectricityFactoryProduction.objects.count(), 31 * 24)
         self.assertEqual(
             ElectricityPrice.objects.filter(plan=self.factory.plan).count(), 0
         )
-        response = self.client.post(
-            reverse("prices"),
-            data=factory_kneja["prices"],
-            format="json",
-        )
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertGreaterEqual(len(response.data), 31 * 24)
-        self.assertEqual(response.data[0]["plan"], self.factory.plan.slug)
-        self.assertEqual(response.data[1]["plan"], self.factory.plan.slug)
-        self.assertEqual(response.data[2]["plan"], self.factory.plan.slug)
 
-
-        self.assertEqual(response.data[0 + 30 * 24]["price"], "194.67")
-        self.assertEqual(response.data[1 + 30 * 24]["price"], "175.56")
-        self.assertEqual(response.data[2 + 30 * 24]["price"], "159.36")
-        self.assertEqual(response.data[3 + 30 * 24]["price"], "164.10")
-        self.assertEqual(response.data[4 + 30 * 24]["price"], "165.06")
-        self.assertEqual(response.data[5 + 30 * 24]["price"], "170.29")
-        self.assertEqual(response.data[6 + 30 * 24]["price"], "202.10")
-        self.assertEqual(response.data[7 + 30 * 24]["price"], "191.99")
-
+        self.check_perported_price(response, 30, 0, "194.67", "BGN")
+        self.check_perported_price(response, 30, 1, "175.56", "BGN")
+        self.check_perported_price(response, 30, 2, "159.36", "BGN")
+        self.check_perported_price(response, 30, 3, "164.10", "BGN")
+        self.check_perported_price(response, 30, 4, "165.06", "BGN")
+        self.check_perported_price(response, 30, 5, "170.29", "BGN")
+        self.check_perported_price(response, 30, 6, "202.10", "BGN")
+        self.check_perported_price(response, 30, 7, "191.99", "BGN")
 
         self.checkTime(2024, 4, 30, 21, 00, response.data[0]["start_interval"])
         self.checkTime(2024, 4, 30, 22, 00, response.data[1]["start_interval"])
@@ -385,7 +346,7 @@ class ElectricityProductionFromExcelWithUserTestCases(APITestCase):
 
         self.checkTime(2024, 4, 30, 22, 00, response.data[0]["end_interval"])
         self.checkTime(2024, 4, 30, 23, 00, response.data[1]["end_interval"])
-        self.checkTime(2024, 5,  1, 0, 00, response.data[2]["end_interval"])
+        self.checkTime(2024, 5, 1, 0, 00, response.data[2]["end_interval"])
 
         self.checkTime(
             2024, 5, 30, 21, 00, response.data[0 + 30 * 24]["start_interval"]
@@ -403,9 +364,4 @@ class ElectricityProductionFromExcelWithUserTestCases(APITestCase):
         self.checkTime(2024, 5, 31, 4, 00, response.data[7 + 30 * 24]["start_interval"])
         self.checkTime(
             2024, 5, 31, 19, 00, response.data[22 + 30 * 24]["start_interval"]
-        )
-
-
-        self.assertEqual(
-            ElectricityPrice.objects.filter(plan=self.factory.plan).count(), 31 * 24
         )
