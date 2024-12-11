@@ -20,8 +20,9 @@ if __name__ == "__main__":
         print("Target %s token=%.4s.." % (target["url"], target["token"]))
 
     IBexScriper().process(target_list)
-    EnergyChartsAPI().process(target_list)
-    EnergyChartsAPI().process_historical(target_list, months=3)
+    # EnergyChartsAPI().process(target_list)
+    # EnergyChartsAPI().process_historical(target_list, months=3)
+
     # start_time = datetime(2024, 10, 1, 00, 00, 00, tzinfo=timezone.utc)
     # end_time = datetime(2024, 11, 1, 00, 00, 00, tzinfo=timezone.utc)
     # EnergyChartsAPI().process(target_list, start=start_time, end=end_time)

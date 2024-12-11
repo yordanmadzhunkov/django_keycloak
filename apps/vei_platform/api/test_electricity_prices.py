@@ -33,7 +33,7 @@ class ElectricityPriceAPIWithUserTestCases(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="123")
         self.client.force_authenticate(self.user)
-        self.url = reverse("price_plans_api")
+        self.url = reverse("plans_api")
 
     def tearDown(self):
         self.user.delete()
@@ -120,6 +120,7 @@ class ElectricityPriceAPIWithUserTestCases(APITestCase):
         self.assertEqual(response.data[0]["electricity_unit"], "MWh")
         self.assertEqual(response.data[0]["slug"], "test-plan-1")
         self.assertEqual(response.data[0]["owner"], "testuser")
+        self.assertEqual(response.data[0]["last_price_start_interval"], None)
 
     def test_create_electricity_price_plan_wrong_unit(self):
         """
@@ -143,7 +144,7 @@ class ElectricityPriceAPIWithUserTestCases(APITestCase):
 
 class ElectricityPriceAPITestCases(APITestCase):
     def setUp(self):
-        self.url = reverse("price_plans_api")
+        self.url = reverse("plans_api")
 
     def test_billing_zones_get_objects(self):
         """
@@ -306,6 +307,10 @@ class ElectricityPricePriceSeriesAPITestCases(APITestCase):
         self.assertEqual(Decimal("10.19"), p.price.amount)
         self.assertEqual(Currency("EUR"), p.price.currency)
 
+        # MAKE SURE SECOND POST returns BAD REQUEST
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_get_price_day_1_hour(self):
         """
         Get price for specific plan by a slug
@@ -375,6 +380,40 @@ class ElectricityPricePriceSeriesAPITestCases(APITestCase):
         self.assertEqual(
             str(response.data["non_field_errors"][0]), "Price plan time window overlap"
         )
+
+    def test_update_price(self):
+        """
+        Get price for specific plan by a slug
+        """
+        url = reverse("prices")
+        data = self.valid_data()
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertGreaterEqual(len(response.data), 4)
+        self.assertEqual(response.data["plan"], self.plan.slug)
+        self.assertEqual(response.data["price"], "10.19")
+        self.checkTime(2024, 5, 19, 11, 0, response.data["start_interval"])
+        self.checkTime(2024, 5, 19, 12, 0, response.data["end_interval"])
+
+        # Second put for updating the value
+        data["price"] = "7.89"
+        response = self.client.put(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(Decimal(response.data["price"]), Decimal("7.89"))
+        self.checkTime(2024, 5, 19, 11, 0, response.data["start_interval"])
+        self.checkTime(2024, 5, 19, 12, 0, response.data["end_interval"])
+
+        # GET the updated data
+        data = {
+            "plan": self.plan.slug,
+            "start_interval": "2024-05-19T11:20+00:00",
+            "end_interval": "2024-05-19T11:30:00+00:00",
+        }
+
+        response = self.client.get(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["price"], "7.89")
 
     def test_create_price_non_overlaping_time_windows(self):
         """

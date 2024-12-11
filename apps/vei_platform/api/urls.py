@@ -9,7 +9,7 @@ from .electricity_prices import ElectricityFactoryScheduleAPIView
 
 urlpatterns = [
     path("zones", ElectricityBillingZoneListAPIView.as_view(), name="billing_zones"),
-    path("plans", ElectricityPricePlanListAPIView.as_view(), name="price_plans_api"),
+    path("plans", ElectricityPricePlanListAPIView.as_view(), name="plans_api"),
     path("prices", ElectricityPricesAPIView.as_view(), name="prices"),
     path("production", ElectricityProductionAPIView.as_view(), name="production_api"),
     path("factories", ElectricityFactoryAPIView.as_view(), name="my_factories_api"),

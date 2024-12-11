@@ -112,6 +112,10 @@ class EnergyChartsAPI:
         return plan_name
 
     def get_currency_and_unit(self, prices):
+        currency = "EUR"
+        unit = "MWh"
+        if prices["unit"] == "No Unit":
+            return currency, unit
         return prices["unit"].split("/")
 
     def process(self, target_list, start: datetime = None, end: datetime = None):
@@ -143,7 +147,7 @@ class EnergyChartsAPI:
                 "Exception %s when processing Target %s token=%.4s.."
                 % (message, target["url"], target["token"])
             )
-            # raise e
+            raise e
 
     def process_historical(self, target_list, months=12):
         for target in target_list:

@@ -5,6 +5,7 @@ from vei_platform.models.electricity_price import (
     ElectricityPricePlan,
     ElectricityBillingZone,
 )
+from rest_framework.mixins import UpdateModelMixin
 from vei_platform.models.production import (
     ElectricityFactory,
     ElectricityFactoryProduction,
@@ -20,6 +21,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
+from django.http import Http404
 
 
 class ElectricityBillingZoneSerializer(serializers.ModelSerializer):
@@ -41,6 +43,42 @@ class ElectricityPricePlanSerializer(serializers.ModelSerializer):
         slug_field="code", queryset=ElectricityBillingZone.objects.all()
     )
     owner = serializers.SlugRelatedField(slug_field="username", read_only=True)
+    last_price_start_interval = serializers.SerializerMethodField(
+        "get_last_price_start_interval"
+    )
+
+    def get_last_price_start_interval(self, plan: ElectricityPricePlan):
+        prices = ElectricityPrice.objects.filter(plan=plan).order_by("start_interval")
+        res = prices.last()
+        if res is not None:
+            res = res.start_interval
+        self.get_continuous_start_interval(plan)
+        return res
+
+    def get_continuous_start_interval(self, plan: ElectricityPricePlan):
+        prices = ElectricityPrice.objects.filter(plan=plan).order_by("-start_interval")
+        # first = prices.first()
+        # if first is not None:
+        prev = None
+        start = None
+        for p in prices:
+            if prev is None:
+                start = p
+                prev = p
+                print("Staring iteration in plan = ", plan.name, " last = ", p)
+            else:
+                if prev.start_interval == p.end_interval:
+                    prev = p
+                else:
+                    if prev.start_interval == p.start_interval:
+                        print("         Duplicate found price = ", p, " prev =", prev)
+                        prev = p
+                    else:
+                        print("Break found price = ", p, " prev =", prev)
+                        prev = p
+
+        if prev is not None:
+            print("Last value found = ", prev, "Fist value = ", start)
 
     class Meta:
         model = ElectricityPricePlan
@@ -52,8 +90,9 @@ class ElectricityPricePlanSerializer(serializers.ModelSerializer):
             "electricity_unit",
             "slug",
             "owner",
+            "last_price_start_interval",
         )
-        read_only_fields = ("slug", "owner")
+        read_only_fields = ("slug", "owner", "last_price_start_interval")
 
     def save(self, **kwargs):
         self.validated_data["owner"] = self.context["request"].user
@@ -127,23 +166,37 @@ class ElectricityPriceSerializer(serializers.ModelSerializer):
             data["end_interval"],
             closed_interval=False,
         )
-        if (
-            ElectricityPrice.objects.filter(plan=data["plan"])
-            .filter(query_overlapping_intervals)
-            .exists()
-        ):
-            raise serializers.ValidationError("Price plan time window overlap")
+        overlaping = ElectricityPrice.objects.filter(plan=data["plan"]).filter(
+            query_overlapping_intervals
+        )
+        if overlaping.exists():
+            if (
+                self.instance is None
+                or overlaping.count() > 1
+                or self.instance != overlaping[0]
+            ):
+                raise serializers.ValidationError("Price plan time window overlap")
         amount = data["price"]
         if isinstance(amount, Money):
             amount = data["price"].amount
         data["price"] = Money(amount=amount, currency=data["plan"].currency)
         return super().validate(data)
 
+    def update(self, instance, validated_data):
+        instance.start_interval = validated_data.get(
+            "start_interval", instance.start_interval
+        )
+        instance.end_interval = validated_data.get(
+            "end_interval", instance.end_interval
+        )
+        instance.price = validated_data.get("price", instance.price)
+        instance.save()
+        return instance
 
-class ElectricityPricesAPIView(generics.ListCreateAPIView):
+
+class ElectricityPricesAPIView(generics.ListCreateAPIView, UpdateModelMixin):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     serializer_class = ElectricityPriceSerializer
-    # queryset = ElectricityPrice.objects.all()
 
     def get_queryset(self):
         plan_slug = self.request.query_params.get("plan")
@@ -171,6 +224,30 @@ class ElectricityPricesAPIView(generics.ListCreateAPIView):
         if isinstance(kwargs.get("data", {}), list):
             kwargs["many"] = True
         return super().get_serializer(*args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def get_object(self):
+        """
+        Returns the object the view is displaying/update
+        """
+        plan_slug = self.request.data.get("plan")
+        start_interval = self.request.data.get("start_interval")
+        end_interval = self.request.data.get("end_interval")
+        if plan_slug and start_interval and end_interval:
+            plan = ElectricityPricePlan.objects.get(slug=plan_slug)
+            if plan:
+                # print("Plan found = ", plan)
+                p = ElectricityPrice.objects.filter(plan=plan)
+                p = p.filter(start_interval__gte=start_interval)
+                p = p.filter(end_interval__lte=end_interval)
+                if p.count() == 1:
+                    obj = p[0]
+                    # May raise a permission denied
+                    self.check_object_permissions(self.request, obj)
+                    return obj
+        raise Http404("No prices found for given plan and intervals ")
 
 
 ### PRODUCTION ###
