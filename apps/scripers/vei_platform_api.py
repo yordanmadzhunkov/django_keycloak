@@ -127,7 +127,7 @@ class VeiPlatformAPI:
         self, billing_zone, plan_name=None, currency="EUR", energy_unit="MWh"
     ):
         res = self.get_plan(billing_zone=billing_zone, name=plan_name)
-        print_green(res)
+        # print_green(res)
         if not "error" in res.keys() and "plan" in res.keys():
             if res["plan"] is None:
                 new_plan = self.create_plan(
@@ -136,7 +136,7 @@ class VeiPlatformAPI:
                     currency=currency,
                     electricity_unit=energy_unit,
                 )
-                print(new_plan)
+                # print(new_plan)
                 res.update(new_plan)
         return res
 
@@ -318,9 +318,44 @@ class VeiPlatformAPI:
 
         plan_info = self.get_or_create_plan(zone, plan_name, currency, energy_unit)
         if "plan" in plan_info.keys():
+            summary = self.get_plan_summary(plan_info["plan"]["slug"])
+            self.show_plan_info(plan_info["plan"], summary)
             return self.post_prices(plan_info["plan"], prices)
         else:
             return plan_info
+
+    def get_plan_summary(self, slug):
+        # reverse("plan_summary_api"), data
+        return None
+
+    def show_plan_info(self, plan):
+
+        {
+            "name": "Day ahead Slovakia",
+            "billing_zone": "SK",
+            "description": "Most basic day ahead plan",
+            "currency": "EUR",
+            "electricity_unit": "MWh",
+            "slug": "day-ahead-slovakia",
+            "owner": "energy_bot",
+            "last_price_start_interval": "2024-12-13T22:00:00Z",
+        }
+        plan["name"]
+        table = PrettyTable(["-", plan["name"]])
+        table.title = plan["name"] + " Billing zone = " + plan["billing_zone"]
+
+        table.add_rows(
+            [
+                ["Description", plan["description"]],
+                ["Slug", plan["slug"]],
+                ["Currency", plan["currency"]],
+                ["Electricity unit", plan["electricity_unit"]],
+                ["Owner", plan["owner"]],
+                ["Last update", plan["last_price_start_interval"]],
+            ]
+        )
+
+        print_green(table)
 
     def get_my_factories(self):
         data = {}

@@ -43,16 +43,44 @@ class ElectricityPricePlanSerializer(serializers.ModelSerializer):
         slug_field="code", queryset=ElectricityBillingZone.objects.all()
     )
     owner = serializers.SlugRelatedField(slug_field="username", read_only=True)
+
+    class Meta:
+        model = ElectricityPricePlan
+        fields = (
+            "name",
+            "billing_zone",
+            "description",
+            "currency",
+            "electricity_unit",
+            "slug",
+            "owner",
+        )
+        read_only_fields = ("slug", "owner")
+
+    def save(self, **kwargs):
+        self.validated_data["owner"] = self.context["request"].user
+        return super().save(**kwargs)
+
+
+class ElectricityPricePlanListAPIView(generics.ListCreateAPIView):
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    queryset = ElectricityPricePlan.objects.all()
+    serializer_class = ElectricityPricePlanSerializer
+
+
+class ElectricityPricePlanSummarySerializer(serializers.ModelSerializer):
     last_price_start_interval = serializers.SerializerMethodField(
         "get_last_price_start_interval"
     )
+    last_gap = serializers.SerializerMethodField("get_last_gap")
+    last_overlap = serializers.SerializerMethodField("get_last_overlap")
 
     def get_last_price_start_interval(self, plan: ElectricityPricePlan):
         prices = ElectricityPrice.objects.filter(plan=plan).order_by("start_interval")
         res = prices.last()
         if res is not None:
             res = res.start_interval
-        self.get_continuous_start_interval(plan)
+        # self.get_continuous_start_interval(plan)
         return res
 
     def get_continuous_start_interval(self, plan: ElectricityPricePlan):
@@ -80,29 +108,70 @@ class ElectricityPricePlanSerializer(serializers.ModelSerializer):
         if prev is not None:
             print("Last value found = ", prev, "Fist value = ", start)
 
+    def get_last_gap(self, plan: ElectricityPricePlan):
+        prices = ElectricityPrice.objects.filter(plan=plan).order_by("-start_interval")
+        prev = None
+        for p in prices:
+            if prev is None:
+                prev = p
+            else:
+                if prev.start_interval == p.end_interval:
+                    prev = p
+                else:
+                    return [p.end_interval, prev.start_interval]
+        return None
+
+    def get_last_overlap(self, plan: ElectricityPricePlan):
+        prices = ElectricityPrice.objects.filter(plan=plan).order_by("-start_interval")
+        prev = None
+        for p in prices:
+            if prev is None:
+                prev = p
+            else:
+                if prev.start_interval < p.end_interval:
+                    return [
+                        p.start_interval,
+                        p.end_interval,
+                        str(p.price),
+                        prev.start_interval,
+                        prev.end_interval,
+                        str(prev.price),
+                    ]
+                prev = p
+
+        return None
+
     class Meta:
         model = ElectricityPricePlan
         fields = (
             "name",
-            "billing_zone",
-            "description",
             "currency",
             "electricity_unit",
             "slug",
-            "owner",
             "last_price_start_interval",
+            "last_gap",
+            "last_overlap",
         )
-        read_only_fields = ("slug", "owner", "last_price_start_interval")
+        read_only_fields = (
+            "slug",
+            "last_price_start_interval",
+            "last_gap",
+            "last_overlap",
+        )
 
     def save(self, **kwargs):
         self.validated_data["owner"] = self.context["request"].user
         return super().save(**kwargs)
 
 
-class ElectricityPricePlanListAPIView(generics.ListCreateAPIView):
+class ElectricityPricePlanSummaryAPIView(generics.RetrieveAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
-    queryset = ElectricityPricePlan.objects.all()
-    serializer_class = ElectricityPricePlanSerializer
+    serializer_class = ElectricityPricePlanSummarySerializer
+
+    def get(self, request, plan, *args, **kwargs):
+        instance = get_object_or_404(ElectricityPricePlan, slug=plan)
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 
 def create_query_for_finding_overlapping_intervals(

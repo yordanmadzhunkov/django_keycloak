@@ -120,7 +120,19 @@ class ElectricityPriceAPIWithUserTestCases(APITestCase):
         self.assertEqual(response.data[0]["electricity_unit"], "MWh")
         self.assertEqual(response.data[0]["slug"], "test-plan-1")
         self.assertEqual(response.data[0]["owner"], "testuser")
-        self.assertEqual(response.data[0]["last_price_start_interval"], None)
+
+        url = reverse("plan_summary_api", kwargs={"plan": "test-plan-1"})
+        response = self.client.get(url)
+        self.assertTrue("last_price_start_interval" in response.data.keys())
+        self.assertEqual(response.data["last_price_start_interval"], None)
+
+        self.assertTrue("last_gap" in response.data.keys())
+        self.assertEqual(response.data["last_gap"], None)
+
+        response = self.client.get(
+            reverse("plan_summary_api", kwargs={"plan": "test-plan-123"}), {}
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_create_electricity_price_plan_wrong_unit(self):
         """
@@ -610,6 +622,60 @@ class ElectricityPricePriceSeriesAPITestCases(APITestCase):
         self.checkTime(2024, 5, 19, 12, 00, response.data[0]["end_interval"])
         self.checkTime(2024, 5, 19, 13, 00, response.data[1]["end_interval"])
         self.checkTime(2024, 5, 19, 14, 00, response.data[2]["end_interval"])
+
+    def test_get_summary_last_price(self):
+        self.test_create_price_bulk()
+        response = self.client.get(
+            reverse("plan_summary_api", kwargs={"plan": self.plan.slug})
+        )
+        self.assertTrue("last_price_start_interval" in response.data.keys())
+        d = datetime(2024, 5, 19, 13, 00, 00, tzinfo=timezone.utc)
+        self.assertEqual(d, response.data["last_price_start_interval"])
+
+        self.assertTrue("last_gap" in response.data.keys())
+        self.assertEqual(response.data["last_gap"], None)
+
+        # add prices to create GAP in price series
+        url = reverse("prices")
+        data = [
+            {
+                "plan": self.plan.slug,
+                "price": "13.13",
+                "start_interval": "2024-05-19T01:00+00:00",
+                "end_interval": "2024-05-19T02:00+00:00",
+            },
+            {
+                "plan": self.plan.slug,
+                "price": "12.26",
+                "start_interval": "2024-05-19T02:00+00:00",
+                "end_interval": "2024-05-19T03:00+00:00",
+            },
+            {
+                "plan": self.plan.slug,
+                "price": "18.77",
+                "start_interval": "2024-05-19T03:00+00:00",
+                "end_interval": "2024-05-19T04:00+00:00",
+            },
+        ]
+
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertGreaterEqual(len(response.data), 3)
+
+        # data = {'plan': self.plan.slug}
+        url = reverse("plan_summary_api", kwargs={"plan": self.plan.slug})
+        data = {}
+        response = self.client.get(url, data)
+        self.assertTrue("last_price_start_interval" in response.data.keys())
+        # print(response.data)
+        d = datetime(2024, 5, 19, 13, 00, 00, tzinfo=timezone.utc)
+        self.assertEqual(d, response.data["last_price_start_interval"])
+
+        d1 = datetime(2024, 5, 19, 4, 00, 00, tzinfo=timezone.utc)
+        d2 = datetime(2024, 5, 19, 11, 00, 00, tzinfo=timezone.utc)
+
+        self.assertTrue("last_gap" in response.data.keys())
+        self.assertEqual(response.data["last_gap"], [d1, d2])
 
     def test_create_price_bulk_one_overlap(self):
         """
