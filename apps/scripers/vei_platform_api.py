@@ -19,6 +19,7 @@ class VeiPlatformAPI:
     hello_url = "api/v1/hello"
     billing_zone_url = "api/v1/zones"
     plans_url = "api/v1/plans"
+    plan_summary_url = "api/v1/plan/summary"
     prices_url = "api/v1/prices"
     factories_url = "api/v1/factories"
     production_url = "api/v1/production"
@@ -318,32 +319,29 @@ class VeiPlatformAPI:
 
         plan_info = self.get_or_create_plan(zone, plan_name, currency, energy_unit)
         if "plan" in plan_info.keys():
-            summary = self.get_plan_summary(plan_info["plan"]["slug"])
-            self.show_plan_info(plan_info["plan"], summary)
+            self.get_plan_summary_and_update_plan(plan_info["plan"])
+            self.show_plan_info(plan_info["plan"])
             return self.post_prices(plan_info["plan"], prices)
         else:
             return plan_info
 
-    def get_plan_summary(self, slug):
+    def get_plan_summary_and_update_plan(self, plan):
+        params = {"plan": plan["slug"]}
+        response = requests.get(
+            self.endpoint_base_url + self.plan_summary_url,
+            params=params,
+            headers=self.headers,
+        )
+        if response.status_code == 200:
+            plan.update(response.json())
+
+        # return response.json() if response.status_code == 200 else None
         # reverse("plan_summary_api"), data
-        return None
+        # return None
 
     def show_plan_info(self, plan):
-
-        {
-            "name": "Day ahead Slovakia",
-            "billing_zone": "SK",
-            "description": "Most basic day ahead plan",
-            "currency": "EUR",
-            "electricity_unit": "MWh",
-            "slug": "day-ahead-slovakia",
-            "owner": "energy_bot",
-            "last_price_start_interval": "2024-12-13T22:00:00Z",
-        }
-        plan["name"]
         table = PrettyTable(["-", plan["name"]])
         table.title = plan["name"] + " Billing zone = " + plan["billing_zone"]
-
         table.add_rows(
             [
                 ["Description", plan["description"]],
@@ -351,10 +349,14 @@ class VeiPlatformAPI:
                 ["Currency", plan["currency"]],
                 ["Electricity unit", plan["electricity_unit"]],
                 ["Owner", plan["owner"]],
-                ["Last update", plan["last_price_start_interval"]],
             ]
         )
-
+        if "last_price_start_interval" in plan.keys():
+            table.add_row(["Last update", plan["last_price_start_interval"]])
+        if "last_gap" in plan.keys():
+            table.add_row(["Last gap", plan["last_gap"]])
+        if "last_overlap" in plan.keys():
+            table.add_row(["Last overlap", plan["last_overlap"]])
         print_green(table)
 
     def get_my_factories(self):

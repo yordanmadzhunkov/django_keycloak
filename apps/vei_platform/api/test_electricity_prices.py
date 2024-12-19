@@ -121,17 +121,14 @@ class ElectricityPriceAPIWithUserTestCases(APITestCase):
         self.assertEqual(response.data[0]["slug"], "test-plan-1")
         self.assertEqual(response.data[0]["owner"], "testuser")
 
-        url = reverse("plan_summary_api", kwargs={"plan": "test-plan-1"})
-        response = self.client.get(url)
+        url = reverse("plan_summary_api")
+        response = self.client.get(url, data={"plan": "test-plan-1"})
         self.assertTrue("last_price_start_interval" in response.data.keys())
         self.assertEqual(response.data["last_price_start_interval"], None)
 
         self.assertTrue("last_gap" in response.data.keys())
         self.assertEqual(response.data["last_gap"], None)
-
-        response = self.client.get(
-            reverse("plan_summary_api", kwargs={"plan": "test-plan-123"}), {}
-        )
+        response = self.client.get(url, data={"plan": "test-plan-123"})
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_create_electricity_price_plan_wrong_unit(self):
@@ -626,8 +623,9 @@ class ElectricityPricePriceSeriesAPITestCases(APITestCase):
     def test_get_summary_last_price(self):
         self.test_create_price_bulk()
         response = self.client.get(
-            reverse("plan_summary_api", kwargs={"plan": self.plan.slug})
+            reverse("plan_summary_api"), data={"plan": self.plan.slug}
         )
+
         self.assertTrue("last_price_start_interval" in response.data.keys())
         d = datetime(2024, 5, 19, 13, 00, 00, tzinfo=timezone.utc)
         self.assertEqual(d, response.data["last_price_start_interval"])
@@ -662,12 +660,10 @@ class ElectricityPricePriceSeriesAPITestCases(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertGreaterEqual(len(response.data), 3)
 
-        # data = {'plan': self.plan.slug}
-        url = reverse("plan_summary_api", kwargs={"plan": self.plan.slug})
-        data = {}
+        data = {"plan": self.plan.slug}
+        url = reverse("plan_summary_api")
         response = self.client.get(url, data)
         self.assertTrue("last_price_start_interval" in response.data.keys())
-        # print(response.data)
         d = datetime(2024, 5, 19, 13, 00, 00, tzinfo=timezone.utc)
         self.assertEqual(d, response.data["last_price_start_interval"])
 
@@ -676,6 +672,10 @@ class ElectricityPricePriceSeriesAPITestCases(APITestCase):
 
         self.assertTrue("last_gap" in response.data.keys())
         self.assertEqual(response.data["last_gap"], [d1, d2])
+
+        # TEST GET WITH NO DATA
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_create_price_bulk_one_overlap(self):
         """

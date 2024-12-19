@@ -168,8 +168,9 @@ class ElectricityPricePlanSummaryAPIView(generics.RetrieveAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     serializer_class = ElectricityPricePlanSummarySerializer
 
-    def get(self, request, plan, *args, **kwargs):
-        instance = get_object_or_404(ElectricityPricePlan, slug=plan)
+    def get(self, request, *args, **kwargs):
+        plan_slug = request.query_params.get("plan")
+        instance = get_object_or_404(ElectricityPricePlan, slug=plan_slug)
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 

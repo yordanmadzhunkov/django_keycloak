@@ -12,7 +12,7 @@ urlpatterns = [
     path("zones", ElectricityBillingZoneListAPIView.as_view(), name="billing_zones"),
     path("plans", ElectricityPricePlanListAPIView.as_view(), name="plans_api"),
     path(
-        "plan/summary?P<slug:plan>",
+        "plan/summary",
         ElectricityPricePlanSummaryAPIView.as_view(),
         name="plan_summary_api",
     ),
